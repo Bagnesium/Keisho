@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "kind": "exploratory real-model calibration; excluded from evaluation",
+  "task_id": "task_001",
+  "task_sha256": "0d5e6fd00e5871521eba08cdc96f09aa1ba2e261307947a79052da4ada667671",
+  "seed": 17,
+  "max_blocks": 1,
+  "max_predecessor_trajectories": 1,
+  "max_successor_branches": 4,
+  "pilot_config": "pilot.yaml",
+  "pilot_config_sha256": "defa4fb8229c205430febfd1e6afd5a7eb85b89c2d361d9715520796cb50e862",
+  "dollar_cap_usd": "1.25",
+  "automatic_retries": 0,
+  "paid_calls_authorized": false,
+  "successor_conditioning": false
+}
