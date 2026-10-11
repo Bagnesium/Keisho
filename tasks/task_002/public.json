@@ -1,0 +1,76 @@
+{
+  "task_id": "task_002",
+  "version": "1.0.0",
+  "description": "Unicode frames corrupt the following message. Fix the supplied repository so all public and hidden behavioral tests pass. Preserve the API and the documented input contracts. Edit source modules only; test fixtures are immutable. Use the provided tools; no network or external files.",
+  "editable_files": [
+    "writer.py",
+    "reader.py",
+    "service.py"
+  ],
+  "cases": [
+    {
+      "id": "ascii_colon",
+      "module": "service",
+      "function": "round_trip",
+      "args": [
+        [
+          "a:b",
+          "ok"
+        ]
+      ],
+      "expected": [
+        "a:b",
+        "ok"
+      ]
+    },
+    {
+      "id": "unicode_batch",
+      "module": "service",
+      "function": "round_trip",
+      "args": [
+        [
+          "caf\u00e9",
+          "next"
+        ]
+      ],
+      "expected": [
+        "caf\u00e9",
+        "next"
+      ],
+      "initial_failure": true
+    },
+    {
+      "id": "chunk_boundary",
+      "module": "service",
+      "function": "chunked_round_trip",
+      "args": [
+        [
+          "alpha",
+          "beta"
+        ],
+        3
+      ],
+      "expected": [
+        "alpha",
+        "beta"
+      ]
+    },
+    {
+      "id": "unicode_chunked",
+      "module": "service",
+      "function": "chunked_round_trip",
+      "args": [
+        [
+          "\u96ea",
+          "done"
+        ],
+        4
+      ],
+      "expected": [
+        "\u96ea",
+        "done"
+      ],
+      "initial_failure": true
+    }
+  ]
+}

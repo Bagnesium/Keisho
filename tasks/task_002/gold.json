@@ -1,0 +1,163 @@
+{
+  "task_id": "task_002",
+  "version": "1.0.0",
+  "bug": {
+    "description": "Writer advertises character count before UTF-8 encoding; reader consumes a byte count.",
+    "failure_type": "cross-file representation mismatch"
+  },
+  "correct_fix": {
+    "writer.py": "def encode(text):\n    body = text.encode(\"utf-8\")\n    header = str(len(body)).encode(\"ascii\") + b\":\"\n    return header + body\n\ndef encode_many(messages):\n    return b\"\".join(encode(text) for text in messages)\n"
+  },
+  "success": {
+    "criterion": "All immutable public and hidden cases pass; source-only edits, unchanged API.",
+    "initial_failing_tests": [
+      "unicode_batch",
+      "unicode_chunked"
+    ],
+    "hidden_cases": [
+      {
+        "id": "emoji_empty",
+        "module": "service",
+        "function": "round_trip",
+        "args": [
+          [
+            "\ud83d\ude42",
+            "",
+            "a:b"
+          ]
+        ],
+        "expected": [
+          "\ud83d\ude42",
+          "",
+          "a:b"
+        ]
+      },
+      {
+        "id": "combining",
+        "module": "service",
+        "function": "chunked_round_trip",
+        "args": [
+          [
+            "e\u0301",
+            "r\u00e9sum\u00e9"
+          ],
+          1
+        ],
+        "expected": [
+          "e\u0301",
+          "r\u00e9sum\u00e9"
+        ]
+      },
+      {
+        "id": "ascii_empty",
+        "module": "service",
+        "function": "round_trip",
+        "args": [
+          [
+            "",
+            "hello"
+          ]
+        ],
+        "expected": [
+          "",
+          "hello"
+        ]
+      }
+    ]
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Colons inside a payload confuse the frame separator.",
+      "truth": false,
+      "falsifying_tests": [
+        "ascii_colon"
+      ]
+    },
+    {
+      "id": "H2",
+      "statement": "Writer and reader disagree about the unit of payload length.",
+      "truth": true
+    },
+    {
+      "id": "H3",
+      "statement": "Joining chunks loses bytes at the split boundary.",
+      "truth": false,
+      "falsifying_tests": [
+        "chunk_boundary"
+      ]
+    }
+  ],
+  "facts": [
+    {
+      "id": "F1",
+      "statement": "ASCII payloads containing a colon round-trip correctly.",
+      "test_id": "ascii_colon",
+      "scope_files": [
+        "writer.py",
+        "reader.py",
+        "service.py"
+      ]
+    }
+  ],
+  "rediscovery_targets": [
+    {
+      "id": "R1",
+      "fact_id": "F1",
+      "test_id": "ascii_colon",
+      "description": "ASCII payloads containing a colon round-trip correctly.",
+      "scope_files": [
+        "writer.py",
+        "reader.py",
+        "service.py"
+      ]
+    }
+  ],
+  "repeated_failure_targets": [
+    {
+      "id": "A1",
+      "description": "Ignoring UTF-8 decode errors in the reader does not repair frame alignment.",
+      "patch_path": "reader.py",
+      "patch_content": "def decode_stream(data):\n    messages = []\n    offset = 0\n    while offset < len(data):\n        separator = data.index(b\":\", offset)\n        size = int(data[offset:separator])\n        start = separator + 1\n        stop = start + size\n        body = data[start:stop]\n        if len(body) != size:\n            raise ValueError(\"incomplete frame\")\n        messages.append(body.decode(\"utf-8\", errors=\"ignore\"))\n        offset = stop\n    return messages\n",
+      "test_ids": [
+        "full"
+      ],
+      "scope_files": [
+        "writer.py",
+        "service.py"
+      ],
+      "failure_test": "unicode_batch"
+    }
+  ],
+  "invalid_actions": [
+    "editing tests or contracts",
+    "reading gold, raw logs, or sibling workspaces",
+    "network or arbitrary shell execution",
+    "changing public API",
+    "test-specific hardcoding or grader interference"
+  ],
+  "checkpoint": {
+    "tool_calls": 9,
+    "selection_reason": "Nine tools end after colon probe, failed tolerant-decoding patch, full-suite failure, restoration, and service inspection. The writer/reader contract mismatch remains unresolved.",
+    "requirements": [
+      "fact established by passing probe",
+      "incorrect hypothesis exposed",
+      "falsified path or demonstrated failed approach",
+      "hidden success not achieved",
+      "no correct-fix declaration"
+    ],
+    "calibration_kind": "scripted development trace; not live-model calibration"
+  },
+  "calibration": {
+    "contract": "Frames are ASCII decimal BYTE length, then colon, then exactly that many UTF-8 bytes. Colons may appear in a body. Multiple frames and arbitrary input chunk boundaries must preserve every message.",
+    "reason": "Nine tools end after colon probe, failed tolerant-decoding patch, full-suite failure, restoration, and service inspection. The writer/reader contract mismatch remains unresolved.",
+    "probe": "ascii_colon",
+    "wrong_patch_path": "reader.py",
+    "wrong_patch_content": "def decode_stream(data):\n    messages = []\n    offset = 0\n    while offset < len(data):\n        separator = data.index(b\":\", offset)\n        size = int(data[offset:separator])\n        start = separator + 1\n        stop = start + size\n        body = data[start:stop]\n        if len(body) != size:\n            raise ValueError(\"incomplete frame\")\n        messages.append(body.decode(\"utf-8\", errors=\"ignore\"))\n        offset = stop\n    return messages\n",
+    "read_paths": [
+      "writer.py",
+      "reader.py",
+      "service.py"
+    ]
+  }
+}
