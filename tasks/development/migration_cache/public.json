@@ -1,0 +1,102 @@
+{
+  "task_id": "migration_cache",
+  "version": "development/1.0",
+  "origin": "authored controlled development application; not historical or real-world benchmark evidence",
+  "family": "migration",
+  "description": "Make normalized configuration changes invalidate only the relevant cached service policy while keeping equivalent legacy/modern representations compatible.",
+  "acceptance": [
+    "Changed timeout or attempt policy yields fresh behavior at the same endpoint",
+    "Equivalent old/new representations share a normalized cache entry; previously returned plans are not mutated",
+    "Validation happens before cache access; old callers, modern callers and serialization agree on the current policy"
+  ],
+  "constraints": [
+    "Preserve module/public API contracts; source-only fixes",
+    "Do not modify diagnostics or read evaluator materials; no test-specific hardcoding"
+  ],
+  "editable_files": [
+    "validation.py",
+    "parser.py",
+    "cache.py",
+    "policy.py",
+    "service.py",
+    "callers.py"
+  ],
+  "cases": [
+    {
+      "id": "timeout_change",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "configs": [
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 2000,
+                "max_attempts": 2
+              }
+            },
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 500,
+                "max_attempts": 2
+              }
+            }
+          ],
+          "select": [
+            "modern"
+          ]
+        }
+      ],
+      "expected": {
+        "modern": [
+          {
+            "endpoint": "local-service",
+            "timeout_ms": 2000,
+            "max_attempts": 2
+          },
+          {
+            "endpoint": "local-service",
+            "timeout_ms": 500,
+            "max_attempts": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "equivalent_representations",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "configs": [
+            {
+              "endpoint": "local-service",
+              "timeout": 2,
+              "retries": 1
+            },
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 2000,
+                "max_attempts": 2
+              }
+            }
+          ],
+          "select": [
+            "cache_entries",
+            "errors"
+          ]
+        }
+      ],
+      "expected": {
+        "cache_entries": 1,
+        "errors": 0
+      }
+    }
+  ]
+}

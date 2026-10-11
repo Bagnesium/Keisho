@@ -1,0 +1,129 @@
+{
+  "task_id": "migration_compat",
+  "version": "development/1.0",
+  "origin": "authored controlled development application; not historical or real-world benchmark evidence",
+  "family": "migration",
+  "description": "Complete the legacy seconds/retries to version-2 milliseconds/max-attempts migration across parser, validation, policy, cache and both caller APIs. Check caller units and every attempt deadline; a local parser-only fix is insufficient.",
+  "acceptance": [
+    "Legacy timeout seconds convert to milliseconds; retries count additional attempts",
+    "Equivalent old/new configs yield equivalent plans and old/modern caller options; roundtrips preserve policy",
+    "Reject invalid or mixed representations, preserve valid fractional legacy timeouts and validate before using cache"
+  ],
+  "constraints": [
+    "Preserve module/public API contracts; source-only fixes",
+    "Do not modify diagnostics or read evaluator materials; no test-specific hardcoding"
+  ],
+  "editable_files": [
+    "validation.py",
+    "parser.py",
+    "cache.py",
+    "policy.py",
+    "service.py",
+    "callers.py"
+  ],
+  "cases": [
+    {
+      "id": "mixed_callers",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "configs": [
+            {
+              "endpoint": "local-service",
+              "timeout": 2,
+              "retries": 1
+            },
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 2000,
+                "max_attempts": 2
+              }
+            }
+          ],
+          "select": [
+            "modern",
+            "legacy",
+            "cache_entries",
+            "last_deadlines"
+          ]
+        }
+      ],
+      "expected": {
+        "modern": [
+          {
+            "endpoint": "local-service",
+            "timeout_ms": 2000,
+            "max_attempts": 2
+          },
+          {
+            "endpoint": "local-service",
+            "timeout_ms": 2000,
+            "max_attempts": 2
+          }
+        ],
+        "legacy": [
+          {
+            "endpoint": "local-service",
+            "timeout": 2,
+            "retries": 1
+          },
+          {
+            "endpoint": "local-service",
+            "timeout": 2,
+            "retries": 1
+          }
+        ],
+        "cache_entries": 1,
+        "last_deadlines": [
+          2000,
+          4000
+        ]
+      }
+    },
+    {
+      "id": "invalid_inputs",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "configs": [
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 0,
+                "max_attempts": 2
+              }
+            },
+            {
+              "endpoint": "local-service",
+              "timeout": 2,
+              "retries": 1,
+              "request": {
+                "timeout_ms": 2000,
+                "max_attempts": 2
+              }
+            },
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 2000,
+                "max_attempts": true
+              }
+            }
+          ],
+          "select": [
+            "errors"
+          ]
+        }
+      ],
+      "expected": {
+        "errors": 3
+      }
+    }
+  ]
+}

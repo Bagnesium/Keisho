@@ -1,0 +1,160 @@
+{
+  "cases": [
+    {
+      "id": "attempt_change",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "configs": [
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 1000,
+                "max_attempts": 1
+              }
+            },
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 1000,
+                "max_attempts": 4
+              }
+            }
+          ],
+          "select": [
+            "modern"
+          ]
+        }
+      ],
+      "expected": {
+        "modern": [
+          {
+            "endpoint": "local-service",
+            "timeout_ms": 1000,
+            "max_attempts": 1
+          },
+          {
+            "endpoint": "local-service",
+            "timeout_ms": 1000,
+            "max_attempts": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": "legacy_fraction_and_zero_retries",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "configs": [
+            {
+              "endpoint": "local-service",
+              "timeout": 0.25,
+              "retries": 0
+            }
+          ],
+          "select": [
+            "legacy",
+            "errors"
+          ]
+        }
+      ],
+      "expected": {
+        "legacy": [
+          {
+            "endpoint": "local-service",
+            "timeout": 0.25,
+            "retries": 0
+          }
+        ],
+        "errors": 0
+      }
+    },
+    {
+      "id": "invalid_after_cached_valid",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "configs": [
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 2000,
+                "max_attempts": 2
+              }
+            },
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 2000,
+                "max_attempts": 0
+              }
+            },
+            {
+              "endpoint": "local-service",
+              "timeout": true,
+              "retries": 1
+            }
+          ],
+          "select": [
+            "errors",
+            "cache_entries"
+          ]
+        }
+      ],
+      "expected": {
+        "errors": 2,
+        "cache_entries": 1
+      }
+    },
+    {
+      "id": "returned_schedule_ownership",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "configs": [
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 2000,
+                "max_attempts": 2
+              }
+            },
+            {
+              "version": 2,
+              "endpoint": "local-service",
+              "request": {
+                "timeout_ms": 2000,
+                "max_attempts": 2
+              }
+            }
+          ],
+          "select": [
+            "last_deadlines"
+          ],
+          "mutate_after_first": true
+        }
+      ],
+      "expected": {
+        "last_deadlines": [
+          2000,
+          4000
+        ]
+      }
+    }
+  ],
+  "property_seeds": [
+    17,
+    29,
+    43
+  ]
+}
