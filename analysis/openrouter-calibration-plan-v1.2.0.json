@@ -1,0 +1,137 @@
+{
+  "version": "calibration-block/1.2.0",
+  "exploratory": true,
+  "evaluation_pooling_allowed": false,
+  "provider": "openrouter",
+  "model_mapping": {
+    "predecessor": {
+      "request_model_id": "openai/gpt-4.1-mini",
+      "model_id": "openai/gpt-4.1-mini-2025-04-14",
+      "accepted_response_model_ids": [
+        "openai/gpt-4.1-mini",
+        "openai/gpt-4.1-mini-2025-04-14"
+      ]
+    },
+    "successor": {
+      "request_model_id": "openai/gpt-4.1",
+      "model_id": "openai/gpt-4.1-2025-04-14",
+      "accepted_response_model_ids": [
+        "openai/gpt-4.1",
+        "openai/gpt-4.1-2025-04-14"
+      ]
+    }
+  },
+  "identity_policy": "exact requested public ID or catalog-confirmed canonical ID; OpenAI provider required; upstream snapshot attestation unavailable",
+  "routing": {
+    "predecessor": {
+      "only": [
+        "openai"
+      ],
+      "order": [
+        "openai"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "max_price": {
+        "prompt": 0.4,
+        "completion": 1.6,
+        "request": 0
+      }
+    },
+    "successor": {
+      "only": [
+        "openai"
+      ],
+      "order": [
+        "openai"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "max_price": {
+        "prompt": 2.0,
+        "completion": 8.0,
+        "request": 0
+      }
+    }
+  },
+  "catalog_sha256": "ebe0775b387d1bea14c736b09a9f40d9afae57c0ee6d23803d3690b054d3e020",
+  "original_pilot_config_sha256": "defa4fb8229c205430febfd1e6afd5a7eb85b89c2d361d9715520796cb50e862",
+  "tls": {
+    "ca_file": "../.cache/certificates/openrouter-ca-v1.2.0.pem",
+    "ca_sha256": "9cc2a774b5198dcff14d9be1e66091f538975d867ce029a96bce15a55dfd730f",
+    "certificate_verification": true,
+    "hostname_verification": true
+  },
+  "config_sha256": "b78d68a9775e40d96bec5098e7a52c6080fa06968474e364fda228a90b5ea506",
+  "pilot_config_sha256": "6746b6959d187de591c398feb575e0e5aa397d17110a3c3be2d0ecbfb85a2f70",
+  "task": {
+    "id": "task_001",
+    "sha256": "0d5e6fd00e5871521eba08cdc96f09aa1ba2e261307947a79052da4ada667671"
+  },
+  "seed": 17,
+  "predecessor_model_id": "openai/gpt-4.1-mini-2025-04-14",
+  "successor_model_id": "openai/gpt-4.1-2025-04-14",
+  "conditions": [
+    "NO_CONTEXT",
+    "FULL_HISTORY",
+    "SUMMARY",
+    "FIXED_STATE"
+  ],
+  "checkpoint_tool_calls": 9,
+  "maximum_predecessor_trajectories": 1,
+  "maximum_successor_branches": 4,
+  "stage_envelopes": {
+    "predecessor": {
+      "maximum_calls": 9,
+      "input_tokens_in_cost_maximizing_mix": 41568,
+      "maximum_output_token_allowance": 18432,
+      "combined_token_envelope": 60000,
+      "cost_envelope_usd": "0.04842432"
+    },
+    "handoff_generation": {
+      "maximum_calls": 1,
+      "input_tokens_in_cost_maximizing_mix": 32000,
+      "maximum_output_token_allowance": 1024,
+      "combined_token_envelope": 33024,
+      "cost_envelope_usd": "0.01516032"
+    },
+    "successors": {
+      "maximum_calls": 56,
+      "input_tokens_in_cost_maximizing_mix": 125312,
+      "maximum_output_token_allowance": 114688,
+      "combined_token_envelope": 240000,
+      "cost_envelope_usd": "1.2265344"
+    }
+  },
+  "maximum_calls": 66,
+  "combined_token_envelope": 333024,
+  "cost_envelope_usd": "1.29011904",
+  "dollar_cap_usd": "1.35",
+  "reservation_multiplier": "1.05",
+  "reservation_policy": "reserve full 32000 input allowance and requested maximum outputs before every network attempt; no cache discounts; OpenRouter adds possible 5% BYOK fee and requires known returned total API cost",
+  "context_policy": "complete cumulative messages sent every call; repeated task/handoff/history included in input and combined-token caps",
+  "retry_policy": "zero; stop entire block on unreconciled usage or denied reservation; no favorable-checkpoint resampling",
+  "state_generation_calls": 0,
+  "summary_calls": 1,
+  "paid_calls_authorized": false,
+  "credential_available": false,
+  "api_access_verified": false,
+  "pricing_source": "https://openrouter.ai/api/v1/models;https://openrouter.ai/docs/cookbook/administration/usage-accounting;https://openrouter.ai/docs/guides/overview/auth/byok (checked 2026-10-04)",
+  "prompts": {
+    "agent": {
+      "version": "1.0.0",
+      "sha256": "63c84354efe4e45dfeb392760c095e8b52cda8b972ac59c5bc036912c8d45ce7",
+      "text": "You are continuing a small debugging task in a confined repository. The original\ntask, current files, and supplied predecessor context define the work. Treat\npredecessor claims according to evidence and scope. No hidden reasoning is\nrequested: emit only concise, externally visible claims and one action per call.\nUse JSON with exactly these keys:\n{\"action\": {\"tool\": \"list_files\"}, \"claims\": []}\nActions allowed:\n{\"tool\":\"list_files\"}\n{\"tool\":\"read_file\",\"path\":\"relative-file\"}\n{\"tool\":\"write_file\",\"path\":\"editable-source.py\",\"content\":\"complete source\"}\n{\"tool\":\"run_tests\",\"test_ids\":[\"full\"]} or a list of named public test IDs\n{\"tool\":\"finish\",\"answer\":\"concise result\"}\nClaims have exactly statement, status, evidence_ids, and basis:\n{\"statement\":\"concise claim\", \"status\":\"INFERRED\", \"evidence_ids\":[], \"basis\":\"independent\"}\nStatus is OBSERVED, VERIFIED, INFERRED, UNCERTAIN, or FALSIFIED. Basis is tool,\npredecessor, or independent. Cite only tool-result event IDs already supplied in\nthis continuation. Describe predecessor evidence in the statement rather than\ninventing a locally available event ID. Your certainty labels are assertions,\nnot independent verification. Keep claims short; no private chain-of-thought.\nEdit source only. Never access other workspaces, evaluation data, host files,\nnetwork, or arbitrary shell commands. Tests/contracts are immutable. Public tests\npassing may stop execution; hidden success tests are evaluated only after stopping.\nWork within the stated tool/model/token budgets. Return one valid JSON object.\n"
+    },
+    "predecessor": {
+      "version": "1.0.0",
+      "sha256": "cb3da20c1ad685c99385ff421be60ca2c208d17cc91fb9df9432083f4e56f269",
+      "text": "Investigate the unfinished task before implementing a final fix. Compare\nplausible explanations using file inspection and public tests. Record concise\nexplicit hypotheses, evidence, failed attempts, and rejections with scope.\nThe controller will stop you at a preregistered checkpoint; do not rush to submit\na final answer. You may edit source to test a hypothesis, but unsupported beliefs\nmust remain uncertain. No evaluator annotations or solutions are available.\n"
+    },
+    "summary": {
+      "version": "0.1.0",
+      "sha256": "70750480ad857ace592e65e14f3b48a6b68b1eee4766b1e7bd7d09981eedae0e",
+      "text": "Summarize the predecessor's externally exposed task trajectory for a successor\ncontinuing the same unfinished task. Include the goal, constraints, current\nworkspace changes, established findings, failed attempts, unresolved questions,\nand likely next steps. Be faithful to the trajectory; preserve uncertainty and\nscope. Do not add facts, use task-grader knowledge, or claim access to hidden\nreasoning. Return a normal prose summary, not a KeishoState object. The caller\nmust freeze this prompt, its output limit, trajectory and response before any\nsuccessor branch runs. This prompt is versioned but has not been used in a model\nexperiment.\n"
+    }
+  }
+}

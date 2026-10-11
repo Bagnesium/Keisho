@@ -1,0 +1,43 @@
+{
+  "version": "1.1.0",
+  "checked_date": "2026-10-04",
+  "scope": "implementation and offline tests only",
+  "test_runs": [
+    {
+      "command": "PYTHONPATH=src python3 -W error::ResourceWarning -m unittest tests.test_openrouter.LocalEnvTests tests.test_openrouter.RouterTests tests.test_openrouter.RouterSpendingTests -v",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.015
+    },
+    {
+      "command": "PYTHONPATH=src python3 -W error::ResourceWarning -m unittest tests.test_openrouter.SecretIsolationTests -v",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.899
+    },
+    {
+      "command": "PYTHONPATH=src python3 -W error::ResourceWarning -m unittest discover -s tests -v",
+      "tests": 82,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 12.04
+    }
+  ],
+  "protected_original_files_checked": 2799,
+  "protected_original_files_changed": [],
+  "real_secret_files_tracked": [],
+  "dotenv_path": "/Users/bagnesium/Documents/GitHub/Keisho/.env",
+  "openrouter_key_present": false,
+  "dotenv_permissions": "0600",
+  "model_inference_calls": 0,
+  "credential_validation_calls": 0,
+  "human_review_complete": false,
+  "public_metadata_reads_only": true,
+  "live_transport_snapshot_identity_and_access_verified": false,
+  "public_metadata_python_tls_observation": "default Python urllib public catalog GET failed certificate verification; catalog retrieved using system curl with certificate verification enabled; no authenticated request tested"
+}
