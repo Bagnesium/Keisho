@@ -1,0 +1,26 @@
+{
+  "version": "setup-functional/1.0",
+  "setup_only": true,
+  "live_execution_authorized": false,
+  "source_comparison_sha256": "f6c5898f2400e7f6d24f70643da2333ea86fd3ba1b5fd30f4ec64ea0c2b3895e",
+  "response_policy": "auxiliary-claims/2.0",
+  "system_sha256": "054a669071973a82c98bb7bb2c7f858e585a21fc1c86a1386396e4eb84f2644e",
+  "response_format_sha256": "e5852f087c53d95a994682cf19715090139f4545e1716f666cbbd620fc1d712c",
+  "model_id": "openai/gpt-4.1-mini-2025-04-14",
+  "provider_config": "calibration-task001-openrouter-v1.2.0.yaml",
+  "cap_usd": "0.50",
+  "seed": 20261007,
+  "budgets": {
+    "model_calls": 8,
+    "tool_calls": 8,
+    "output_tokens": 2048,
+    "total_tokens": 180000,
+    "request_input_tokens": 32000,
+    "context_tokens": 128000
+  },
+  "fixture_source": "tasks/task_001 public initial files and public cases only",
+  "fixture_sha256": "fa4f58d4d5b678c85b3529b349405a288f48765c3ea88dde48d52aec7c616ef7",
+  "objective_sha256": "2dc297625f4b018d5276eaf373b0a996e694ee88acdadd840d0a15da8300f734",
+  "automatic_retries": 0,
+  "comparison_requires_demonstrated_repair": true
+}
