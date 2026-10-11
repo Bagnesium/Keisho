@@ -1,0 +1,29 @@
+{
+  "label": "Keisho handoff evaluation on SWE-bench Verified",
+  "config_sha256": "416b8e880c9ef7843724da9c079b7fb8f3fe2dc8f64cc56cb36283ffefcc6193",
+  "task_sha256": "1ece7acf4065ac5399dfc0781af941c52b5498c5192e51fcf4d3bd59512bf125",
+  "maximum_noncached_costs_usd": {
+    "predecessor": "0.19946304",
+    "successor": "7.9087680",
+    "note_generation": "0.032256"
+  },
+  "total_envelope_usd": "8.14048704",
+  "largest_request_reservation_usd": "0.0844032",
+  "cap_usd": "10.00",
+  "plausibly_fits": true,
+  "assumptions": "No cache discount; configured model rates; possible 5% BYOK fee; 2 note calls; no retries; unknown usage stops all calls.",
+  "credential_presence": {
+    "OPENAI_API_KEY": false,
+    "OPENROUTER_API_KEY": true
+  },
+  "catalog_sha256": "985fa9336cdd1cb022acac45f789e5c1ddcbf9e42efb8a3639527231930979e0",
+  "branch_order": [
+    "FULL_HISTORY",
+    "SUMMARY_2K",
+    "REPOSITORY_ONLY",
+    "KEISHO_2K",
+    "STRUCTURED_NOTES_2K"
+  ],
+  "checkpoint_uses_hidden_grades": false,
+  "agent_calls_so_far": 0
+}

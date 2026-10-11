@@ -1,0 +1,20 @@
+{
+  "pydata__xarray-6721": {
+    "repo": true,
+    "base_commit": true,
+    "problem_statement": true,
+    "patch": true,
+    "test_patch": true,
+    "FAIL_TO_PASS": true,
+    "PASS_TO_PASS": true
+  },
+  "sympy__sympy-20590": {
+    "repo": true,
+    "base_commit": true,
+    "problem_statement": true,
+    "patch": true,
+    "test_patch": true,
+    "FAIL_TO_PASS": true,
+    "PASS_TO_PASS": true
+  }
+}
