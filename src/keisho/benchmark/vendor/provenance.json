@@ -1,0 +1,19 @@
+{
+  "repository": "https://github.com/anjilab/agent-handoff-debt",
+  "commit": "5179b1d759be466600c453da8b9078341967ec17",
+  "files": {
+    "signals.py": "src/handoff_debt/tracing/checkpoints/signals.py",
+    "summary_summarizer.py.txt": "src/handoff_debt/handoff/summary_summarizer.py",
+    "structured_summarizer.py.txt": "src/handoff_debt/handoff/structured_summarizer.py",
+    "prompt_parts.py.txt": "src/handoff_debt/handoff/prompt_parts.py",
+    "LICENSE": "LICENSE"
+  },
+  "sha256": {
+    "signals.py": "8e5e9574ba70ac1edca0bb7e20503773d525f56c1265efcc161a8f3aa35914a3",
+    "summary_summarizer.py.txt": "23daca0e5338d244f12db387f1b6dbb34692b3cb62dbc0fa762e0ede3ed04380",
+    "structured_summarizer.py.txt": "08a2cae497d2a7ad7e993c0a604ab3b3b38022ffda9b921487a8198b1c18e3a8",
+    "prompt_parts.py.txt": "cac65952648c1f76a896e186aebccf6bdfcafa61909c548ce553ce96c7b83272",
+    "LICENSE": "b10c006d5e3159d3fa13a07f93f0b46b9d6bd90c8e6f3fb9c79eb1658659d6a8"
+  },
+  "adaptation": "Keisho event mapping and tool protocol; no OpenHands runtime replacement. Generation uses first-pass author prompts without repair or automatic retry, 1600 output tokens, 2048 total rendered handoff tokens. Hidden continuation classification stays UNKNOWN."
+}

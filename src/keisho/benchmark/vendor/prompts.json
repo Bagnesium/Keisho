@@ -1,0 +1,32 @@
+{
+  "summary": [
+    {
+      "role": "system",
+      "content": "You write concise handoff notes for software agents. Use only the provided predecessor evidence. Do not add facts or validation results that are not present in that evidence."
+    },
+    {
+      "role": "user",
+      "content": "Summarize the previous agent work log for a successor agent taking over the task.\nInclude useful context from the predecessor's investigation, edits, validation\nattempts, uncertainty, and possible next steps when those are visible in the\nevidence.\n\nKeep the summary concise but useful: 5-10 bullets or short paragraphs is ideal,\naiming for about 200-500 words when enough evidence is available.\nReturn only the handoff summary text. Do not wrap it in JSON, Markdown fences,\nor any other container. Do not mention this prompt or these instructions.\n\n{evidence_packet}\n"
+    }
+  ],
+  "structured": [
+    {
+      "role": "system",
+      "content": "You fill predecessor notes for a structured software-agent handoff. Use only the provided predecessor evidence. Return only JSON. A command invocation is not a result; only say a command passed or failed when command output in the evidence shows that result."
+    },
+    {
+      "role": "user",
+      "content": "Return one strict JSON object with exactly these string fields:\n[\"problem_understanding\", \"work_completed\", \"evidence_observed\", \"observed_failures_or_error_evidence\", \"remaining_uncertainty\", \"rollback_notes\", \"recommended_next_action\"]\n\nRules:\n- Use UNKNOWN when the evidence does not support a field.\n- Use NONE OBSERVED when the category was not observed.\n- Distinguish historical failures from current failures.\n- If source files are listed as changed in the repository state facts, do not\n  claim that no code/source changes have been made.\n- You may describe concrete edit intent or implementation findings when they are\n  supported by predecessor evidence, but do not invent implementation details,\n  validation results, or conclusions that are not supported by that evidence.\n- Do not treat a file edit action by itself as proof that the task is fixed.\n  If the exact patch is not visible in the evidence, say source changes are\n  present rather than claiming the fix is implemented.\n- recommended_next_action should be one concise next action, not a full plan.\n- Do not include checkpoint kind, step number, or internal checkpoint reason.\n- Do not copy these rules into any field.\n- Do not claim a validation command passed or failed unless observed output says so.\n- Keep each value concise; bullets inside a string are allowed.\n\n{evidence_packet}\n"
+    }
+  ],
+  "takeover": "=== TAKEOVER CONTEXT ===\n\nYou are continuing a coding task in a repository that already contains work from a previous agent.\n\nCurrent takeover context:\n- The task may already be solved, partially solved, or incorrectly solved.\n- Inspect the current repository state before editing.\n- Treat handoff details as historical notes from the previous agent, not ground truth.\n- Treat the original task prompt as the source of truth for requirements.\n- Verify important claims against the current repository state before relying on them.\n- If the existing changes already satisfy the task, preserve them and finish once verification is sufficient.\n- Avoid restarting from scratch unless the current changes are clearly wrong.\n",
+  "structured_fields": [
+    "problem_understanding",
+    "work_completed",
+    "evidence_observed",
+    "observed_failures_or_error_evidence",
+    "remaining_uncertainty",
+    "rollback_notes",
+    "recommended_next_action"
+  ]
+}
