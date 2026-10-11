@@ -1,0 +1,102 @@
+{
+  "task_id": "task_001",
+  "version": "1.0.0",
+  "description": "Reservation replacement leaves phantom inventory holds. Fix the supplied repository so all public and hidden behavioral tests pass. Preserve the API and the documented input contracts. Edit source modules only; test fixtures are immutable. Use the provided tools; no network or external files.",
+  "editable_files": [
+    "normalize.py",
+    "ledger.py",
+    "api.py"
+  ],
+  "cases": [
+    {
+      "id": "single_release",
+      "module": "api",
+      "function": "availability",
+      "args": [
+        10,
+        [
+          {
+            "kind": "reserve",
+            "id": "a",
+            "units": 3
+          },
+          {
+            "kind": "release",
+            "id": "a",
+            "units": 0
+          }
+        ]
+      ],
+      "expected": 10
+    },
+    {
+      "id": "replacement_then_release",
+      "module": "api",
+      "function": "availability",
+      "args": [
+        10,
+        [
+          {
+            "kind": "reserve",
+            "id": "a",
+            "units": 3
+          },
+          {
+            "kind": "reserve",
+            "id": "a",
+            "units": 5
+          },
+          {
+            "kind": "release",
+            "id": "a",
+            "units": 0
+          }
+        ]
+      ],
+      "expected": 10,
+      "initial_failure": true
+    },
+    {
+      "id": "replacement_active",
+      "module": "api",
+      "function": "availability",
+      "args": [
+        10,
+        [
+          {
+            "kind": "reserve",
+            "id": "a",
+            "units": 3
+          },
+          {
+            "kind": "reserve",
+            "id": "a",
+            "units": 5
+          }
+        ]
+      ],
+      "expected": 5,
+      "initial_failure": true
+    },
+    {
+      "id": "normalizer_preserves_events",
+      "module": "normalize",
+      "function": "normalized_count",
+      "args": [
+        [
+          {
+            "kind": "reserve",
+            "id": "a",
+            "units": 3
+          },
+          {
+            "kind": "release",
+            "id": "a",
+            "units": 0
+          }
+        ]
+      ],
+      "expected": 2
+    }
+  ]
+}

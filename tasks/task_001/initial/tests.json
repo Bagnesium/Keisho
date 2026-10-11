@@ -1,0 +1,92 @@
+[
+  {
+    "id": "single_release",
+    "module": "api",
+    "function": "availability",
+    "args": [
+      10,
+      [
+        {
+          "kind": "reserve",
+          "id": "a",
+          "units": 3
+        },
+        {
+          "kind": "release",
+          "id": "a",
+          "units": 0
+        }
+      ]
+    ],
+    "expected": 10
+  },
+  {
+    "id": "replacement_then_release",
+    "module": "api",
+    "function": "availability",
+    "args": [
+      10,
+      [
+        {
+          "kind": "reserve",
+          "id": "a",
+          "units": 3
+        },
+        {
+          "kind": "reserve",
+          "id": "a",
+          "units": 5
+        },
+        {
+          "kind": "release",
+          "id": "a",
+          "units": 0
+        }
+      ]
+    ],
+    "expected": 10,
+    "initial_failure": true
+  },
+  {
+    "id": "replacement_active",
+    "module": "api",
+    "function": "availability",
+    "args": [
+      10,
+      [
+        {
+          "kind": "reserve",
+          "id": "a",
+          "units": 3
+        },
+        {
+          "kind": "reserve",
+          "id": "a",
+          "units": 5
+        }
+      ]
+    ],
+    "expected": 5,
+    "initial_failure": true
+  },
+  {
+    "id": "normalizer_preserves_events",
+    "module": "normalize",
+    "function": "normalized_count",
+    "args": [
+      [
+        {
+          "kind": "reserve",
+          "id": "a",
+          "units": 3
+        },
+        {
+          "kind": "release",
+          "id": "a",
+          "units": 0
+        }
+      ]
+    ],
+    "expected": 2
+  }
+]

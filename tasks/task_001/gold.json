@@ -1,0 +1,176 @@
+{
+  "task_id": "task_001",
+  "version": "1.0.0",
+  "bug": {
+    "description": "Replacement reserves add the full new amount to the aggregate instead of the delta from the previous hold. Release removes only the latest amount.",
+    "failure_type": "local state transition"
+  },
+  "correct_fix": {
+    "ledger.py": "from normalize import normalize\n\ndef replay(capacity, events):\n    state = {\"active\": {}, \"reserved\": 0, \"releases\": 0}\n    for event in normalize(events):\n        key = event[\"id\"]\n        if event[\"kind\"] == \"reserve\":\n            units = event[\"units\"]\n            previous = state[\"active\"].get(key, 0)\n            state[\"active\"][key] = units\n            state[\"reserved\"] += units - previous\n        else:\n            previous = state[\"active\"].pop(key, None)\n            if previous is not None:\n                state[\"reserved\"] -= previous\n                state[\"releases\"] += 1\n    return {\"available\": capacity - state[\"reserved\"], \"active\": state[\"active\"], \"releases\": state[\"releases\"]}\n"
+  },
+  "success": {
+    "criterion": "All immutable public and hidden cases pass; source-only edits, unchanged API.",
+    "initial_failing_tests": [
+      "replacement_then_release",
+      "replacement_active"
+    ],
+    "hidden_cases": [
+      {
+        "id": "two_keys_resize",
+        "module": "api",
+        "function": "availability",
+        "args": [
+          30,
+          [
+            {
+              "kind": "reserve",
+              "id": "a",
+              "units": 8
+            },
+            {
+              "kind": "reserve",
+              "id": "b",
+              "units": 4
+            },
+            {
+              "kind": "reserve",
+              "id": "a",
+              "units": 2
+            },
+            {
+              "kind": "release",
+              "id": "b",
+              "units": 0
+            }
+          ]
+        ],
+        "expected": 28
+      },
+      {
+        "id": "zero_resize",
+        "module": "api",
+        "function": "availability",
+        "args": [
+          11,
+          [
+            {
+              "kind": "reserve",
+              "id": "x",
+              "units": 7
+            },
+            {
+              "kind": "reserve",
+              "id": "x",
+              "units": 0
+            },
+            {
+              "kind": "release",
+              "id": "x",
+              "units": 0
+            }
+          ]
+        ],
+        "expected": 11
+      },
+      {
+        "id": "unknown_release",
+        "module": "api",
+        "function": "availability",
+        "args": [
+          12,
+          [
+            {
+              "kind": "release",
+              "id": "absent",
+              "units": 0
+            }
+          ]
+        ],
+        "expected": 12
+      }
+    ]
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "The normalizer duplicates reservation events.",
+      "truth": false,
+      "falsifying_tests": [
+        "normalizer_preserves_events"
+      ]
+    },
+    {
+      "id": "H2",
+      "statement": "Replacement reservations do not remove the previous amount from the aggregate.",
+      "truth": true
+    }
+  ],
+  "facts": [
+    {
+      "id": "F1",
+      "statement": "The normalizer preserves exactly the supplied two reserve/release events.",
+      "test_id": "normalizer_preserves_events",
+      "scope_files": [
+        "normalize.py"
+      ]
+    }
+  ],
+  "rediscovery_targets": [
+    {
+      "id": "R1",
+      "fact_id": "F1",
+      "test_id": "normalizer_preserves_events",
+      "description": "The normalizer preserves exactly the supplied two reserve/release events.",
+      "scope_files": [
+        "normalize.py"
+      ]
+    }
+  ],
+  "repeated_failure_targets": [
+    {
+      "id": "A1",
+      "description": "Deduplicating all events by reservation ID destroys the operation history and does not fix the suite.",
+      "patch_path": "normalize.py",
+      "patch_content": "def normalize(events):\n    result = []\n    for event in events:\n        kind = event[\"kind\"]\n        if kind not in (\"reserve\", \"release\"):\n            raise ValueError(\"unsupported event\")\n        amount = int(event.get(\"units\", 0))\n        if amount < 0:\n            raise ValueError(\"negative units\")\n        result.append({\"kind\": kind, \"id\": str(event[\"id\"]), \"units\": amount})\n    return list({item[\"id\"]: item for item in result}.values())\n\ndef normalized_count(events):\n    return len(normalize(events))\n",
+      "test_ids": [
+        "full"
+      ],
+      "scope_files": [
+        "ledger.py",
+        "api.py"
+      ],
+      "failure_test": "normalizer_preserves_events"
+    }
+  ],
+  "invalid_actions": [
+    "editing tests or contracts",
+    "reading gold, raw logs, or sibling workspaces",
+    "network or arbitrary shell execution",
+    "changing public API",
+    "test-specific hardcoding or grader interference"
+  ],
+  "checkpoint": {
+    "tool_calls": 9,
+    "selection_reason": "Nine tools end after normalizer probe, a failed ID-dedup patch, full-suite failure, restoration, and API inspection. Replacement-state accounting is unresolved; no correct code has been written.",
+    "requirements": [
+      "fact established by passing probe",
+      "incorrect hypothesis exposed",
+      "falsified path or demonstrated failed approach",
+      "hidden success not achieved",
+      "no correct-fix declaration"
+    ],
+    "calibration_kind": "scripted development trace; not live-model calibration"
+  },
+  "calibration": {
+    "contract": "A reserve for an existing ID REPLACES its units. Release removes that ID once. Unknown releases are no-ops. Event order is significant. Availability is capacity minus current active units.",
+    "reason": "Nine tools end after normalizer probe, a failed ID-dedup patch, full-suite failure, restoration, and API inspection. Replacement-state accounting is unresolved; no correct code has been written.",
+    "probe": "normalizer_preserves_events",
+    "wrong_patch_path": "normalize.py",
+    "wrong_patch_content": "def normalize(events):\n    result = []\n    for event in events:\n        kind = event[\"kind\"]\n        if kind not in (\"reserve\", \"release\"):\n            raise ValueError(\"unsupported event\")\n        amount = int(event.get(\"units\", 0))\n        if amount < 0:\n            raise ValueError(\"negative units\")\n        result.append({\"kind\": kind, \"id\": str(event[\"id\"]), \"units\": amount})\n    return list({item[\"id\"]: item for item in result}.values())\n\ndef normalized_count(events):\n    return len(normalize(events))\n",
+    "read_paths": [
+      "ledger.py",
+      "normalize.py",
+      "api.py"
+    ]
+  }
+}
