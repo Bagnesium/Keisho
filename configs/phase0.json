@@ -1,0 +1,11 @@
+{
+  "config_version": "0.1.0",
+  "protocol_version": "0.1.0",
+  "state_version": "0.1.0",
+  "phase": 0,
+  "mode": "offline_scaffold_validation",
+  "seed": 17,
+  "conditions": ["NO_CONTEXT", "FULL_HISTORY", "SUMMARY", "FIXED_STATE"],
+  "paid_calls_authorized": false,
+  "successor_conditioning_enabled": false
+}
