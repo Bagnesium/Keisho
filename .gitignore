@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+.venv/
+build/
+dist/
+*.egg-info/
+.DS_Store
+.env
+.env.*
+!.env.example
+/.cache/
+/runs/offline/
+/runs/calibration/
+/runs/real-calibration/
+/runs/readiness-offline/
+/runs/real-calibration-openrouter/
+/runs/readiness-offline-openrouter/
+/runs/raw/*
+!/runs/raw/.gitkeep
+/runs/processed/*
+!/runs/processed/.gitkeep
+
+# Execution archives and generated workspaces are local evidence, not source.
+# Reviewed public metadata can be added explicitly; never bulk-add these roots.
+/runs/*
+!/runs/raw/
+!/runs/processed/
+/results/*
+!/results/README.md

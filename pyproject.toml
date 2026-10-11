@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "keisho"
+version = "0.1.0"
+description = "Research scaffold for externally reconstructable cross-model task state transfer"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+keisho = "keisho.pilot.cli:main"
+
+[project.optional-dependencies]
+pilot = ["tiktoken==0.12.0"]
+benchmark = ["tiktoken==0.12.0", "jsonschema==4.26.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"keisho.benchmark.vendor" = ["*.json", "*.txt", "LICENSE"]
+
+[tool.keisho]
+protocol_version = "0.1.0+phase1.1.0.0"
+state_version = "0.1.1"
+phase = 1

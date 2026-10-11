@@ -1,0 +1,4 @@
+# Phase 0 has no third-party runtime or test dependencies.
+# The sole build dependency and its complete dependency closure are pinned here.
+# Install this file only if building a distribution; offline tests need neither pip nor setuptools.
+setuptools==80.9.0
