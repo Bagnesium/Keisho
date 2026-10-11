@@ -1,0 +1,43 @@
+{
+  "version": "1.1.0",
+  "kind": "prospective OpenRouter exploratory calibration; separately authorized; excluded from evaluation",
+  "task_id": "task_001",
+  "task_sha256": "0d5e6fd00e5871521eba08cdc96f09aa1ba2e261307947a79052da4ada667671",
+  "seed": 17,
+  "max_blocks": 1,
+  "max_predecessor_trajectories": 1,
+  "max_successor_branches": 4,
+  "pilot_config": "pilot.yaml",
+  "pilot_config_sha256": "defa4fb8229c205430febfd1e6afd5a7eb85b89c2d361d9715520796cb50e862",
+  "dollar_cap_usd": "1.25",
+  "automatic_retries": 0,
+  "paid_calls_authorized": false,
+  "successor_conditioning": false,
+  "provider": "openrouter",
+  "catalog_path": "../analysis/openrouter-catalog-v1.0.0.json",
+  "catalog_sha256": "b78d1aa8e54fb2d94839ed62dc997bb4644cd17caf2afd131802b01e9deece96",
+  "models": {
+    "predecessor": {
+      "request_model_id": "openai/gpt-4.1-mini",
+      "model_id": "openai/gpt-4.1-mini-2025-04-14"
+    },
+    "successor": {
+      "request_model_id": "openai/gpt-4.1",
+      "model_id": "openai/gpt-4.1-2025-04-14"
+    }
+  },
+  "routing": {
+    "only": [
+      "openai"
+    ],
+    "order": [
+      "openai"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true
+  },
+  "identity_policy": "exact dated canonical response model and OpenAI provider required; aliases rejected; upstream snapshot attestation unavailable",
+  "reservation_multiplier": "1.05",
+  "automatic_model_selection": false,
+  "model_fallbacks": false
+}

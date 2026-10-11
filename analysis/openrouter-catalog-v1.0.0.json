@@ -1,0 +1,862 @@
+{
+  "version": "1.0.0",
+  "checked_date": "2026-10-04",
+  "authenticated": false,
+  "inference_calls": 0,
+  "models_url": "https://openrouter.ai/api/v1/models",
+  "models": [
+    {
+      "id": "openai/gpt-4.1",
+      "canonical_slug": "openai/gpt-4.1-2025-04-14",
+      "hugging_face_id": "",
+      "name": "OpenAI: GPT-4.1",
+      "created": 1744651385,
+      "description": "GPT-4.1 is a flagship large language model optimized for advanced instruction following, real-world software engineering, and long-context reasoning. It supports a 1 million token context window and outperforms GPT-4o and...",
+      "context_length": 1047576,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": [
+          "image",
+          "text",
+          "file"
+        ],
+        "output_modalities": [
+          "text"
+        ],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000002",
+        "completion": "0.000008",
+        "web_search": "0.01",
+        "input_cache_read": "0.0000005"
+      },
+      "top_provider": {
+        "context_length": 1047576,
+        "max_completion_tokens": 32768,
+        "is_moderated": true
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "max_completion_tokens",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": "2024-06-30",
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/openai/gpt-4.1-2025-04-14/endpoints"
+      },
+      "benchmarks": {
+        "design_arena": [
+          {
+            "arena": "models",
+            "category": "3d",
+            "elo": 865,
+            "win_rate": 30.9,
+            "rank": 116
+          },
+          {
+            "arena": "models",
+            "category": "codecategories",
+            "elo": 1031,
+            "win_rate": 50.9,
+            "rank": 108
+          },
+          {
+            "arena": "models",
+            "category": "dataviz",
+            "elo": 1111,
+            "win_rate": 59.5,
+            "rank": 89
+          },
+          {
+            "arena": "models",
+            "category": "gamedev",
+            "elo": 1092,
+            "win_rate": 59.1,
+            "rank": 91
+          },
+          {
+            "arena": "models",
+            "category": "uicomponent",
+            "elo": 1007,
+            "win_rate": 49.7,
+            "rank": 107
+          },
+          {
+            "arena": "models",
+            "category": "website",
+            "elo": 1045,
+            "win_rate": 52.3,
+            "rank": 110
+          }
+        ]
+      }
+    },
+    {
+      "id": "openai/gpt-4.1-mini",
+      "canonical_slug": "openai/gpt-4.1-mini-2025-04-14",
+      "hugging_face_id": "",
+      "name": "OpenAI: GPT-4.1 Mini",
+      "created": 1744651381,
+      "description": "GPT-4.1 Mini is a mid-sized model delivering performance competitive with GPT-4o at substantially lower latency and cost. It retains a 1 million token context window and scores 45.1% on hard...",
+      "context_length": 1047576,
+      "architecture": {
+        "modality": "text+image+file->text",
+        "input_modalities": [
+          "image",
+          "text",
+          "file"
+        ],
+        "output_modalities": [
+          "text"
+        ],
+        "tokenizer": "GPT",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.0000004",
+        "completion": "0.0000016",
+        "web_search": "0.01",
+        "input_cache_read": "0.0000001"
+      },
+      "top_provider": {
+        "context_length": 1047576,
+        "max_completion_tokens": 32768,
+        "is_moderated": true
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "max_completion_tokens",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p"
+      ],
+      "default_parameters": {},
+      "supported_voices": null,
+      "knowledge_cutoff": "2024-06-30",
+      "expiration_date": null,
+      "links": {
+        "details": "/api/v1/models/openai/gpt-4.1-mini-2025-04-14/endpoints"
+      },
+      "benchmarks": {
+        "design_arena": [
+          {
+            "arena": "models",
+            "category": "3d",
+            "elo": 852,
+            "win_rate": 30.5,
+            "rank": 117
+          },
+          {
+            "arena": "models",
+            "category": "codecategories",
+            "elo": 999,
+            "win_rate": 47.5,
+            "rank": 115
+          },
+          {
+            "arena": "models",
+            "category": "dataviz",
+            "elo": 1041,
+            "win_rate": 49.2,
+            "rank": 104
+          },
+          {
+            "arena": "models",
+            "category": "gamedev",
+            "elo": 1083,
+            "win_rate": 58.5,
+            "rank": 95
+          },
+          {
+            "arena": "models",
+            "category": "uicomponent",
+            "elo": 968,
+            "win_rate": 45.4,
+            "rank": 111
+          },
+          {
+            "arena": "models",
+            "category": "website",
+            "elo": 1004,
+            "win_rate": 47.8,
+            "rank": 118
+          }
+        ],
+        "artificial_analysis": {
+          "intelligence_index": null,
+          "coding_index": 20.2,
+          "agentic_index": null
+        }
+      }
+    }
+  ],
+  "endpoints": {
+    "openai/gpt-4.1-mini": {
+      "data": {
+        "id": "openai/gpt-4.1-mini",
+        "name": "OpenAI: GPT-4.1 Mini",
+        "created": 1744651381,
+        "description": "GPT-4.1 Mini is a mid-sized model delivering performance competitive with GPT-4o at substantially lower latency and cost. It retains a 1 million token context window and scores 45.1% on hard...",
+        "architecture": {
+          "tokenizer": "GPT",
+          "instruct_type": null,
+          "modality": "text+image+file->text",
+          "input_modalities": [
+            "image",
+            "text",
+            "file"
+          ],
+          "output_modalities": [
+            "text"
+          ]
+        },
+        "endpoints": [
+          {
+            "name": "Azure | openai/gpt-4.1-mini-2025-04-14",
+            "model_id": "openai/gpt-4.1-mini",
+            "model_name": "OpenAI: GPT-4.1 Mini",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.0000004",
+              "completion": "0.0000016",
+              "web_search": "0.01",
+              "input_cache_read": "0.0000001",
+              "discount": 0
+            },
+            "provider_name": "Azure",
+            "tag": "azure",
+            "quantization": "unknown",
+            "max_completion_tokens": 942818,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "temperature",
+              "top_p",
+              "max_completion_tokens",
+              "tools",
+              "tool_choice",
+              "structured_outputs",
+              "response_format",
+              "seed"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": 99.93664871713652,
+            "uptime_last_5m": 99.7560975609756,
+            "uptime_last_1d": 99.98456551937028,
+            "supports_implicit_caching": true,
+            "native_tools": {},
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          },
+          {
+            "name": "OpenAI | openai/gpt-4.1-mini-2025-04-14",
+            "model_id": "openai/gpt-4.1-mini",
+            "model_name": "OpenAI: GPT-4.1 Mini",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.0000004",
+              "completion": "0.0000016",
+              "web_search": "0.01",
+              "input_cache_read": "0.0000001",
+              "discount": 0
+            },
+            "provider_name": "OpenAI",
+            "tag": "openai",
+            "quantization": "unknown",
+            "max_completion_tokens": 32768,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "seed",
+              "max_tokens",
+              "response_format",
+              "structured_outputs",
+              "tools",
+              "tool_choice",
+              "temperature",
+              "top_p"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": 99.96627460899626,
+            "uptime_last_5m": 99.9682464078749,
+            "uptime_last_1d": 99.97929262185859,
+            "supports_implicit_caching": false,
+            "native_tools": {
+              "openrouter:web_search": {
+                "type": "web_search"
+              }
+            },
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          },
+          {
+            "name": "Azure | openai/gpt-4.1-mini-2025-04-14",
+            "model_id": "openai/gpt-4.1-mini",
+            "model_name": "OpenAI: GPT-4.1 Mini",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.00000044",
+              "completion": "0.00000176",
+              "web_search": "0.01",
+              "input_cache_read": "0.00000011",
+              "discount": 0
+            },
+            "provider_name": "Azure",
+            "tag": "azure/swedencentral",
+            "quantization": "unknown",
+            "max_completion_tokens": 942818,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "temperature",
+              "top_p",
+              "max_completion_tokens",
+              "tools",
+              "tool_choice",
+              "structured_outputs",
+              "response_format",
+              "seed"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": null,
+            "uptime_last_5m": null,
+            "uptime_last_1d": 100,
+            "supports_implicit_caching": true,
+            "native_tools": {},
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          }
+        ]
+      }
+    },
+    "openai/gpt-4.1": {
+      "data": {
+        "id": "openai/gpt-4.1",
+        "name": "OpenAI: GPT-4.1",
+        "created": 1744651385,
+        "description": "GPT-4.1 is a flagship large language model optimized for advanced instruction following, real-world software engineering, and long-context reasoning. It supports a 1 million token context window and outperforms GPT-4o and...",
+        "architecture": {
+          "tokenizer": "GPT",
+          "instruct_type": null,
+          "modality": "text+image+file->text",
+          "input_modalities": [
+            "image",
+            "text",
+            "file"
+          ],
+          "output_modalities": [
+            "text"
+          ]
+        },
+        "endpoints": [
+          {
+            "name": "Azure | openai/gpt-4.1-2025-04-14",
+            "model_id": "openai/gpt-4.1",
+            "model_name": "OpenAI: GPT-4.1",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.000002",
+              "completion": "0.000008",
+              "web_search": "0.01",
+              "input_cache_read": "0.0000005",
+              "discount": 0
+            },
+            "provider_name": "Azure",
+            "tag": "azure",
+            "quantization": "unknown",
+            "max_completion_tokens": 942818,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "temperature",
+              "top_p",
+              "max_completion_tokens",
+              "tools",
+              "tool_choice",
+              "structured_outputs",
+              "response_format",
+              "seed"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": 100,
+            "uptime_last_5m": 100,
+            "uptime_last_1d": 99.97387396802173,
+            "supports_implicit_caching": true,
+            "native_tools": {},
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          },
+          {
+            "name": "OpenAI | openai/gpt-4.1-2025-04-14",
+            "model_id": "openai/gpt-4.1",
+            "model_name": "OpenAI: GPT-4.1",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.000002",
+              "completion": "0.000008",
+              "web_search": "0.01",
+              "input_cache_read": "0.0000005",
+              "discount": 0
+            },
+            "provider_name": "OpenAI",
+            "tag": "openai",
+            "quantization": "unknown",
+            "max_completion_tokens": 32768,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "seed",
+              "max_tokens",
+              "response_format",
+              "structured_outputs",
+              "tools",
+              "tool_choice",
+              "temperature",
+              "top_p"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": 99.98833909900104,
+            "uptime_last_5m": 99.97696913864579,
+            "uptime_last_1d": 99.98765689766222,
+            "supports_implicit_caching": false,
+            "native_tools": {
+              "openrouter:web_search": {
+                "type": "web_search"
+              }
+            },
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          },
+          {
+            "name": "Azure | openai/gpt-4.1-2025-04-14",
+            "model_id": "openai/gpt-4.1",
+            "model_name": "OpenAI: GPT-4.1",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.0000022",
+              "completion": "0.0000088",
+              "web_search": "0.01",
+              "input_cache_read": "0.00000055",
+              "discount": 0
+            },
+            "provider_name": "Azure",
+            "tag": "azure/swedencentral",
+            "quantization": "unknown",
+            "max_completion_tokens": 942818,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "temperature",
+              "top_p",
+              "max_completion_tokens",
+              "tools",
+              "tool_choice",
+              "structured_outputs",
+              "response_format",
+              "seed"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": null,
+            "uptime_last_5m": null,
+            "uptime_last_1d": 100,
+            "supports_implicit_caching": true,
+            "native_tools": {},
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          }
+        ]
+      }
+    }
+  },
+  "dated_endpoint_lookups": {
+    "openai/gpt-4.1-mini-2025-04-14": {
+      "data": {
+        "id": "openai/gpt-4.1-mini",
+        "name": "OpenAI: GPT-4.1 Mini",
+        "created": 1744651381,
+        "description": "GPT-4.1 Mini is a mid-sized model delivering performance competitive with GPT-4o at substantially lower latency and cost. It retains a 1 million token context window and scores 45.1% on hard...",
+        "architecture": {
+          "tokenizer": "GPT",
+          "instruct_type": null,
+          "modality": "text+image+file->text",
+          "input_modalities": [
+            "image",
+            "text",
+            "file"
+          ],
+          "output_modalities": [
+            "text"
+          ]
+        },
+        "endpoints": [
+          {
+            "name": "Azure | openai/gpt-4.1-mini-2025-04-14",
+            "model_id": "openai/gpt-4.1-mini",
+            "model_name": "OpenAI: GPT-4.1 Mini",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.0000004",
+              "completion": "0.0000016",
+              "web_search": "0.01",
+              "input_cache_read": "0.0000001",
+              "discount": 0
+            },
+            "provider_name": "Azure",
+            "tag": "azure",
+            "quantization": "unknown",
+            "max_completion_tokens": 942818,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "temperature",
+              "top_p",
+              "max_completion_tokens",
+              "tools",
+              "tool_choice",
+              "structured_outputs",
+              "response_format",
+              "seed"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": 99.93664871713652,
+            "uptime_last_5m": 99.7560975609756,
+            "uptime_last_1d": 99.98456551937028,
+            "supports_implicit_caching": true,
+            "native_tools": {},
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          },
+          {
+            "name": "OpenAI | openai/gpt-4.1-mini-2025-04-14",
+            "model_id": "openai/gpt-4.1-mini",
+            "model_name": "OpenAI: GPT-4.1 Mini",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.0000004",
+              "completion": "0.0000016",
+              "web_search": "0.01",
+              "input_cache_read": "0.0000001",
+              "discount": 0
+            },
+            "provider_name": "OpenAI",
+            "tag": "openai",
+            "quantization": "unknown",
+            "max_completion_tokens": 32768,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "seed",
+              "max_tokens",
+              "response_format",
+              "structured_outputs",
+              "tools",
+              "tool_choice",
+              "temperature",
+              "top_p"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": 99.96627460899626,
+            "uptime_last_5m": 99.9682464078749,
+            "uptime_last_1d": 99.97929262185859,
+            "supports_implicit_caching": false,
+            "native_tools": {
+              "openrouter:web_search": {
+                "type": "web_search"
+              }
+            },
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          },
+          {
+            "name": "Azure | openai/gpt-4.1-mini-2025-04-14",
+            "model_id": "openai/gpt-4.1-mini",
+            "model_name": "OpenAI: GPT-4.1 Mini",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.00000044",
+              "completion": "0.00000176",
+              "web_search": "0.01",
+              "input_cache_read": "0.00000011",
+              "discount": 0
+            },
+            "provider_name": "Azure",
+            "tag": "azure/swedencentral",
+            "quantization": "unknown",
+            "max_completion_tokens": 942818,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "temperature",
+              "top_p",
+              "max_completion_tokens",
+              "tools",
+              "tool_choice",
+              "structured_outputs",
+              "response_format",
+              "seed"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": null,
+            "uptime_last_5m": null,
+            "uptime_last_1d": 100,
+            "supports_implicit_caching": true,
+            "native_tools": {},
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          }
+        ]
+      }
+    },
+    "openai/gpt-4.1-2025-04-14": {
+      "data": {
+        "id": "openai/gpt-4.1",
+        "name": "OpenAI: GPT-4.1",
+        "created": 1744651385,
+        "description": "GPT-4.1 is a flagship large language model optimized for advanced instruction following, real-world software engineering, and long-context reasoning. It supports a 1 million token context window and outperforms GPT-4o and...",
+        "architecture": {
+          "tokenizer": "GPT",
+          "instruct_type": null,
+          "modality": "text+image+file->text",
+          "input_modalities": [
+            "image",
+            "text",
+            "file"
+          ],
+          "output_modalities": [
+            "text"
+          ]
+        },
+        "endpoints": [
+          {
+            "name": "Azure | openai/gpt-4.1-2025-04-14",
+            "model_id": "openai/gpt-4.1",
+            "model_name": "OpenAI: GPT-4.1",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.000002",
+              "completion": "0.000008",
+              "web_search": "0.01",
+              "input_cache_read": "0.0000005",
+              "discount": 0
+            },
+            "provider_name": "Azure",
+            "tag": "azure",
+            "quantization": "unknown",
+            "max_completion_tokens": 942818,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "temperature",
+              "top_p",
+              "max_completion_tokens",
+              "tools",
+              "tool_choice",
+              "structured_outputs",
+              "response_format",
+              "seed"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": 100,
+            "uptime_last_5m": null,
+            "uptime_last_1d": 99.97386167598934,
+            "supports_implicit_caching": true,
+            "native_tools": {},
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          },
+          {
+            "name": "OpenAI | openai/gpt-4.1-2025-04-14",
+            "model_id": "openai/gpt-4.1",
+            "model_name": "OpenAI: GPT-4.1",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.000002",
+              "completion": "0.000008",
+              "web_search": "0.01",
+              "input_cache_read": "0.0000005",
+              "discount": 0
+            },
+            "provider_name": "OpenAI",
+            "tag": "openai",
+            "quantization": "unknown",
+            "max_completion_tokens": 32768,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "seed",
+              "max_tokens",
+              "response_format",
+              "structured_outputs",
+              "tools",
+              "tool_choice",
+              "temperature",
+              "top_p"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": 99.98356276967331,
+            "uptime_last_5m": 100,
+            "uptime_last_1d": 99.9877195413643,
+            "supports_implicit_caching": false,
+            "native_tools": {
+              "openrouter:web_search": {
+                "type": "web_search"
+              }
+            },
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          },
+          {
+            "name": "Azure | openai/gpt-4.1-2025-04-14",
+            "model_id": "openai/gpt-4.1",
+            "model_name": "OpenAI: GPT-4.1",
+            "context_length": 1047576,
+            "pricing": {
+              "prompt": "0.0000022",
+              "completion": "0.0000088",
+              "web_search": "0.01",
+              "input_cache_read": "0.00000055",
+              "discount": 0
+            },
+            "provider_name": "Azure",
+            "tag": "azure/swedencentral",
+            "quantization": "unknown",
+            "max_completion_tokens": 942818,
+            "max_prompt_tokens": null,
+            "supported_parameters": [
+              "temperature",
+              "top_p",
+              "max_completion_tokens",
+              "tools",
+              "tool_choice",
+              "structured_outputs",
+              "response_format",
+              "seed"
+            ],
+            "supports_tool_choice": {
+              "none": true,
+              "auto": true,
+              "required": true,
+              "function": true
+            },
+            "status": 0,
+            "uptime_last_30m": null,
+            "uptime_last_5m": null,
+            "uptime_last_1d": 100,
+            "supports_implicit_caching": true,
+            "native_tools": {},
+            "supports_voice_cloning": false,
+            "supports_multiple_audio_references": false,
+            "supports_image_reference": false,
+            "latency_last_30m": null,
+            "throughput_last_30m": null
+          }
+        ]
+      }
+    }
+  }
+}
