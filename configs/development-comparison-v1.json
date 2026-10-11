@@ -1,0 +1,13 @@
+{
+  "version": "development-comparison/1.0",
+  "provider_config": "calibration-task001-openrouter-v1.2.0.yaml",
+  "provider_config_sha256": "b78d68a9775e40d96bec5098e7a52c6080fa06968474e364fda228a90b5ea506",
+  "conditions": ["NO_CONTEXT", "FULL_HISTORY", "SUMMARY_2K", "KEISHO_2K"],
+  "handoff_token_budget": 2048,
+  "checkpoint": {"completed_tool_budget": 12, "uses_hidden_grades": false},
+  "successor_budgets": {"model_calls": 32, "tool_calls": 24, "output_tokens": 2048, "total_tokens": 120000, "request_input_tokens": 32000, "context_tokens": 128000},
+  "generation": "deterministic prose and structured rendering from identical material; zero API calls",
+  "automatic_retries": 0,
+  "paid_calls_authorized": false,
+  "successor_conditioning": false
+}
