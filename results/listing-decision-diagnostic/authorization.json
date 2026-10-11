@@ -1,0 +1,13 @@
+{
+  "version": "decision-diagnostic-authorization/1.0",
+  "source": "user authorization 2026-10-08: new shared maximum $2; four single decisions and at most one eight-call confirmation",
+  "cap_usd": "2.00",
+  "config_path": "/Users/bagnesium/Documents/GitHub/Keisho/configs/listing-decision-diagnostic-v1.json",
+  "config_sha256": "902fd3211c4adeaa197cc91284d17321d012967383b5f0021934da97e6bd816d",
+  "guard": "/Users/bagnesium/Documents/GitHub/Keisho/runs/listing-decision-diagnostic-v1",
+  "max_probes": 4,
+  "max_confirmations": 1,
+  "max_confirmation_calls": 8,
+  "old_authorizations_not_reopened": true,
+  "automatic_retries": 0
+}
