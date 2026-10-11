@@ -1,0 +1,28 @@
+{
+  "version": "original-response-fixture/1.0",
+  "purpose": "offline regression only; never a continuation",
+  "files": {
+    "predecessor_call_001-request.json": {
+      "source": "runs/swebench-integration/comparison/predecessor/predecessor_call_001-request.json",
+      "sha256": "73d72a12e98c3f91a9bbc646233d53cb1a30eb67cacb596018243cc12bb4f93b"
+    },
+    "predecessor_call_001-response.json": {
+      "source": "runs/swebench-integration/comparison/predecessor/predecessor_call_001-response.json",
+      "sha256": "6c8eee86b69f6290e8a2f7eebe519265085d3127933f6382b9e464ad50401cb4"
+    },
+    "postrun-protocol-diagnosis.json": {
+      "source": "runs/swebench-integration/comparison/predecessor/postrun-protocol-diagnosis.json",
+      "sha256": "7e54dc85e8233e733aa7e75651a5666730a61fafc8274b369c58e930bc9308f4"
+    },
+    "raw-provider-response.json": {
+      "source_field": "raw_response_json",
+      "source_envelope": "predecessor_call_001-response.json",
+      "sha256": "7183e956ecfa8974baef8f76e70926d2fda0c150f69ebe90d68a0e6c93cb8de3"
+    },
+    "response-text.json": {
+      "source_field": "text",
+      "source_envelope": "predecessor_call_001-response.json",
+      "sha256": "b877b6788e8f9186caaa77433351071220d2c042ddd5a0bebc8b2f0c8cca4de8"
+    }
+  }
+}
