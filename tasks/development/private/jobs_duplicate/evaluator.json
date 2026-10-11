@@ -1,0 +1,147 @@
+{
+  "cases": [
+    {
+      "id": "rollback_and_restart",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "enqueue",
+              "id": "a",
+              "payload": {
+                "amount": 3,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "step",
+              "crash": "after_effect"
+            },
+            {
+              "op": "restart"
+            },
+            {
+              "op": "enqueue",
+              "id": "b",
+              "payload": {
+                "amount": 5,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "drain"
+            }
+          ],
+          "select": [
+            "balances",
+            "completed",
+            "effects",
+            "pending",
+            "crashes"
+          ]
+        }
+      ],
+      "expected": {
+        "balances": {
+          "team": 8
+        },
+        "completed": 2,
+        "effects": 2,
+        "pending": 0,
+        "crashes": 1
+      }
+    },
+    {
+      "id": "payload_collision",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "enqueue",
+              "id": "a",
+              "payload": {
+                "amount": 3,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "enqueue",
+              "id": "a",
+              "payload": {
+                "amount": 9,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "drain"
+            }
+          ],
+          "select": [
+            "balances",
+            "errors",
+            "pending"
+          ]
+        }
+      ],
+      "expected": {
+        "balances": {
+          "team": 3
+        },
+        "errors": 1,
+        "pending": 0
+      }
+    },
+    {
+      "id": "terminal_failure",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "enqueue",
+              "id": "r",
+              "payload": {
+                "amount": 4,
+                "recipient": "team",
+                "failures": 9
+              }
+            },
+            {
+              "op": "drain"
+            }
+          ],
+          "select": [
+            "balances",
+            "states",
+            "attempts",
+            "pending"
+          ]
+        }
+      ],
+      "expected": {
+        "balances": {},
+        "states": {
+          "r": "failed"
+        },
+        "attempts": {
+          "r": 3
+        },
+        "pending": 0
+      }
+    }
+  ],
+  "property_seeds": [
+    17,
+    29,
+    43
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "task_id": "jobs_recovery",
+  "version": "development/1.0",
+  "origin": "authored controlled development application; not historical or real-world benchmark evidence",
+  "family": "jobs",
+  "description": "Recover delivery progress after a worker dies between durable result commit and acknowledgment; cached results must not block later work or lose interrupted jobs.",
+  "acceptance": [
+    "Restart after result commit acknowledges the original delivery without repeating its effect",
+    "Later jobs and duplicates progress; interruption inside the transaction leaves retryable work, not acknowledged loss",
+    "Respect retry scheduling, terminal transitions, immutable job payloads and persistent result API"
+  ],
+  "constraints": [
+    "Preserve module/public API contracts; source-only fixes",
+    "Do not modify diagnostics or read evaluator materials; no test-specific hardcoding"
+  ],
+  "editable_files": [
+    "storage.py",
+    "queue.py",
+    "retry.py",
+    "effects.py",
+    "results.py",
+    "worker.py"
+  ],
+  "cases": [
+    {
+      "id": "result_ack_crash_then_next",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "enqueue",
+              "id": "a",
+              "payload": {
+                "amount": 3,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "step",
+              "crash": "after_result"
+            },
+            {
+              "op": "restart"
+            },
+            {
+              "op": "enqueue",
+              "id": "b",
+              "payload": {
+                "amount": 5,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "drain"
+            }
+          ],
+          "select": [
+            "balances",
+            "completed",
+            "pending",
+            "crashes"
+          ]
+        }
+      ],
+      "expected": {
+        "balances": {
+          "team": 8
+        },
+        "completed": 2,
+        "pending": 0,
+        "crashes": 1
+      }
+    },
+    {
+      "id": "persistent_restart",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "enqueue",
+              "id": "a",
+              "payload": {
+                "amount": 3,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "drain"
+            },
+            {
+              "op": "restart"
+            },
+            {
+              "op": "enqueue",
+              "id": "b",
+              "payload": {
+                "amount": 5,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "drain"
+            }
+          ],
+          "select": [
+            "balances",
+            "completed",
+            "pending"
+          ]
+        }
+      ],
+      "expected": {
+        "balances": {
+          "team": 8
+        },
+        "completed": 2,
+        "pending": 0
+      }
+    }
+  ]
+}

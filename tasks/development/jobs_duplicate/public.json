@@ -1,0 +1,118 @@
+{
+  "task_id": "jobs_duplicate",
+  "version": "development/1.0",
+  "origin": "authored controlled development application; not historical or real-world benchmark evidence",
+  "family": "jobs",
+  "description": "Make durable result handling idempotent under duplicate delivery while preserving distinct jobs, bounded retries and atomic effects/results across interruption.",
+  "acceptance": [
+    "Each unique job has exactly one stored effect; distinct job IDs remain legitimate work even for the same recipient",
+    "A committed result is reused and every delivery can be acknowledged; invalid job-ID reuse is rejected",
+    "Retry deadlines, terminal failure and restart/crash recovery preserve the ledger and existing payload/result API"
+  ],
+  "constraints": [
+    "Preserve module/public API contracts; source-only fixes",
+    "Do not modify diagnostics or read evaluator materials; no test-specific hardcoding"
+  ],
+  "editable_files": [
+    "storage.py",
+    "queue.py",
+    "retry.py",
+    "effects.py",
+    "results.py",
+    "worker.py"
+  ],
+  "cases": [
+    {
+      "id": "duplicate_delivery",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "enqueue",
+              "id": "a",
+              "payload": {
+                "amount": 3,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "enqueue",
+              "id": "a",
+              "payload": {
+                "amount": 3,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "enqueue",
+              "id": "b",
+              "payload": {
+                "amount": 5,
+                "recipient": "team",
+                "failures": 0
+              }
+            },
+            {
+              "op": "drain"
+            }
+          ],
+          "select": [
+            "balances",
+            "completed",
+            "effects",
+            "pending"
+          ]
+        }
+      ],
+      "expected": {
+        "balances": {
+          "team": 8
+        },
+        "completed": 2,
+        "effects": 2,
+        "pending": 0
+      }
+    },
+    {
+      "id": "retry_compatibility",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "enqueue",
+              "id": "r",
+              "payload": {
+                "amount": 4,
+                "recipient": "team",
+                "failures": 2
+              }
+            },
+            {
+              "op": "drain"
+            }
+          ],
+          "select": [
+            "balances",
+            "attempts",
+            "pending"
+          ]
+        }
+      ],
+      "expected": {
+        "balances": {
+          "team": 4
+        },
+        "attempts": {
+          "r": 3
+        },
+        "pending": 0
+      }
+    }
+  ]
+}
