@@ -1,0 +1,108 @@
+{
+  "task_id": "index_update",
+  "version": "development/1.0",
+  "origin": "authored controlled development application; not historical or real-world benchmark evidence",
+  "family": "index",
+  "description": "Replace stale chunks on document updates while preserving persistent metadata, unrelated documents, idempotent unchanged updates and identifier/encoding normalization.",
+  "acceptance": [
+    "Search after update returns current chunks only; metadata counts and versions describe that same generation",
+    "Other documents survive an update, including after reopening storage",
+    "Unchanged normalized content is idempotent; UTF-8/NFC identifiers, whitespace normalization, empty content and invalid inputs remain consistent"
+  ],
+  "constraints": [
+    "Preserve module/public API contracts; source-only fixes",
+    "Do not modify diagnostics or read evaluator materials; no test-specific hardcoding"
+  ],
+  "editable_files": [
+    "normalize.py",
+    "chunking.py",
+    "storage.py",
+    "lookup.py",
+    "metadata.py",
+    "ingest.py"
+  ],
+  "cases": [
+    {
+      "id": "replace_stale_chunks",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "update",
+              "id": "a",
+              "text": "old alpha token"
+            },
+            {
+              "op": "update",
+              "id": "a",
+              "text": "new beta token"
+            },
+            {
+              "op": "search",
+              "query": "old"
+            },
+            {
+              "op": "search",
+              "query": "new"
+            }
+          ],
+          "select": [
+            "searches",
+            "stored_chunks"
+          ]
+        }
+      ],
+      "expected": {
+        "searches": [
+          [],
+          [
+            {
+              "doc_id": "a",
+              "text": "new beta"
+            }
+          ]
+        ],
+        "stored_chunks": 2
+      }
+    },
+    {
+      "id": "unchanged_update",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "update",
+              "id": "a",
+              "text": "same content"
+            },
+            {
+              "op": "update",
+              "id": "a",
+              "text": "same  content"
+            }
+          ],
+          "select": [
+            "changes",
+            "documents"
+          ]
+        }
+      ],
+      "expected": {
+        "changes": [
+          true,
+          false
+        ],
+        "documents": {
+          "a": {
+            "version": 1,
+            "chunks": 1
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "task_id": "index_delete",
+  "version": "development/1.0",
+  "origin": "authored controlled development application; not historical or real-world benchmark evidence",
+  "family": "index",
+  "description": "Propagate deletion through document identity normalization, chunk storage, metadata and lookup, including persistence, re-addition and unaffected documents.",
+  "acceptance": [
+    "Deleted normalized IDs disappear from lookup and persistent metadata; orphan chunks are removed",
+    "Other documents remain searchable and may still be updated",
+    "Deleting unknown IDs is safe; deletion via equivalent Unicode ID, restart and re-addition remain consistent"
+  ],
+  "constraints": [
+    "Preserve module/public API contracts; source-only fixes",
+    "Do not modify diagnostics or read evaluator materials; no test-specific hardcoding"
+  ],
+  "editable_files": [
+    "normalize.py",
+    "chunking.py",
+    "storage.py",
+    "lookup.py",
+    "metadata.py",
+    "ingest.py"
+  ],
+  "cases": [
+    {
+      "id": "delete_lookup",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "update",
+              "id": "a",
+              "text": "old alpha"
+            },
+            {
+              "op": "delete",
+              "id": "a"
+            },
+            {
+              "op": "search",
+              "query": "old"
+            }
+          ],
+          "select": [
+            "searches",
+            "documents"
+          ]
+        }
+      ],
+      "expected": {
+        "searches": [
+          []
+        ],
+        "documents": {}
+      }
+    },
+    {
+      "id": "unknown_delete",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "update",
+              "id": "a",
+              "text": "keep me"
+            },
+            {
+              "op": "delete",
+              "id": "missing"
+            },
+            {
+              "op": "search",
+              "query": "keep"
+            }
+          ],
+          "select": [
+            "searches",
+            "orphans"
+          ]
+        }
+      ],
+      "expected": {
+        "searches": [
+          [
+            {
+              "doc_id": "a",
+              "text": "keep me"
+            }
+          ]
+        ],
+        "orphans": 0
+      }
+    }
+  ]
+}

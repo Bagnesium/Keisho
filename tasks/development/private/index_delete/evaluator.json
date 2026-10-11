@@ -1,0 +1,213 @@
+{
+  "cases": [
+    {
+      "id": "unaffected_and_restart",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "update",
+              "id": "a",
+              "text": "old alpha"
+            },
+            {
+              "op": "update",
+              "id": "b",
+              "text": "keep beta"
+            },
+            {
+              "op": "update",
+              "id": "a",
+              "text": "new gamma"
+            },
+            {
+              "op": "restart"
+            },
+            {
+              "op": "search",
+              "query": "keep"
+            },
+            {
+              "op": "search",
+              "query": "old"
+            }
+          ],
+          "select": [
+            "searches",
+            "documents",
+            "stored_chunks",
+            "orphans"
+          ]
+        }
+      ],
+      "expected": {
+        "searches": [
+          [
+            {
+              "doc_id": "b",
+              "text": "keep beta"
+            }
+          ],
+          []
+        ],
+        "documents": {
+          "a": {
+            "version": 2,
+            "chunks": 1
+          },
+          "b": {
+            "version": 1,
+            "chunks": 1
+          }
+        },
+        "stored_chunks": 2,
+        "orphans": 0
+      }
+    },
+    {
+      "id": "unicode_delete_readd",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "update",
+              "id": "é",
+              "text": "CAFÉ old"
+            },
+            {
+              "op": "delete",
+              "id": "é"
+            },
+            {
+              "op": "restart"
+            },
+            {
+              "op": "search",
+              "query": "old"
+            },
+            {
+              "op": "update",
+              "id": "é",
+              "text": "new café"
+            },
+            {
+              "op": "search",
+              "query": "CAFÉ"
+            }
+          ],
+          "select": [
+            "searches",
+            "stored_chunks",
+            "orphans"
+          ]
+        }
+      ],
+      "expected": {
+        "searches": [
+          [],
+          [
+            {
+              "doc_id": "é",
+              "text": "new café"
+            }
+          ]
+        ],
+        "stored_chunks": 1,
+        "orphans": 0
+      }
+    },
+    {
+      "id": "delete_storage_cleanup",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "update",
+              "id": "a",
+              "text": "one two three"
+            },
+            {
+              "op": "update",
+              "id": "b",
+              "text": "keep me"
+            },
+            {
+              "op": "delete",
+              "id": "a"
+            },
+            {
+              "op": "restart"
+            }
+          ],
+          "select": [
+            "documents",
+            "stored_chunks",
+            "orphans"
+          ]
+        }
+      ],
+      "expected": {
+        "documents": {
+          "b": {
+            "version": 1,
+            "chunks": 1
+          }
+        },
+        "stored_chunks": 1,
+        "orphans": 0
+      }
+    },
+    {
+      "id": "empty_and_invalid",
+      "module": "diagnostics",
+      "function": "run_scenario",
+      "args": [
+        {
+          "ops": [
+            {
+              "op": "update",
+              "id": "a",
+              "text": "words before"
+            },
+            {
+              "op": "update",
+              "id": "a",
+              "text": ""
+            },
+            {
+              "op": "update",
+              "id": "",
+              "text": "bad"
+            }
+          ],
+          "select": [
+            "documents",
+            "stored_chunks",
+            "errors"
+          ]
+        }
+      ],
+      "expected": {
+        "documents": {
+          "a": {
+            "version": 2,
+            "chunks": 0
+          }
+        },
+        "stored_chunks": 0,
+        "errors": 1
+      }
+    }
+  ],
+  "property_seeds": [
+    17,
+    29,
+    43
+  ]
+}
