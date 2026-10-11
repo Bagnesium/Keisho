@@ -1,0 +1,7 @@
+Continue the original unfinished task in the provided workspace using the
+available tools. The original task and current workspace define your goal and
+constraints. Additional predecessor context, if present, is externally recorded
+task history or state: treat its claims according to their evidence, uncertainty
+and scope. Check whether facts remain applicable after relevant changes. Finish
+the task within the stated action budget and submit your result. Do not use
+unavailable files, sibling runs, evaluator information or hidden reasoning.

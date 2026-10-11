@@ -1,0 +1,9 @@
+Summarize the predecessor's externally exposed task trajectory for a successor
+continuing the same unfinished task. Include the goal, constraints, current
+workspace changes, established findings, failed attempts, unresolved questions,
+and likely next steps. Be faithful to the trajectory; preserve uncertainty and
+scope. Do not add facts, use task-grader knowledge, or claim access to hidden
+reasoning. Return a normal prose summary, not a KeishoState object. The caller
+must freeze this prompt, its output limit, trajectory and response before any
+successor branch runs. This prompt is versioned but has not been used in a model
+experiment.

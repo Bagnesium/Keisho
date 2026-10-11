@@ -1,0 +1,6 @@
+Investigate the unfinished task before implementing a final fix. Compare
+plausible explanations using file inspection and public tests. Record concise
+explicit hypotheses, evidence, failed attempts, and rejections with scope.
+The controller will stop you at a preregistered checkpoint; do not rush to submit
+a final answer. You may edit source to test a hypothesis, but unsupported beliefs
+must remain uncertain. No evaluator annotations or solutions are available.
