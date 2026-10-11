@@ -1,0 +1,129 @@
+{
+  "version": "listing-decision-diagnostic/1.0",
+  "cap_usd": "2.00",
+  "live_execution_authorized": false,
+  "order": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "probe_calls_per_cell": 1,
+  "confirmation_attempts": 1,
+  "probe_input_source": "runs/swebench-integration/interface-diagnosis-v1/functional/predecessor_call_002-request.json",
+  "probe_input_sha256": "72bbd9b9a1690cedf1eef858d1cea61371ce66558d041fe21734a1efcb488366",
+  "probe_messages_sha256": "a68e023e5b184d65fcbe8b0ae312e94331828685a4edc00bb6707291e8e3404b",
+  "confirmation_input_source": "runs/swebench-integration/interface-diagnosis-v1/functional/predecessor_call_001-request.json",
+  "confirmation_input_sha256": "4aea55ef67741477cc43c50922c2918d3ee3c0c3562e2108416afcf277eacefb",
+  "fixture_sha256": "fa4f58d4d5b678c85b3529b349405a288f48765c3ea88dde48d52aec7c616ef7",
+  "system_sha256": "054a669071973a82c98bb7bb2c7f858e585a21fc1c86a1386396e4eb84f2644e",
+  "schema_sha256": "e5852f087c53d95a994682cf19715090139f4545e1716f666cbbd620fc1d712c",
+  "provider_config": "calibration-task001-openrouter-v1.2.0.yaml",
+  "provider_config_sha256": "b78d68a9775e40d96bec5098e7a52c6080fa06968474e364fda228a90b5ea506",
+  "public_catalog_sha256": "6168aafe26f12aa206019e7e265c2020e21787a845c1f79049978efbb40f6bd6",
+  "cells": [
+    {
+      "id": "A",
+      "role": "predecessor",
+      "model_id": "openai/gpt-4.1-mini-2025-04-14",
+      "output_mode": "json_schema",
+      "wire_requested_model": "openai/gpt-4.1-mini",
+      "accepted_response_model_ids": [
+        "openai/gpt-4.1-mini",
+        "openai/gpt-4.1-mini-2025-04-14"
+      ],
+      "wire_body_sha256": "98a63fe4192944845a78bb3f1d857b6b998ce7b29b8e03a81f2008928c3857d1"
+    },
+    {
+      "id": "B",
+      "role": "predecessor",
+      "model_id": "openai/gpt-4.1-mini-2025-04-14",
+      "output_mode": "json_object",
+      "wire_requested_model": "openai/gpt-4.1-mini",
+      "accepted_response_model_ids": [
+        "openai/gpt-4.1-mini",
+        "openai/gpt-4.1-mini-2025-04-14"
+      ],
+      "wire_body_sha256": "7884d5e158762d05b9f3dc4ed77efd0dfc4d0e84da8b786cc13d4b813ac13125"
+    },
+    {
+      "id": "C",
+      "role": "successor",
+      "model_id": "openai/gpt-4.1-2025-04-14",
+      "output_mode": "json_schema",
+      "wire_requested_model": "openai/gpt-4.1",
+      "accepted_response_model_ids": [
+        "openai/gpt-4.1",
+        "openai/gpt-4.1-2025-04-14"
+      ],
+      "wire_body_sha256": "390204f572dfe74c8880a98621f57a71c995dee6c72a6f1a66b6e37de3b6b6da"
+    },
+    {
+      "id": "D",
+      "role": "successor",
+      "model_id": "openai/gpt-4.1-2025-04-14",
+      "output_mode": "json_object",
+      "wire_requested_model": "openai/gpt-4.1",
+      "accepted_response_model_ids": [
+        "openai/gpt-4.1",
+        "openai/gpt-4.1-2025-04-14"
+      ],
+      "wire_body_sha256": "fa16955a4d8b4c542eb6f987f7f117185b28e8155753a5a5a4052ce071fd1461"
+    }
+  ],
+  "common_request_parameters": {
+    "seed": 20261007,
+    "temperature": 0.0,
+    "max_tokens": 2048,
+    "stream": false,
+    "plugins": [],
+    "transforms_field": "absent"
+  },
+  "model_specific_differences": [
+    "requested/accepted model identifiers",
+    "routing max_price matches registered model pricing"
+  ],
+  "probe_limits": {
+    "model_calls": 1,
+    "request_input_tokens": 32000,
+    "output_tokens": 2048,
+    "context_tokens": 128000
+  },
+  "confirmation_budgets": {
+    "context_tokens": 128000,
+    "model_calls": 8,
+    "output_tokens": 2048,
+    "request_input_tokens": 32000,
+    "tool_calls": 8,
+    "total_tokens": 180000
+  },
+  "confirmation_time_seconds": 600,
+  "tool_timeout_seconds": 120,
+  "tool_output_bytes": 49152,
+  "selection_preference": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "evaluation_criteria": {
+    "parse": "unchanged auxiliary-claims/2.0 top-level parser",
+    "action_schema": "existing declared action variants, evaluated separately from annotations",
+    "safety": "existing runtime shape/path/encoding/bounds validation; probes never execute",
+    "new_information": "existing fixture file contents or scoped read-only cat/head/tail/grep/rg/sed-print command; shell ambiguity recorded unknown and does not qualify",
+    "non_progress": [
+      "repeated listing",
+      "blind writing",
+      "finishing without evidence",
+      "unrelated command"
+    ],
+    "qualifies": "parse, action schema, safety all valid; finish_reason stop; relevant new information true",
+    "annotations": "unchanged auxiliary policy; rejected annotations retained, not rewritten",
+    "confirmation": "fresh initial state/context; actual source inspection, permitted source edit, first post-edit public acceptance attempt passing, unchanged acceptance inputs and independent public check passing"
+  },
+  "maximum_reservations_usd": "0.87779328",
+  "reservation_assumptions": "Four full 32000/2048 reservations (two mini, two full), at most eight full-model confirmation reservations; no cache discounts; 5% possible BYOK margin; charged unknown calls retain reservation and stop all stages",
+  "automatic_retries": 0,
+  "swebench_authorized": false,
+  "third_model_authorized": false
+}
