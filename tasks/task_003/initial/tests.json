@@ -1,0 +1,48 @@
+[
+  {
+    "id": "empty_metadata",
+    "module": "auth",
+    "function": "authenticate",
+    "args": [
+      "body",
+      {}
+    ],
+    "expected": {
+      "ok": true,
+      "error": null
+    },
+    "initial_failure": true
+  },
+  {
+    "id": "nonempty_metadata",
+    "module": "auth",
+    "function": "authenticate",
+    "args": [
+      "body",
+      {
+        "client": "app"
+      }
+    ],
+    "expected": {
+      "ok": true,
+      "error": null
+    }
+  },
+  {
+    "id": "cache_identity",
+    "module": "keys",
+    "function": "cache_identity",
+    "args": [],
+    "expected": true
+  },
+  {
+    "id": "clear_cache_auth",
+    "module": "auth",
+    "function": "authenticate_after_clear",
+    "args": [
+      "body"
+    ],
+    "expected": true,
+    "initial_failure": true
+  }
+]

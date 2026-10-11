@@ -1,0 +1,146 @@
+{
+  "task_id": "task_003",
+  "version": "1.0.0",
+  "bug": {
+    "description": "Middleware adds signed metadata for missing/empty metadata after the signature was computed; the cache error is misleading.",
+    "failure_type": "misleading symptom"
+  },
+  "correct_fix": {
+    "middleware.py": "def prepare(request):\n    result = dict(request)\n    metadata = request.get(\"metadata\", {})\n    result[\"metadata\"] = dict(metadata)\n    return result\n"
+  },
+  "success": {
+    "criterion": "All immutable public and hidden cases pass; source-only edits, unchanged API.",
+    "initial_failing_tests": [
+      "empty_metadata",
+      "clear_cache_auth"
+    ],
+    "hidden_cases": [
+      {
+        "id": "omitted_metadata",
+        "module": "auth",
+        "function": "authenticate",
+        "args": [
+          "different",
+          null,
+          true
+        ],
+        "expected": {
+          "ok": true,
+          "error": null
+        }
+      },
+      {
+        "id": "zero_metadata_value",
+        "module": "auth",
+        "function": "authenticate",
+        "args": [
+          "other",
+          {
+            "attempt": 0
+          }
+        ],
+        "expected": {
+          "ok": true,
+          "error": null
+        }
+      },
+      {
+        "id": "unicode_payload",
+        "module": "auth",
+        "function": "authenticate",
+        "args": [
+          "\u0434\u0430\u043d\u043d\u044b\u0435",
+          {}
+        ],
+        "expected": {
+          "ok": true,
+          "error": null
+        }
+      }
+    ]
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "The key cache returns a stale signing key.",
+      "truth": false,
+      "falsifying_tests": [
+        "cache_identity",
+        "clear_cache_auth"
+      ]
+    },
+    {
+      "id": "H2",
+      "statement": "Middleware changes signed metadata between signing and verification.",
+      "truth": true
+    }
+  ],
+  "facts": [
+    {
+      "id": "F1",
+      "statement": "The cache returns the same public test key as its backing table.",
+      "test_id": "cache_identity",
+      "scope_files": [
+        "keys.py"
+      ]
+    }
+  ],
+  "rediscovery_targets": [
+    {
+      "id": "R1",
+      "fact_id": "F1",
+      "test_id": "cache_identity",
+      "description": "The cache returns the same public test key as its backing table.",
+      "scope_files": [
+        "keys.py"
+      ]
+    }
+  ],
+  "repeated_failure_targets": [
+    {
+      "id": "A1",
+      "description": "Clearing the key cache before verification does not fix empty-metadata authentication.",
+      "test_ids": [
+        "clear_cache_auth"
+      ],
+      "scope_files": [
+        "canonical.py",
+        "keys.py",
+        "middleware.py",
+        "auth.py"
+      ],
+      "failure_test": "clear_cache_auth"
+    }
+  ],
+  "invalid_actions": [
+    "editing tests or contracts",
+    "reading gold, raw logs, or sibling workspaces",
+    "network or arbitrary shell execution",
+    "changing public API",
+    "test-specific hardcoding or grader interference"
+  ],
+  "checkpoint": {
+    "tool_calls": 9,
+    "selection_reason": "Nine tools end after cache identity verification, a failed cache-clear experiment, canonical/auth/middleware inspection and passing nonempty-metadata control. No middleware fix has been applied; the diagnostic error has been falsified as a root-cause explanation.",
+    "requirements": [
+      "fact established by passing probe",
+      "incorrect hypothesis exposed",
+      "falsified path or demonstrated failed approach",
+      "hidden success not achieved",
+      "no correct-fix declaration"
+    ],
+    "calibration_kind": "scripted development trace; not live-model calibration"
+  },
+  "calibration": {
+    "contract": "Metadata is a signed caller-supplied dictionary. Missing metadata means an empty dictionary. Middleware must preserve signed fields. The public test key is fixed; no network or real credentials are involved.",
+    "reason": "Nine tools end after cache identity verification, a failed cache-clear experiment, canonical/auth/middleware inspection and passing nonempty-metadata control. No middleware fix has been applied; the diagnostic error has been falsified as a root-cause explanation.",
+    "probe": "cache_identity",
+    "failed_probe": "clear_cache_auth",
+    "read_paths": [
+      "auth.py",
+      "middleware.py",
+      "canonical.py",
+      "keys.py"
+    ]
+  }
+}

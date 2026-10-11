@@ -1,0 +1,59 @@
+{
+  "task_id": "task_003",
+  "version": "1.0.0",
+  "description": "Authentication reports a cached-key mismatch. Fix the supplied repository so all public and hidden behavioral tests pass. Preserve the API and the documented input contracts. Edit source modules only; test fixtures are immutable. Use the provided tools; no network or external files.",
+  "editable_files": [
+    "canonical.py",
+    "keys.py",
+    "middleware.py",
+    "auth.py"
+  ],
+  "cases": [
+    {
+      "id": "empty_metadata",
+      "module": "auth",
+      "function": "authenticate",
+      "args": [
+        "body",
+        {}
+      ],
+      "expected": {
+        "ok": true,
+        "error": null
+      },
+      "initial_failure": true
+    },
+    {
+      "id": "nonempty_metadata",
+      "module": "auth",
+      "function": "authenticate",
+      "args": [
+        "body",
+        {
+          "client": "app"
+        }
+      ],
+      "expected": {
+        "ok": true,
+        "error": null
+      }
+    },
+    {
+      "id": "cache_identity",
+      "module": "keys",
+      "function": "cache_identity",
+      "args": [],
+      "expected": true
+    },
+    {
+      "id": "clear_cache_auth",
+      "module": "auth",
+      "function": "authenticate_after_clear",
+      "args": [
+        "body"
+      ],
+      "expected": true,
+      "initial_failure": true
+    }
+  ]
+}
