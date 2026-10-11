@@ -1,0 +1,10 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "PENDING-V13-NEW-USER-AUTHORIZATION",
+  "config_sha256": "471feb73c690c9d202ef7a42dc25bd0d00175dd752256973adf3e3afdc043a5a",
+  "plan_sha256": "48ffc5d96806d5e4d3bbfb75ff41ec01ea3ab9b1fd3ec3f847b4101e9a873d42",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": false,
+  "note": "Template only; no spending authorized. Later create a new explicit authorization record, never overwrite this template or reuse old scopes."
+}

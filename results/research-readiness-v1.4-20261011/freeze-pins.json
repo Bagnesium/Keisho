@@ -1,0 +1,10 @@
+{
+  "config_sha256": "e6a5ad8c56043924890b393363cee457ae88b6e7dbf14d6a1fa97f2ac4a14b2f",
+  "plan_sha256": "60cb7044d642bb37234a5b01d8e096a74474de023bd450d585553ea46c49e2ff",
+  "manifest_sha256": "b1bd32a720c195fadc92b2e39818a3f4a3a1cb1d633abfe639358fc523f461cd",
+  "manifest_components": 83,
+  "agent_prompt_sha256": "4f99b6495be87680583af9460943a26fbd389ee017007e289e7fbe1a5dfc527d",
+  "annotation_guidance_sha256": "4355a256a11dc729a2c6d35e95b770ae041777a1c96d19217003222406f25d1e",
+  "first_request_upper_bound": 4782,
+  "provider_requests": 0
+}

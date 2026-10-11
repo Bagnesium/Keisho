@@ -1,6 +1,6 @@
 """One setup-only API-driven check using the existing agent and Docker tools.
 
-No new agent scaffold, benchmark tasks, model routing or response contract.
+Uses the existing agent scaffold, model routing and versioned local wire admission.
 The comparison is intentionally not launched here: it requires a demonstrated
 repair as well as a passing functional check under the user's authorization.
 """
@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / 'src'))
 from keisho.agents.providers.openai_chat import http_transport
 from keisho.agents.providers.openrouter_chat import BASE_URL, OpenRouterChatModel
 from keisho.benchmark.comparison import (response_settings, check_public_catalog, read_input,
-        execution_result, SPEC_SHA, PROVIDER_SHA, IMAGE_METADATA_SHA)
+        execution_result, SPEC_SHA, NEXT_SPEC_SHA, WIRE_SPEC_SHA, PROVIDER_SHA, IMAGE_METADATA_SHA, action_wire_options)
 from keisho.benchmark.environment import RepositorySession, docker
 from keisho.benchmark.protocol import completed_validation_command
 from keisho.core import canonical_json, digest, require
@@ -31,6 +31,8 @@ from keisho.benchmark.response_measurements import capture_response, measure_run
 SCOPE = ROOT / 'runs/swebench-integration/interface-diagnosis-v1'
 CONFIG = ROOT / 'configs/swebench-functional-check-v1.json'
 CONFIRMATION12_SHA = '1cb6cab0b171ca0adbb9d6ba4f2e75738e640f88d70690dbff40d6c682a1e76c'
+CONFIRMATION12_V12_SHA = 'a2e7207a8226c173ec76eb43256f8011e80e6e3b26a8fadab1e032cfb5e327b4'
+CONFIRMATION12_V13_SHA = 'a833849a3b6706b17c96ed60e2e3252b89fa57e03418c8720cce8b067e781f61'
 CHECKER = '''import importlib,json
 from pathlib import Path
 cases = json.loads(Path('tests.json').read_text())
@@ -142,15 +144,25 @@ class PublicAcceptanceBoundary12(AcceptanceBoundary):
 def execute_confirmation12(config_path, authorization_path, run_dir, *, approve_live=False, dry_run=False):
     """Explicit prospective binding; old eight-call entry point stays unchanged."""
     config = read_input(config_path)
-    require(digest(config) == CONFIRMATION12_SHA, 'prepared 12-call configuration changed')
+    config_sha = digest(config)
+    require(config_sha in (CONFIRMATION12_SHA, CONFIRMATION12_V12_SHA, CONFIRMATION12_V13_SHA), 'prepared 12-call configuration changed')
+    version13 = config_sha == CONFIRMATION12_V13_SHA
+    version12 = config_sha in (CONFIRMATION12_V12_SHA, CONFIRMATION12_V13_SHA)
     require(config['live_execution_authorized'] is False, 'prospective configuration must remain disabled')
     run_dir = Path(run_dir).absolute()
     require(run_dir == ROOT / config['run_dir'] and not any(p.is_symlink() for p in (run_dir, *run_dir.parents)), 'unsafe or unbound output directory')
     require(not run_dir.exists(), 'confirmation attempt already claimed; no retry')
-    frozen = read_input(ROOT / 'configs/swebench-comparison-v1.1.json')
-    require(digest(frozen) == SPEC_SHA == config['source_comparison_sha256'], 'historical benchmark specification changed')
+    frozen = read_input(ROOT / 'configs' / (config['source_comparison_config'] if version12 else 'swebench-comparison-v1.1.json'))
+    require(digest(frozen) == (WIRE_SPEC_SHA if version13 else NEXT_SPEC_SHA if version12 else SPEC_SHA) == config['source_comparison_sha256'], 'frozen benchmark specification changed')
     system, policy, _ = response_settings(frozen)
     require(digest(system) == config['system_sha256'] and policy == config['response_policy'], 'prompt/policy pin changed')
+    if version12:
+        require(all(config[name] == frozen[name] for name in ('agent_prompt_version', 'agent_prompt_sha256',
+            'agent_output_format', 'agent_output_format_sha256', 'action_contract_version', 'action_contract_sha256',
+            'listing_policy', 'execution_contract_version')), 'version-1.2 execution contract changed')
+    if version13:
+        require(all(config[name] == frozen[name] for name in ('action_wire_version',
+            'internal_action_contract_version', 'internal_action_contract_sha256')), 'version-1.3 action wire contract changed')
     require(config['output_mode'] == 'json_object' and config['model_id'] == frozen['predecessor_model'], 'selected model/mode changed')
     require(digest(fixture_files()) == config['fixture_sha256'] and digest(OBJECTIVE) == config['objective_sha256'], 'fixture/objective changed')
     provider = read_input(ROOT / 'configs' / config['provider_config'])
@@ -164,21 +176,34 @@ def execute_confirmation12(config_path, authorization_path, run_dir, *, approve_
     if auth is not None:
         require(auth.get('version') == config['version'] and auth.get('config_sha256') == digest(config)
             and auth.get('run_dir') == config['run_dir'] and auth.get('attempts') == 1
-            and auth.get('user_authorized') is True and auth.get('swebench_authorized') is False,
+            and (auth.get('user_authorized') is True or
+                (version13 and dry_run and auth.get('user_authorized') is False))
+            and auth.get('swebench_authorized') is False,
             'authorization does not bind this one functional attempt')
+        if version13:
+            require(auth.get('provider_inference_authorized') is True or
+                (dry_run and auth.get('provider_inference_authorized') is False), 'new provider inference authorization required')
         cap = Decimal(auth['cap_usd'])
         require(cap.is_finite() and maximum <= cap <= Decimal('2'), 'new diagnostic cap insufficient or outside registered ceiling')
     else:
         cap = None
     if dry_run:
+        contract = {name: config[name] for name in ('source_comparison_sha256', 'system_sha256',
+            'agent_prompt_version', 'agent_output_format', 'action_contract_version', 'action_contract_sha256',
+            'listing_policy', 'execution_contract_version')} if version12 else {}
+        if version13:
+            contract.update({name: config[name] for name in ('action_wire_version',
+                'internal_action_contract_version', 'internal_action_contract_sha256')})
         print(canonical_json({'configuration': str(Path(config_path).resolve()), 'config_sha256': digest(config),
             'run_dir': str(run_dir), 'authorization': str(authorization_path) if authorization_path else None,
-            'live_admission': auth is not None and approve_live, 'cap_usd': str(cap) if cap else None,
+            'live_admission': auth is not None and auth.get('user_authorized') is True and approve_live
+                and (not version13 or auth.get('provider_inference_authorized') is True), 'cap_usd': str(cap) if cap else None,
             'maximum_reservations_usd': str(maximum), 'model': config['model_id'], 'output_mode': config['output_mode'],
             'budgets': config['budgets'], 'live_guard_created': False, 'provider_requests': 0,
-            'remaining_check': 'live also verifies credential presence, public catalog and prepared image'}))
+            'remaining_check': 'live also verifies credential presence, public catalog and prepared image', **contract}))
         return 0
     require(approve_live is True and auth is not None, 'new spending authorization and explicit approval required; old scopes closed')
+    require(auth.get('user_authorized') is True, 'new user spending authorization required')
     ca = (ROOT / 'configs' / provider['tls']['ca_file']).resolve()
     require(hashlib.sha256(ca.read_bytes()).hexdigest() == provider['tls']['ca_sha256'], 'verified CA changed')
     require(load_project_env(ROOT)['present']['OPENROUTER_API_KEY'], 'configured credential missing')
@@ -201,7 +226,9 @@ def execute_confirmation12(config_path, authorization_path, run_dir, *, approve_
     result = {'status': 'interrupted', 'setup_only': True, 'comparison_started': False, 'automatic_retries': False}
     session = None
     try:
-        session = RepositorySession(image['image_id'], audit=raw)
+        options = {'listing_policy': config['listing_policy']} if version12 else {}
+        session = RepositorySession(image['image_id'], audit=raw, timeout=config['tool_timeout_seconds'],
+            output_bytes=config['tool_output_bytes'], **options)
         base = initialize_public_fixture(session, raw, fixture_files())
         def transport(body, key):
             number = len(ledger.records)
@@ -213,7 +240,7 @@ def execute_confirmation12(config_path, authorization_path, run_dir, *, approve_
         boundary = PublicAcceptanceBoundary12()
         execution = run_agent(BudgetedModel(model, ledger, 'functional_confirmation12', config['model_id']), session, rec,
             OBJECTIVE, system, '', config['seed'], budgets, role='predecessor', checkpoint_predicate=boundary,
-            time_limit_seconds=config['time_limit_seconds'], response_policy=policy)
+            time_limit_seconds=config['time_limit_seconds'], response_policy=policy, **action_wire_options(config))
         result.update(assess_public_fixture(session, raw, base, execution, boundary))
         result.update(model_executed_post_edit_public_test=boundary.test_event is not None,
             post_edit_acceptance_marker=bool(boundary.test_event and 'PUBLIC_ACCEPTANCE passed 4 cases' in boundary.test_event.get('output', '')))
@@ -228,7 +255,11 @@ def execute_confirmation12(config_path, authorization_path, run_dir, *, approve_
         ledger.stop(ledger.reason or 'one 12-call functional confirmation ended; no retries or SWE-bench authorized')
         validator = RepositorySession.__new__(RepositorySession)
         validator.output_bytes = config['tool_output_bytes']
-        raw.write_artifact('response-measurements.json', measure_run(raw, validator.validate_action))
+        if version12:
+            validator.listing_policy = config['listing_policy']
+        measurement_options = {'action_contract_version': config['action_contract_version']} if version12 else {}
+        measurement_options.update(action_wire_options(config))
+        raw.write_artifact('response-measurements.json', measure_run(raw, validator.validate_action, **measurement_options))
         raw.write_artifact('spending.json', ledger.report())
         raw.write_artifact('result.json', result)
         raw.freeze()

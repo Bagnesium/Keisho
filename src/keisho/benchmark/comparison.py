@@ -18,7 +18,8 @@ from keisho.local_env import load_project_env
 from keisho.logging.raw import RawRun, EventKind
 from keisho.metrics.definitions import CallPurpose
 from keisho.pilot.agent import Budgets, Recorder, run_agent, logged_generate, request_upper_bound
-from keisho.pilot.response_policy import STRICT, AUXILIARY, agent_response_format
+from keisho.pilot.response_policy import (STRICT, AUXILIARY, agent_response_format,
+    ANNOTATION_GUIDANCE, ANNOTATION_GUIDANCE_VERSION)
 from keisho.pilot.spending import SpendLedger, BudgetedModel
 from keisho.pilot.tokenizer import NativeTokenizer
 from .environment import RepositorySession, docker
@@ -40,6 +41,10 @@ PROVIDER_SHA = 'b78d68a9775e40d96bec5098e7a52c6080fa06968474e364fda228a90b5ea506
 IMAGE_METADATA_SHA = '7b84f30a9701357e7317a796a52bff4a84ee769cd3eeb6ddaa5a992a53e5e5ed'
 NEXT_SPEC_SHA = 'f4c7733335e0991aebdc59ac393b8a347207b452accc1119831273f77691d425'
 NEXT_PLAN_SHA = '6bd86821a4d40df417c49a03f5564546e212d7f401bd74d8d0ee9ea5105902ba'
+WIRE_SPEC_SHA = '471feb73c690c9d202ef7a42dc25bd0d00175dd752256973adf3e3afdc043a5a'
+WIRE_PLAN_SHA = '48ffc5d96806d5e4d3bbfb75ff41ec01ea3ab9b1fd3ec3f847b4101e9a873d42'
+READINESS_SPEC_SHA = 'e6a5ad8c56043924890b393363cee457ae88b6e7dbf14d6a1fa97f2ac4a14b2f'
+READINESS_PLAN_SHA = '60cb7044d642bb37234a5b01d8e096a74474de023bd450d585553ea46c49e2ff'
 
 SYSTEM = '''You are a coding agent in an isolated repository at /testbed. Solve the original issue.
 Use only the issue and available repository/evidence. Test important changes with public tests.
@@ -68,6 +73,11 @@ Listings are bounded by 100 entries and 8192 path bytes. truncated/has_more and 
 Request another page or a narrower prefix to discover further paths. Exact unchanged pages may reference an earlier listing_id instead of repeating filenames; the original tool result stays in this conversation.
 Cursors become stale after repository changes; restart the listing when told so. Listing names do not establish file contents or task completion.
 '''
+SYSTEM_V4 = SYSTEM_V3 + ANNOTATION_GUIDANCE
+
+
+def observable_audit_enabled(config):
+    return config.get('agent_prompt_version') in ('benchmark-agent/3.0', 'benchmark-agent/4.0')
 
 
 def response_settings(config):
@@ -75,12 +85,35 @@ def response_settings(config):
     require(policy in (STRICT, AUXILIARY), 'unsupported benchmark response policy')
     if policy == STRICT:
         return SYSTEM, policy, None
+    if config.get('agent_prompt_version') == 'benchmark-agent/4.0':
+        require(config.get('annotation_guidance_version') == ANNOTATION_GUIDANCE_VERSION
+            and config.get('annotation_guidance_sha256') == digest(ANNOTATION_GUIDANCE)
+            and config.get('agent_prompt_sha256') == digest(SYSTEM_V4), 'version-4 annotation guidance pin changed')
+        require(config.get('action_wire_version') == 'flat-or-args/1.0'
+            and config.get('action_contract_version') == '4.0'
+            and config.get('internal_action_contract_version') == '3.0'
+            and config.get('internal_action_contract_sha256') == digest(agent_response_format('3.0')['json_schema']['schema'])
+            and config.get('action_contract_sha256') == digest(agent_response_format('4.0')['json_schema']['schema'])
+            and config.get('agent_output_format') == 'json_object/3.0'
+            and config.get('agent_output_format_sha256') == digest({'type':'json_object'})
+            and config.get('listing_policy') == 'bounded-listing/1.0'
+            and config.get('execution_contract_version') == 'agent-runtime/3.2'
+            and config.get('patch_export_policy') == 'source-and-artifacts/2.0', 'version-4 shared interface changed')
+        return SYSTEM_V4, policy, None
     if config.get('agent_prompt_version')=='benchmark-agent/3.0':
-        require(config.get('agent_output_format')=='json_object/3.0' and config.get('action_contract_version')=='3.0'
+        wire = config.get('action_wire_version')
+        if wire is not None:
+            require(wire == 'flat-or-args/1.0' and config.get('action_contract_version') == '4.0'
+                and config.get('internal_action_contract_version') == '3.0'
+                and config.get('internal_action_contract_sha256') == digest(agent_response_format('3.0')['json_schema']['schema'])
+                and config.get('execution_contract_version') == 'agent-runtime/3.1', 'version-1.3 wire contract must be selected together')
+        else:
+            require(config.get('action_contract_version') == '3.0', 'version-3 action contract changed')
+        require(config.get('agent_output_format')=='json_object/3.0'
             and config.get('listing_policy')=='bounded-listing/1.0','version-3 contract must be selected together')
         require(config.get('agent_prompt_sha256')==digest(SYSTEM_V3) and
             config.get('agent_output_format_sha256')==digest({'type':'json_object'}) and
-            config.get('action_contract_sha256')==digest(agent_response_format('3.0')['json_schema']['schema']), 'version-3 interface pin changed')
+            config.get('action_contract_sha256')==digest(agent_response_format(config['action_contract_version'])['json_schema']['schema']), 'version-3 interface pin changed')
         return SYSTEM_V3,policy,None
     require(config.get('agent_prompt_version') == 'benchmark-agent/2.0' and
             config.get('agent_output_format') == 'json_schema/2.0', 'amended response contract must be versioned together')
@@ -88,6 +121,11 @@ def response_settings(config):
     require(config.get('agent_prompt_sha256') == digest(SYSTEM_V2) and
             config.get('agent_output_format_sha256') == digest(output_format), 'amended prompt/schema pin changed')
     return SYSTEM_V2, policy, output_format
+
+
+def action_wire_options(config):
+    """One explicit selection shared by predecessor and every successor."""
+    return {'action_wire_version': config['action_wire_version']} if config.get('action_wire_version') else {}
 
 
 def read_input(path):
@@ -108,8 +146,10 @@ def load_frozen_plan(config_path=None, plan_path=None):
     task = read_input(PRESELECT / 'task.json')
     plan = read_input(plan_path or PRESELECT / 'plan.json')
     if config_path is not None:
-        require(digest(config) in (SPEC_SHA,NEXT_SPEC_SHA), 'configuration differs from frozen supported specification')
-        expected_plan = NEXT_PLAN_SHA if digest(config)==NEXT_SPEC_SHA else PLAN_SHA
+        supported = {SPEC_SHA: PLAN_SHA, NEXT_SPEC_SHA: NEXT_PLAN_SHA, WIRE_SPEC_SHA: WIRE_PLAN_SHA,
+                     READINESS_SPEC_SHA: READINESS_PLAN_SHA}
+        require(digest(config) in supported, 'configuration differs from frozen supported specification')
+        expected_plan = supported[digest(config)]
         require(digest(plan) == expected_plan, 'plan differs from matched frozen plan')
         require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
         selection = read_input(PRESELECT / 'plan.json')
@@ -121,6 +161,9 @@ def load_frozen_plan(config_path=None, plan_path=None):
     require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
     require(plan['plausibly_fits'] and config['selection']['count'] == 1, 'one comparison must fit cap')
     require(config['automatic_retries'] == 0, 'no automatic paid retries')
+    if digest(config) == READINESS_SPEC_SHA:
+        from .experiment_freeze import validate_freeze
+        validate_freeze(config, ROOT)
     return config, task, plan
 
 
@@ -167,9 +210,11 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
     response_settings(config)
     authorization = read_input(authorization_path)
     require(authorization['cap_usd'] == config['cap_usd'] == '10.00', 'authorization cap changed')
-    if digest(config)==NEXT_SPEC_SHA:
+    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA):
+        expected_plan = {NEXT_SPEC_SHA:NEXT_PLAN_SHA, WIRE_SPEC_SHA:WIRE_PLAN_SHA,
+                         READINESS_SPEC_SHA:READINESS_PLAN_SHA}[digest(config)]
         require(authorization.get('version')=='swebench-authorization/2.0' and
-            authorization.get('config_sha256')==NEXT_SPEC_SHA and authorization.get('plan_sha256')==NEXT_PLAN_SHA and
+            authorization.get('config_sha256')==digest(config) and authorization.get('plan_sha256')==expected_plan and
             authorization.get('attempts')==1 and isinstance(authorization.get('authorization_id'),str) and authorization['authorization_id'].strip(),
             'new scope must explicitly bind the frozen configuration and plan')
         require(re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}',authorization['authorization_id']) is not None,'unsafe authorization scope identifier')
@@ -217,7 +262,7 @@ def make_handoffs(task, predecessor, inventory, base_inventory, note_models, con
     trajectory = predecessor.load_frozen()
     state, archive, _ = load_session(predecessor.path, task['problem_statement'],
          acceptance=('Resolve the original issue; verify with repository tests. Official grade is unknown.',))
-    if config.get('agent_prompt_version')=='benchmark-agent/3.0':
+    if observable_audit_enabled(config):
         from keisho.handoff.workspace import compare_scope_hashes
         for item in state['items']:item['revalidation']=compare_scope_hashes(item,inventory)
     predecessor.write_artifact('handoff-imported-state.json', state)
@@ -241,7 +286,7 @@ def make_handoffs(task, predecessor, inventory, base_inventory, note_models, con
     for n, kind in enumerate(('summary', 'structured'), 1):
         messages = tuple(Message(m['role'], m['content']) for m in generation_messages(kind, evidence, adapter_version, deterministic))
         request = ModelRequest(messages, config['branch_seed'], config['generation_output_tokens'], 0.0)
-        model = note_models(kind,audit=note_run) if config.get('agent_prompt_version')=='benchmark-agent/3.0' else note_models(kind)
+        model = note_models(kind,audit=note_run) if observable_audit_enabled(config) else note_models(kind)
         require(request_upper_bound(model, request) <= 32000, 'note evidence exceeds frozen input budget; no truncation')
         response, call = logged_generate(model, request, recorder, kind, CallPurpose.SUMMARY, n)
         note_run.write_artifact(kind + '-call.json', call)
@@ -343,6 +388,11 @@ def dry_run(*, config_path, plan_path, run_dir, authorization_path):
             'agent_output_format': binding.config['agent_output_format'], 'agent_prompt_sha256': binding.config['agent_prompt_sha256'],
             'agent_output_format_sha256': binding.config['agent_output_format_sha256'], 'notes_adapter_version': binding.config['notes_adapter_version'],
             'selected_task': binding.task['instance_id'], 'base_commit': binding.task['base_commit'],
+            'action_wire_version': binding.config.get('action_wire_version'),
+            'internal_action_contract_version': binding.config.get('internal_action_contract_version', binding.config.get('action_contract_version')),
+            'annotation_guidance_version': binding.config.get('annotation_guidance_version'),
+            'patch_export_policy': binding.config.get('patch_export_policy'),
+            'experiment_manifest_sha256': binding.config.get('experiment_manifest_sha256'),
             'models': ctx['provider']['models'], 'conditions': binding.config['conditions'],
             'cost_envelope_usd': binding.plan['total_envelope_usd'], 'reservation_headroom_usd': binding.plan['largest_request_reservation_usd'],
             'pricing_assumptions': binding.plan['assumptions'], 'credential_presence': ctx['credential_presence'],
@@ -357,6 +407,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
     require(not binding.authorization_guard.exists(), 'authorization already claimed; no restart elsewhere')
     config, task, plan = binding.config, binding.task, binding.plan
     system, response_policy, output_format = response_settings(config)
+    wire_options = action_wire_options(config)
     ctx = runtime_preflight(binding)
     public_catalog = check_public_catalog(ctx['ca'])
     index = claim_launch(binding)  # Atomic authorization claim before any model.
@@ -374,6 +425,8 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
                           'reference_sha256': digest(binding.authorization), 'continued_scope': digest(config)==SPEC_SHA, 'prior_scope_accounted_usd': '0', 'cap_is_not_additional': digest(config)==SPEC_SHA})
     index.write_artifact('binding.json', binding.record())
     index.write_artifact('plan.json', {'source_config': config, 'plan': plan, 'setup': ctx['setup']})
+    if config.get('experiment_manifest'):
+        index.write_artifact('experiment-manifest.json', read_input(ROOT / config['experiment_manifest']))
     index.write_artifact('execution-config.json', {'source_config_sha256': digest(config), 'config': {**config, 'live_execution_authorized': True},
                           'execution_metadata': binding.record()})
     index.write_artifact('public-catalog-preflight.json', public_catalog)
@@ -402,11 +455,14 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
         return BudgetedModel(adapter, ledger, stage or role, identity)
     def session_for(image,raw):
         options={'listing_policy':config['listing_policy']} if config.get('listing_policy') else {}
+        if config.get('patch_export_policy'):
+            options['patch_export_policy'] = config['patch_export_policy']
         return RepositorySession(image,audit=raw,timeout=config['tool_timeout_seconds'],output_bytes=config['tool_output_bytes'],**options)
     def measure(raw,session,role):
-        if config.get('agent_prompt_version')=='benchmark-agent/3.0':
+        if observable_audit_enabled(config):
             from .response_measurements import measure_run
-            raw.write_artifact('response-measurements.json',measure_run(raw,session.validate_action,role=role,action_contract_version='3.0'))
+            raw.write_artifact('response-measurements.json',measure_run(raw,session.validate_action,role=role,
+                action_contract_version=config['action_contract_version'], **wire_options))
     results = {c: {'status': 'unstarted', 'official_status': None} for c in config['conditions']}
     overall = 'interrupted'
     predecessor_info = None
@@ -425,9 +481,9 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
         try:
             base_inventory = session.initialize_base(task['base_commit'])
             checkpoint = ValidationCheckpoint()
-            execution = run_agent(model('predecessor',audit=predecessor if config.get('agent_prompt_version')=='benchmark-agent/3.0' else None), session, Recorder(predecessor), task['problem_statement'], system, '',
+            execution = run_agent(model('predecessor',audit=predecessor if observable_audit_enabled(config) else None), session, Recorder(predecessor), task['problem_statement'], system, '',
                                   config['branch_seed'], Budgets(**config['predecessor_budgets']), role='predecessor',
-                                  checkpoint_predicate=checkpoint, time_limit_seconds=config['time_limit_seconds'], response_policy=response_policy)
+                                  checkpoint_predicate=checkpoint, time_limit_seconds=config['time_limit_seconds'], response_policy=response_policy, **wire_options)
             predecessor_info = execution_result(execution)
             predecessor.write_artifact('execution.json', predecessor_info)
             predecessor.write_artifact('calls.json', execution.calls)
@@ -467,9 +523,9 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
             try:
                 session.base_inventory = base_inventory
                 require(session.inventory() == inventory, 'branch restoration mismatch')
-                execution = run_agent(model('successor', stage=condition,audit=branch if config.get('agent_prompt_version')=='benchmark-agent/3.0' else None), session, Recorder(branch), task['problem_statement'], successor_system,
+                execution = run_agent(model('successor', stage=condition,audit=branch if observable_audit_enabled(config) else None), session, Recorder(branch), task['problem_statement'], successor_system,
                                       texts[condition], config['branch_seed'], Budgets(**config['successor_budgets']),
-                                      time_limit_seconds=config['time_limit_seconds'], response_policy=response_policy)
+                                      time_limit_seconds=config['time_limit_seconds'], response_policy=response_policy, **wire_options)
                 branch.write_artifact('calls.json', execution.calls)
                 branch.write_artifact('execution.json', execution)
                 measure(branch,session,'successor')

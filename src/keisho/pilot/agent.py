@@ -9,7 +9,8 @@ from keisho.logging.raw import Event, EventKind, FrozenTrajectory, RawRun
 from keisho.metrics.definitions import CallPurpose, CallRecord
 from .sandbox import IsolationUnavailable
 from .tools import InvalidAction, ToolSession
-from .response_policy import STRICT, AUXILIARY, parse_auxiliary
+from .response_policy import STRICT, AUXILIARY, parse_auxiliary, parse_unique_json, validate_recordable_json
+from .action_wire import VERSION as ACTION_WIRE_VERSION, canonicalize_action, rejected_response
 
 
 class BudgetExceeded(ValueError):
@@ -79,11 +80,16 @@ def logged_generate(model: AgentModel, request: ModelRequest, recorder: Recorder
     return response, record
 
 
-def parse_output(text: str, known_evidence_ids: set[str], policy=STRICT) -> dict:
+def parse_output(text: str, known_evidence_ids: set[str], policy=STRICT, action_wire_version=None) -> dict:
     require(policy in (STRICT, AUXILIARY), 'unsupported response policy')
+    require(action_wire_version in (None, ACTION_WIRE_VERSION), 'unsupported action wire version')
+    if action_wire_version is not None:
+        data = parse_unique_json(text)
+        validate_recordable_json(data)
     if policy == AUXILIARY:
         return parse_auxiliary(text, known_evidence_ids)
-    data = json.loads(text)
+    if action_wire_version is None:
+        data = json.loads(text)
     require(isinstance(data, dict) and set(data) == {"action", "claims"}, "response must contain action and claims only")
     require(isinstance(data["action"], dict) and isinstance(data["claims"], list), "invalid action/claims types")
     require(len(data["claims"]) <= 8, "too many claims")
@@ -99,9 +105,11 @@ def parse_output(text: str, known_evidence_ids: set[str], policy=STRICT) -> dict
 
 def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_text: str, system_prompt: str,
               handoff_text: str, seed: int, budgets: Budgets, role="successor", checkpoint_tools: int | None = None,
-              checkpoint_predicate=None, time_limit_seconds: float | None = None, response_policy=STRICT) -> AgentExecution:
+              checkpoint_predicate=None, time_limit_seconds: float | None = None, response_policy=STRICT,
+              action_wire_version=None) -> AgentExecution:
     require(response_policy in (STRICT, AUXILIARY), 'unsupported response policy')
-    if response_policy == AUXILIARY:
+    require(action_wire_version in (None, ACTION_WIRE_VERSION), 'unsupported action wire version')
+    if response_policy == AUXILIARY or action_wire_version is not None:
         require(callable(getattr(session, 'validate_action', None)), 'amended policy requires independent action validator')
     start = time.monotonic()
     purpose = CallPurpose.PREDECESSOR if role == "predecessor" else CallPurpose.SUCCESSOR
@@ -116,6 +124,12 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
         recorder.emit(f"{role}_handoff", EventKind.USER_MESSAGE, "user", {"content": handoff_text})
     calls, tools, consumed, known = [], 0, 0, set()
     reason = "budget_exhausted"
+    def audit_admission(number, action, result, rejection_reason=None):
+        if action_wire_version is not None:
+            recorder.raw.write_artifact(f'{role}_call_{number:03d}-action-admission.json',
+                {'wire_version':action_wire_version, 'canonical_action':action,
+                 'runtime_validation_result':result, 'tool_execution_completed':result=='completed',
+                 'rejection_reason':rejection_reason})
     for number in range(1, budgets.model_calls + 1):
         if time_limit_seconds is not None and time.monotonic() - start >= time_limit_seconds:
             reason = "time_budget_exhausted"
@@ -127,8 +141,12 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
         response, call = logged_generate(model, request, recorder, role, purpose, number)
         calls.append(call)
         if response is None:
+            if action_wire_version is not None:
+                recorder.raw.write_artifact(f'{role}_call_{number:03d}-action-wire.json',
+                    rejected_response('provider did not return an admitted model response', stage='generation'))
             reason = "model_failure"
             break
+        parsing_started = False
         try:
             response.usage.validate()
             accepted_ids = getattr(model, "response_model_ids", lambda: (model.model_id(),))()
@@ -138,8 +156,12 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
             consumed += response.usage.input_tokens + response.usage.output_tokens
             require(consumed <= budgets.total_tokens, "total token budget exceeded")
             require(response.finish_reason == "stop", "truncated/refused response")
-            parsed = parse_output(response.text, known, response_policy)
+            parsing_started = True
+            parsed = parse_output(response.text, known, response_policy, action_wire_version)
         except (ValueError, TypeError) as exc:
+            if action_wire_version is not None:
+                recorder.raw.write_artifact(f'{role}_call_{number:03d}-action-wire.json',
+                    rejected_response(str(exc), text=response.text, stage='response' if parsing_started else 'generation'))
             recorder.raw.write_artifact(f'{role}_call_{number:03d}-protocol-failure.json', {
                 'exception_type': type(exc).__name__, 'reason': str(exc),
                 'tool_executed': False, 'automatic_retry': False})
@@ -152,6 +174,15 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
             recorder.emit(f'{role}_annotations_{number:03d}', EventKind.ANNOTATION, 'response-validator',
                           {'type': 'response_annotations', **report}, (call.response_event_id,))
         action = parsed["action"]
+        if action_wire_version is not None:
+            wire_report = canonicalize_action(action, session.validate_action)
+            recorder.raw.write_artifact(f'{role}_call_{number:03d}-action-wire.json', wire_report)
+            if wire_report['validation_result'] != 'accepted':
+                recorder.raw.write_artifact(f'{role}_call_{number:03d}-action-failure.json',
+                    {'reason':wire_report['rejection_reason'], 'tool_executed':False, 'automatic_retry':False})
+                reason = 'invalid_run'
+                break
+            action = wire_report['canonical_action']
         if action.get("tool") == "finish":
             if set(action) != {"tool", "answer"} or not isinstance(action["answer"], str):
                 recorder.raw.write_artifact(f'{role}_call_{number:03d}-action-failure.json',
@@ -161,7 +192,7 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
                 recorder.emit(f"{role}_final", EventKind.FINAL_ANSWER, role, {"answer": action["answer"]}, (call.response_event_id,))
                 reason = "finished"
             break
-        if response_policy == AUXILIARY:
+        if response_policy == AUXILIARY and action_wire_version is None:
             try:
                 session.validate_action(action)
             except InvalidAction as exc:
@@ -170,6 +201,7 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
                 reason = 'invalid_run'
                 break
         if tools >= budgets.tool_calls:
+            audit_admission(number, action, 'not_executed', 'tool call budget exhausted')
             break
         tools += 1
         tool_id, result_id = f"{role}_tool_{tools:03d}", f"{role}_result_{tools:03d}"
@@ -177,21 +209,26 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
         try:
             result = session.execute(action)
         except InvalidAction as exc:
+            audit_admission(number, action, 'rejected', str(exc))
             recorder.emit(result_id, EventKind.TOOL_RESULT, role, {"invalid_action": str(exc)}, (tool_id,))
             reason = "invalid_run"
             break
         except IsolationUnavailable:
+            audit_admission(number, action, 'infrastructure_failure', 'isolation unavailable; no completed tool result')
             recorder.emit(result_id, EventKind.TOOL_RESULT, role, {'infrastructure_failure':'isolation unavailable; no completed tool result'}, (tool_id,))
             reason = "infrastructure_failure"
             break
         except (OSError, ValueError) as exc:
+            audit_admission(number, action, 'infrastructure_failure', type(exc).__name__)
             recorder.emit(result_id, EventKind.TOOL_RESULT, role, {"infrastructure_failure": type(exc).__name__}, (tool_id,))
             reason = "infrastructure_failure"
             break
         if not isinstance(result,dict):
+            audit_admission(number, action, 'infrastructure_failure', 'missing or invalid tool result')
             recorder.emit(result_id, EventKind.TOOL_RESULT, role, {'infrastructure_failure':'missing or invalid tool result'}, (tool_id,))
             reason='infrastructure_failure'
             break
+        audit_admission(number, action, 'completed')
         recorder.emit(result_id, EventKind.TOOL_RESULT, role, result, (tool_id,))
         known.add(result_id)
         messages.append(Message("user", canonical_json({"event_id": result_id, "tool_result": result})))

@@ -1,0 +1,10 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "PENDING-V14-NEW-USER-AUTHORIZATION",
+  "config_sha256": "e6a5ad8c56043924890b393363cee457ae88b6e7dbf14d6a1fa97f2ac4a14b2f",
+  "plan_sha256": "60cb7044d642bb37234a5b01d8e096a74474de023bd450d585553ea46c49e2ff",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": false,
+  "note": "Template only. Create a fresh explicit authorization record after approval; never overwrite this template or reuse a historical guard. All five conditions use the same annotation/action policy. No inference authorized."
+}

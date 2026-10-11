@@ -1,0 +1,12 @@
+{
+  "command": "PYTHONPATH=src .cache/swebench-evaluator/venv/bin/python -m unittest tests.test_patch_export tests.test_benchmark tests.test_environments -v",
+  "exit_code": 0,
+  "tests_passed": 31,
+  "focused_patch_tests": 12,
+  "scope": "offline tests after final filter controls and raw/staged byte checks; no provider calls or benchmark invocation",
+  "source_sha256": {
+    "src/keisho/benchmark/environment.py": "2a84545ea7bd2983ce6ba3df074533501d03f0b6e69de8ce9220931dce5248d3",
+    "src/keisho/benchmark/patch_export.py": "85691691bc499cedd73300eb9e58e99feaa81378cdaef9152790bbf516e2271a",
+    "tests/test_patch_export.py": "119299c0bf579e71501b33ca5470487bb6461872f24c628d7db0aff958860f24"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "offline_only": true,
+  "provider_requests": 0,
+  "credential_validation_requests": 0,
+  "new_spending_authorized": false,
+  "config_sha256": "471feb73c690c9d202ef7a42dc25bd0d00175dd752256973adf3e3afdc043a5a",
+  "task_sha256": "1ece7acf4065ac5399dfc0781af941c52b5498c5192e51fcf4d3bd59512bf125",
+  "catalog_sha256": "985fa9336cdd1cb022acac45f789e5c1ddcbf9e42efb8a3639527231930979e0",
+  "response_policy": "auxiliary-claims/2.0",
+  "response_format_sha256": "376bde7986cc2f8fd182f04e745c607933760bea7c306ea6e8e992b7f70be25a",
+  "agent_prompt_sha256": "47e63eb19aec604408d88f0463485ba6fb55a55af8c9a8d5053ec15ff6c4583c",
+  "schema_native_tokens": 0,
+  "first_request_upper_bound": 4227,
+  "cap_usd_proposed": "10.00",
+  "maximum_noncached_costs_usd": {
+    "predecessor": "0.19946304",
+    "successor": "7.9087680",
+    "note_generation": "0.032256"
+  },
+  "total_envelope_usd": "8.14048704",
+  "largest_request_reservation_usd": "0.0844032",
+  "assumptions": "Recorded frozen rates, no cache discounts, possible 5% BYOK fee. Existing cumulative/token/call bounds and two note calls retained; JSON-object mode has no schema payload. Full-history overflow stops without truncation. No paid inference authorized; current public pricing must pass live preflight.",
+  "endpoint_schema_support_in_saved_catalog": {
+    "openai/gpt-4.1-mini": {
+      "endpoint": "OpenAI | openai/gpt-4.1-mini-2025-04-14",
+      "supported_parameters": [
+        "seed",
+        "max_tokens",
+        "response_format",
+        "structured_outputs",
+        "tools",
+        "tool_choice",
+        "temperature",
+        "top_p"
+      ]
+    },
+    "openai/gpt-4.1": {
+      "endpoint": "OpenAI | openai/gpt-4.1-2025-04-14",
+      "supported_parameters": [
+        "seed",
+        "max_tokens",
+        "response_format",
+        "structured_outputs",
+        "tools",
+        "tool_choice",
+        "temperature",
+        "top_p"
+      ]
+    }
+  },
+  "version": "swebench-plan/1.3",
+  "action_wire_version": "flat-or-args/1.0",
+  "wire_action_contract_sha256": "b17d5737b9f67e70f8b21ea6e7d27a800b726acee86d4fe1b88f7e975e678d95",
+  "internal_action_contract_sha256": "48af7498236adb94a9e291c17269239ef998c1eda977dfd13e7dc1c14da73388",
+  "intervention": "Deterministic flat-or-args compatibility and separate audit artifacts only. Same prompt, provider JSON-object mode, models, budgets, handoff representation and baseline instructions as v1.2. No benchmark execution authorized."
+}

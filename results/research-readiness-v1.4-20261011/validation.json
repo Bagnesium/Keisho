@@ -1,0 +1,93 @@
+{
+  "version": "offline-research-readiness-validation/1.4",
+  "checked_at": "2026-10-11T18:59:53.883416+00:00",
+  "status": "passed",
+  "tests": {
+    "focused": {
+      "passed": 40,
+      "exit_code": 0,
+      "skipped": 0,
+      "log_sha256": "aeb1dd02f127d4972052ed93f3666ffa9b2c325920dc460f6a75d79ce17e951e"
+    },
+    "broader": {
+      "passed": 238,
+      "exit_code": 0,
+      "skipped": 0,
+      "log_sha256": "7258ba5090fef6c14882dddf0601394b2b961cad2e070bad2e64a92ac402787a"
+    }
+  },
+  "excluded_execution_fixtures": [
+    "tests.test_benchmark_launcher.LauncherTests.test_full_cli_downstream_binding_with_offline_provider_evaluator",
+    "tests.test_benchmark_real_offline.PublicFiveWayTests.test_real_public_five_way_contexts_patches_and_gates",
+    "tests.test_functional_public.PublicFunctionalTests.test_actual_public_subprocess_complete_loop_and_callback",
+    "tests.test_functional_public.PublicFunctionalTests.test_invalid_json_and_arguments_fail_without_repair_or_retry",
+    "tests.test_functional_public.PublicFunctionalTests.test_version12_public_cli_uses_repaired_prompt_and_bounded_listing",
+    "tests.test_functional_public.PublicFunctionalTests.test_version13_public_cli_canonicalizes_actual_rejected_response_in_real_docker",
+    "tests.test_response_measurements.ResponseMeasurementTests.test_prepared_execution_path_uses_real_loop_and_archives_before_adapter"
+  ],
+  "preservation": {
+    "historical-before.json": {
+      "verified_files": 9327,
+      "mismatches": []
+    },
+    "representation-and-baselines-before.json": {
+      "verified_files": 22,
+      "mismatches": []
+    },
+    "final-source-freeze.json": {
+      "verified_files": 148,
+      "mismatches": []
+    }
+  },
+  "runtime_frozen_components_verified": 83,
+  "frozen_pins": {
+    "config_sha256": "e6a5ad8c56043924890b393363cee457ae88b6e7dbf14d6a1fa97f2ac4a14b2f",
+    "plan_sha256": "60cb7044d642bb37234a5b01d8e096a74474de023bd450d585553ea46c49e2ff",
+    "manifest_sha256": "b1bd32a720c195fadc92b2e39818a3f4a3a1cb1d633abfe639358fc523f461cd",
+    "manifest_components": 83,
+    "agent_prompt_sha256": "4f99b6495be87680583af9460943a26fbd389ee017007e289e7fbe1a5dfc527d",
+    "annotation_guidance_sha256": "4355a256a11dc729a2c6d35e95b770ae041777a1c96d19217003222406f25d1e",
+    "first_request_upper_bound": 4782,
+    "provider_requests": 0
+  },
+  "final_source_freeze_keisho_digest": "c40de7269ee4c61ad934da0a8c98fcb19ea8d482089885f40f12a5ec42409176",
+  "sealed_v13_trajectory_sha256": "f4ec784f6f1f160ec990c43e6e76a067968577b5426005e37dc956f775a36a30",
+  "archived_annotations": {
+    "old": {
+      "supplied": 8,
+      "accepted": 1,
+      "rejected": 7
+    },
+    "proposed": {
+      "supplied": 8,
+      "accepted": 1,
+      "rejected": 7
+    },
+    "interpretation": "retrospective compatibility only; real-model prompt compliance unverified"
+  },
+  "new_provider_usage_usd": "0",
+  "paid_provider_calls": 0,
+  "functional_confirmation_reruns": 0,
+  "benchmark_executions": 0,
+  "official_evaluation_executions": 0,
+  "public_cli_dry_run": {
+    "provider_requests": 0,
+    "live_admission": false,
+    "guard_created": false
+  },
+  "pending_authorization_record_absent": true,
+  "future_run_directory_absent": true,
+  "dirty_export_evidence": {
+    "host_included_paths": 8,
+    "host_excluded_paths": 8,
+    "docker_included_paths": 8,
+    "docker_excluded_paths": 8,
+    "source_sha256": {
+      "src/keisho/benchmark/environment.py": "2a84545ea7bd2983ce6ba3df074533501d03f0b6e69de8ce9220931dce5248d3",
+      "src/keisho/benchmark/patch_export.py": "85691691bc499cedd73300eb9e58e99feaa81378cdaef9152790bbf516e2271a",
+      "tests/test_patch_export.py": "119299c0bf579e71501b33ca5470487bb6461872f24c628d7db0aff958860f24"
+    }
+  },
+  "official_base_export_inspection": "passed; no task tests/model/evaluator",
+  "git_diff_check_exit_code": 0
+}

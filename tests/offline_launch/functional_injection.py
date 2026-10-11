@@ -1,4 +1,5 @@
 """Synthetic provider through the real public CLI, real Docker and real loop."""
+import base64
 import json
 from pathlib import Path
 from urllib.request import OpenerDirector
@@ -54,6 +55,17 @@ def inject(namespace, settings):
                {'tool':'shell','command':'python check_public.py'},
                {'tool':'write_file','path':'ledger.py','content':FIX},
                {'tool':'shell','command':'python check_public.py'}]
+    if settings.get('action_contract_version') == '3.0':
+        actions[0] = {'tool':'list_files','prefix':'','limit':2}
+    archived_text=None
+    if settings.get('action_wire_version'):
+        capture=json.loads((root/'archived-rejected-wire-response.json').read_text())
+        archived_text=json.loads(base64.b64decode(capture['body_base64']))['choices'][0]['message']['content']
+        actions[0]=json.loads(archived_text)['action']
+        # Remaining messages are the existing synthetic fixture actions, using
+        # both admitted wire shapes through the same public parser and runtime.
+        actions[1]={'tool':'read_file','args':{'path':'ledger.py'}}
+        actions[3]={'tool':'write_file','args':{'path':'ledger.py','content':FIX}}
     number = 0
     def transport(body, key, **kwargs):
         nonlocal number
@@ -68,8 +80,13 @@ def inject(namespace, settings):
         if mode == 'invalid_action_schema': action = {'tool':'read_file','path':12}
         if mode == 'task_failure':
             action = actions[number-1]
-            if number == 4: action = {**action, 'content':'from normalize import normalize\ndef replay(capacity, events):\n    return {}\n'}
-        text = '{malformed' if mode == 'invalid_json' else canonical_json({'action':action,'claims':[claim] if number==1 else []})
+            if number == 4:
+                failure='from normalize import normalize\ndef replay(capacity, events):\n    return {}\n'
+                action=({**action,'args':{**action['args'],'content':failure}} if 'args' in action
+                        else {**action,'content':failure})
+        annotation_number=2 if archived_text else 1
+        text = '{malformed' if mode == 'invalid_json' else canonical_json({'action':action,'claims':[claim] if number==annotation_number else []})
+        if archived_text and number==1 and mode=='complete':text=archived_text
         usage = {'prompt_tokens':sum(tokenizer.count(m['content']).count for m in body['messages']),
                  'completion_tokens':tokenizer.count(text).count, 'cost':'0', 'is_byok':False,
                  'prompt_tokens_details':{'cached_tokens':0}}

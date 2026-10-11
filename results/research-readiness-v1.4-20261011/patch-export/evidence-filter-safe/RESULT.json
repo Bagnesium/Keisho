@@ -1,0 +1,233 @@
+{
+  "scope": "offline synthetic Git patch export only",
+  "policy": "source-and-artifacts/2.0",
+  "base_commit": "5cd1c23f183552c111171c033b30175dac5bf6a3",
+  "provider_calls": 0,
+  "benchmark_executions": 0,
+  "functional_confirmations": 0,
+  "host_git_apply_check": "passed",
+  "independent_source_and_binary_acceptance": "passed",
+  "original_index_unchanged": true,
+  "included_paths": [
+    {
+      "path": ":literal[abc].py",
+      "status": "A"
+    },
+    {
+      "path": "deleted.py",
+      "status": "D"
+    },
+    {
+      "path": "fixtures/relevant.bin",
+      "status": "A"
+    },
+    {
+      "path": "ignored-data.bin",
+      "status": "A"
+    },
+    {
+      "path": "ignored_source.py",
+      "status": "A"
+    },
+    {
+      "path": "new_source.py",
+      "status": "A"
+    },
+    {
+      "path": "source.py",
+      "status": "M"
+    },
+    {
+      "path": "space and\nnewline.py",
+      "status": "A"
+    }
+  ],
+  "excluded_paths": [
+    {
+      "changed_tracked_path": false,
+      "path": ".hypothesis/constants/generated",
+      "reason": "documented-test-cache-directory",
+      "tracked_at_base": false,
+      "tracked_in_original_index": false,
+      "worktree_present": true
+    },
+    {
+      "changed_tracked_path": false,
+      "path": ".mypy_cache/3.10/cache.json",
+      "reason": "documented-test-cache-directory",
+      "tracked_at_base": false,
+      "tracked_in_original_index": false,
+      "worktree_present": true
+    },
+    {
+      "changed_tracked_path": false,
+      "path": ".pytest_cache/binary-output.bin",
+      "reason": "documented-test-cache-directory",
+      "tracked_at_base": false,
+      "tracked_in_original_index": false,
+      "worktree_present": true
+    },
+    {
+      "changed_tracked_path": false,
+      "path": ".pytest_cache/v/cache/nodeids",
+      "reason": "documented-test-cache-directory",
+      "tracked_at_base": false,
+      "tracked_in_original_index": false,
+      "worktree_present": true
+    },
+    {
+      "changed_tracked_path": false,
+      "path": ".ruff_cache/entry",
+      "reason": "documented-test-cache-directory",
+      "tracked_at_base": false,
+      "tracked_in_original_index": false,
+      "worktree_present": true
+    },
+    {
+      "changed_tracked_path": false,
+      "path": "__pycache__/source.pyc",
+      "reason": "python-bytecode-cache-directory",
+      "tracked_at_base": false,
+      "tracked_in_original_index": false,
+      "worktree_present": true
+    },
+    {
+      "changed_tracked_path": false,
+      "path": "nested/__pycache__/another.pyc",
+      "reason": "python-bytecode-cache-directory",
+      "tracked_at_base": false,
+      "tracked_in_original_index": false,
+      "worktree_present": true
+    },
+    {
+      "changed_tracked_path": false,
+      "path": "standalone.pyo",
+      "reason": "python-bytecode-file",
+      "tracked_at_base": false,
+      "tracked_in_original_index": false,
+      "worktree_present": true
+    }
+  ],
+  "byte_preservation_check": {
+    "mismatched_paths": [],
+    "status": "passed"
+  },
+  "disabled_filter_keys": [],
+  "docker": {
+    "image_id": "sha256:58c7f4ada7f3cbcfcde50e0b55157701100cf694faa87978c672e368c0531898",
+    "owned_container": "keisho-agent-b8a0b05a42894d2ea8d5464b0eb9df1d",
+    "base_commit": "626662d2c911ad7e9b49aa34681c3cc96b21d9f0",
+    "git_apply_check": "passed",
+    "independent_acceptance": "passed",
+    "included_paths": [
+      {
+        "path": ":literal[abc].py",
+        "status": "A"
+      },
+      {
+        "path": "deleted.py",
+        "status": "D"
+      },
+      {
+        "path": "fixtures/relevant.bin",
+        "status": "A"
+      },
+      {
+        "path": "ignored-data.bin",
+        "status": "A"
+      },
+      {
+        "path": "ignored_source.py",
+        "status": "A"
+      },
+      {
+        "path": "new_source.py",
+        "status": "A"
+      },
+      {
+        "path": "source.py",
+        "status": "M"
+      },
+      {
+        "path": "space and\nnewline.py",
+        "status": "A"
+      }
+    ],
+    "excluded_paths": [
+      {
+        "changed_tracked_path": false,
+        "path": ".hypothesis/constants/generated",
+        "reason": "documented-test-cache-directory",
+        "tracked_at_base": false,
+        "tracked_in_original_index": false,
+        "worktree_present": true
+      },
+      {
+        "changed_tracked_path": false,
+        "path": ".mypy_cache/3.10/cache.json",
+        "reason": "documented-test-cache-directory",
+        "tracked_at_base": false,
+        "tracked_in_original_index": false,
+        "worktree_present": true
+      },
+      {
+        "changed_tracked_path": false,
+        "path": ".pytest_cache/binary-output.bin",
+        "reason": "documented-test-cache-directory",
+        "tracked_at_base": false,
+        "tracked_in_original_index": false,
+        "worktree_present": true
+      },
+      {
+        "changed_tracked_path": false,
+        "path": ".pytest_cache/v/cache/nodeids",
+        "reason": "documented-test-cache-directory",
+        "tracked_at_base": false,
+        "tracked_in_original_index": false,
+        "worktree_present": true
+      },
+      {
+        "changed_tracked_path": false,
+        "path": ".ruff_cache/entry",
+        "reason": "documented-test-cache-directory",
+        "tracked_at_base": false,
+        "tracked_in_original_index": false,
+        "worktree_present": true
+      },
+      {
+        "changed_tracked_path": false,
+        "path": "__pycache__/source.pyc",
+        "reason": "python-bytecode-cache-directory",
+        "tracked_at_base": false,
+        "tracked_in_original_index": false,
+        "worktree_present": true
+      },
+      {
+        "changed_tracked_path": false,
+        "path": "nested/__pycache__/another.pyc",
+        "reason": "python-bytecode-cache-directory",
+        "tracked_at_base": false,
+        "tracked_in_original_index": false,
+        "worktree_present": true
+      },
+      {
+        "changed_tracked_path": false,
+        "path": "standalone.pyo",
+        "reason": "python-bytecode-file",
+        "tracked_at_base": false,
+        "tracked_in_original_index": false,
+        "worktree_present": true
+      }
+    ],
+    "byte_preservation_check": {
+      "mismatched_paths": [],
+      "status": "passed"
+    },
+    "disabled_filter_keys": []
+  },
+  "source_sha256": {
+    "src/keisho/benchmark/environment.py": "2a84545ea7bd2983ce6ba3df074533501d03f0b6e69de8ce9220931dce5248d3",
+    "src/keisho/benchmark/patch_export.py": "85691691bc499cedd73300eb9e58e99feaa81378cdaef9152790bbf516e2271a",
+    "tests/test_patch_export.py": "119299c0bf579e71501b33ca5470487bb6461872f24c628d7db0aff958860f24"
+  }
+}

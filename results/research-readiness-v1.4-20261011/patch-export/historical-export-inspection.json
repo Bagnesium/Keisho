@@ -1,0 +1,16 @@
+{
+  "classification": "historical inspection only; original export and result preserved",
+  "archive_path": "runs/functional-confirmation12-v1.3-pending/cumulative-patch.json",
+  "archive_sha256": "df9a21fb489e9016735ddef45e8a6d8b4b3c06d6d12a5f29f9607c3bfdcc54f0",
+  "diff_paths": [
+    "__pycache__/api.cpython-310.pyc",
+    "__pycache__/ledger.cpython-310.pyc",
+    "__pycache__/normalize.cpython-310.pyc",
+    "ledger.py"
+  ],
+  "generated_bytecode_paths": [
+    "__pycache__/api.cpython-310.pyc",
+    "__pycache__/ledger.cpython-310.pyc",
+    "__pycache__/normalize.cpython-310.pyc"
+  ]
+}

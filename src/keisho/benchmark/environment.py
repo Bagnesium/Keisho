@@ -6,6 +6,7 @@ Image snapshots preserve the installed environment in independent writable layer
 import base64
 import hashlib
 import json
+from pathlib import Path
 import re
 import shlex
 import subprocess
@@ -16,6 +17,7 @@ from keisho.environments.base import safe_relative_path
 from keisho.pilot.tools import InvalidAction
 from .vendor.signals import is_source_file
 from .listing import BoundedListing, VERSION as LISTING_VERSION, parameters as listing_parameters
+from .patch_export import VERSION as PATCH_EXPORT_VERSION
 
 INVENTORY = '''import os,json,hashlib,stat
 rows={}
@@ -45,9 +47,11 @@ def run_arguments(image, name):
 
 
 class RepositorySession:
-    def __init__(self, image, *, timeout=120, output_bytes=49152, audit=None, listing_policy='legacy'):
+    def __init__(self, image, *, timeout=120, output_bytes=49152, audit=None, listing_policy='legacy', patch_export_policy='legacy'):
         require(listing_policy in ('legacy',LISTING_VERSION),'unsupported listing policy')
+        require(patch_export_policy in ('legacy',PATCH_EXPORT_VERSION),'unsupported patch export policy')
         self.listing_policy=listing_policy
+        self.patch_export_policy=patch_export_policy
         self.listings=BoundedListing()
         self.name = 'keisho-agent-' + uuid.uuid4().hex
         self.image = image
@@ -92,6 +96,18 @@ test -z "$(git remote)"
 
     def patch(self, base):
         require(re.fullmatch('[a-f0-9]{40}', base), 'invalid base commit')
+        if getattr(self,'patch_export_policy','legacy') == PATCH_EXPORT_VERSION:
+            source = Path(__file__).with_name('patch_export.py').read_text()
+            r = self.command('python3 -c ' + shlex.quote(source) + ' ' + shlex.quote(base))
+            require(r.returncode == 0, 'cumulative patch export process failed')
+            exported = json.loads(r.stdout)
+            self.patch_export_audit = exported['audit']
+            if getattr(self,'audit',None) is not None:
+                self.patch_exports = getattr(self,'patch_exports',0) + 1
+                self.audit.write_artifact(f'patch-export-{self.patch_exports:03d}.json', self.patch_export_audit)
+            require(self.patch_export_audit['validation_result'] == 'accepted',
+                    'cumulative patch export rejected: ' + str(self.patch_export_audit['rejection_reason']))
+            return exported['patch']
         r = self.command(f'export GIT_INDEX_FILE=/tmp/keisho-export-index; git read-tree {base} && git add -A && git diff --cached --binary {base} --; code=$?; rm -f /tmp/keisho-export-index; exit $code')
         require(r.returncode == 0, 'cumulative patch export failed')
         return r.stdout.decode()

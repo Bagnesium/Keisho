@@ -1,0 +1,83 @@
+{
+  "version": "five-way-cost/1.4",
+  "prepared_date": "2026-10-11",
+  "offline_only": true,
+  "provider_requests": 0,
+  "spending_authorized": false,
+  "experiment_config": "configs/swebench-comparison-v1.4.json",
+  "experiment_config_keisho_digest": "e6a5ad8c56043924890b393363cee457ae88b6e7dbf14d6a1fa97f2ac4a14b2f",
+  "matched_launch_plan": "analysis/swebench-comparison-v1.4-plan.json",
+  "matched_launch_plan_keisho_digest": "60cb7044d642bb37234a5b01d8e096a74474de023bd450d585553ea46c49e2ff",
+  "runtime_manifest": "analysis/swebench-experiment-v1.4-manifest.json",
+  "runtime_manifest_keisho_digest": "b1bd32a720c195fadc92b2e39818a3f4a3a1cb1d633abfe639358fc523f461cd",
+  "pricing_evidence": {
+    "path": "results/functional-confirmation12-v1.3-live-20261011/public-catalog-preflight.json",
+    "file_sha256": "49ca83afb53e435e7f2198447c21ee26a8bf4e21a1d5196a8598b77950fccdcd",
+    "checked_at_utc": "2026-10-11T18:24:51.666536+00:00",
+    "authenticated": false,
+    "public_source": "https://openrouter.ai/api/v1/models",
+    "current_at_future_launch_verification_pending": true,
+    "fee_policy_at_future_launch_verification_pending": true
+  },
+  "rates_usd_per_million": {
+    "openai/gpt-4.1-mini-2025-04-14": {"input": "0.40", "cached_input": "0.10", "output": "1.60"},
+    "openai/gpt-4.1-2025-04-14": {"input": "2.00", "cached_input": "0.50", "output": "8.00"}
+  },
+  "cache_discounts_assumed": false,
+  "conservative_multiplier": "1.05",
+  "multiplier_reason": "Existing possible 5 percent BYOK fee assumption, without free allowance; current fee verification required at future launch",
+  "expected_scenario": {
+    "interpretation": "Illustrative utilization assumptions, not an empirically established forecast and not extrapolated from the public functional fixture",
+    "predecessor": {"calls": 12, "input_tokens": 96000, "output_tokens": 12000, "cost_usd": "0.060480"},
+    "summary_generation": {"calls": 1, "input_tokens": 12000, "output_tokens": 1000, "cost_usd": "0.006720"},
+    "structured_generation": {"calls": 1, "input_tokens": 12000, "output_tokens": 1200, "cost_usd": "0.007056"},
+    "keisho_compilation": {"calls": 0, "input_tokens": 0, "output_tokens": 0, "cost_usd": "0"},
+    "each_successor": {"calls": 20, "input_tokens": 200000, "output_tokens": 20000, "cost_usd": "0.588000"},
+    "successor_count": 5,
+    "total_calls": 114,
+    "total_input_tokens": 1120000,
+    "total_output_tokens": 114200,
+    "total_cost_usd": "3.014256"
+  },
+  "conservative_maximum": {
+    "formula": "O=min(total_tokens,model_calls*output_cap); cost=1.05*((total_tokens-O)*input_rate+O*output_rate)/1000000; cumulative total includes input and output",
+    "predecessor": {"calls": 48, "total_tokens": 180000, "input_tokens_at_maximum": 81696, "output_tokens_at_maximum": 98304, "cost_usd": "0.19946304"},
+    "summary_generation": {"calls": 1, "input_tokens": 32000, "output_tokens": 1600, "cost_usd": "0.01612800"},
+    "structured_generation": {"calls": 1, "input_tokens": 32000, "output_tokens": 1600, "cost_usd": "0.01612800"},
+    "keisho_compilation": {"calls": 0, "input_tokens": 0, "output_tokens": 0, "cost_usd": "0"},
+    "each_successor": {"calls": 64, "total_tokens": 360000, "input_tokens_at_maximum": 228928, "output_tokens_at_maximum": 131072, "cost_usd": "1.58175360"},
+    "successor_count": 5,
+    "total_calls": 370,
+    "total_tool_calls": 276,
+    "total_input_tokens_at_maximum": 1290336,
+    "total_output_tokens_at_maximum": 756864,
+    "total_cost_usd": "8.14048704",
+    "largest_request_reservation_usd": "0.08440320",
+    "envelope_plus_reservation_usd": "8.22489024",
+    "reservation_is_extra_charge": false
+  },
+  "proposed_allocation_usd": {
+    "predecessor": "0.22",
+    "summary_generation": "0.02",
+    "structured_generation": "0.02",
+    "REPOSITORY_ONLY": "1.65",
+    "FULL_HISTORY": "1.65",
+    "SUMMARY_2K": "1.65",
+    "STRUCTURED_NOTES_2K": "1.65",
+    "KEISHO_2K": "1.65",
+    "common_reserve": "1.49"
+  },
+  "proposed_total_cap_usd": "10.00",
+  "stage_allocations_are_advisory": true,
+  "runtime_spending_policy": "Existing common ledger cap and equal successor budgets; no additional per-condition dollar cutoff",
+  "official_evaluation": {
+    "maximum_invocations": 6,
+    "provider_api_calls": 0,
+    "provider_api_cost_usd": "0",
+    "local_compute_cost_usd": null,
+    "future_paid_cloud_compute_cost_usd": null,
+    "note": "Local CPU/Docker has no model API charge; hosting, power and time are unpriced, not represented as zero-dollar compute"
+  },
+  "failure_policy": "No retry, guard reset, resampling or task substitution; actual incurred costs and distinct no-checkpoint, generation failure, budget-stop, error, unstarted and ungraded statuses remain recorded",
+  "patch_export_admission": "Local temporary-index export disables configured Git clean/smudge/process filters and compares staged bytes/modes to raw worktree bytes/modes; attribute transformations or changed tracked cache paths reject with diagnostics without paid repair or retry"
+}

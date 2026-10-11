@@ -1,4 +1,112 @@
-# Keisho benchmark progress — offline sprint completed 2026-10-11
+# Keisho benchmark progress — offline v1.4 research freeze complete 2026-10-11
+
+**All four offline workstreams completed; new provider usage $0.** Added shared
+`annotation-guidance/1.0` prompt clarification and audited `source-and-artifacts/2.0`
+cumulative patch export, froze prospective `swebench-handoff/1.4`, and specified
+the exact exploratory five-way comparison and cost plan. Annotation parser/enums,
+action adapter, memory representation/compiler, baselines, task, models, routing,
+checkpoint and numeric budgets remain unchanged.
+
+Archived annotation replay accepts **1/8 supplied claims and rejects 7/8** under
+both old and proposed contracts. Basis labels were free-text source descriptions;
+new guidance defines provenance/status/temporal scope and examples. This is
+retrospective compatibility analysis; real-model compliance improvement remains
+unverified. Rejected annotations do not imply false claims or lost tool evidence.
+
+Patch exporter preserves source/additions/deletions/relevant binaries, excludes
+bytecode/caches with inventories, prevents configured filter execution, verifies
+raw staged bytes/modes and official-base applicability, and rejects ambiguous
+tracked-cache or transforming-attribute changes explicitly. Host/Docker dirty
+fixtures each preserved 8 intended paths and excluded 8 generated paths. Real
+unchanged xarray-base exporter inspection passed with no task/model/test execution.
+
+Final offline checks: **40 focused / 238 broader tests passed**, exit 0; seven
+functional/comparison execution fixtures excluded under scope, selected skips 0.
+Public CLI dry-run passes with provider requests 0, live admission false and no
+guard created. All 9,327 historical files and 22 representation/baseline files
+preserved. No paid inference, functional rerun, SWE-bench/evaluator launch,
+project commit, push, publication or deployment.
+
+Final report: results/research-readiness-v1.4-20261011/REPORT.md.
+Experiment: research/FIVE_WAY_EXPERIMENT_SPEC.md.
+Spending: analysis/FIVE_WAY_COST_PLAN.md.
+Frozen config: configs/swebench-comparison-v1.4.json.
+Canonical config SHA `e6a5ad8c56043924890b393363cee457ae88b6e7dbf14d6a1fa97f2ac4a14b2f`;
+plan SHA `60cb7044d642bb37234a5b01d8e096a74474de023bd450d585553ea46c49e2ff`;
+83-component manifest SHA `b1bd32a720c195fadc92b2e39818a3f4a3a1cb1d633abfe639358fc523f461cd`.
+
+Assumed planning scenario $3.014256; conservative API envelope $8.14048704 plus
+$0.08440320 reservation headroom. Recommend a NEW $10 total / one-attempt scope;
+no such scope is authorized. Current public prices/routing require future preflight.
+The exact next command after approval is in the final report. One exposed task is
+exploratory; it cannot establish general superiority. Historical v1.3 remains passed
+with its original annotations, cost and dirty patch. Work stops here.
+
+## Historical one real v1.3 confirmation passed 2026-10-11
+
+**Passed: 8 real model calls / 8 successful Docker tool actions.** Relevant source
+inspection, ledger.py source modification, model-requested post-edit test and
+independent acceptance all completed; both tests passed 4/4 with immutable inputs
+preserved. One nested args action canonicalized; seven flat actions admitted.
+Zero rejected actions. Seven auxiliary claims had invalid basis enums and were
+archived/excluded; only one claim structurally validated. Semantic truth unverified.
+
+Actual provider cost **$0.0033044**; conservative noncached accounting $0.0063764;
+held reservations $0. New $0.50 / one-attempt authorization is closed. No retry,
+guard reset, additional confirmation or SWE-bench execution occurred.
+
+Current catalog pricing/OpenAI-only routing checked before inference. Frozen v1.3
+model/prompts/action contracts/representation/budgets unchanged. All 9,178 protected
+historical files and 124 frozen implementation entries unchanged. Previous failed
+runs remain failed. No commit/push/merge/publication. Work stopped after reporting.
+
+Report: results/functional-confirmation12-v1.3-live-20261011/REPORT.md.
+Occupied closed guard/ledger: runs/functional-confirmation12-v1.3-pending/.
+Fresh authorization: analysis/functional-confirmation12-v1.3-authorization.json.
+This single public fixture pass does not establish benchmark or handoff effectiveness;
+no further inference or benchmark execution is authorized.
+
+## Historical v1.3 wire repair verified offline 2026-10-11
+
+**Versioned flat-or-args compatibility implemented; new provider spending $0.**
+Both pure wire shapes canonicalize to the unchanged internal action contract 3.0.
+Mixed/unknown/invalid inputs reject without repair or retry. Raw responses/history
+remain intact; separate static/runtime audit files do not enrich handoff inputs.
+Prompt/model/JSON-object generation, budgets, Keisho representation and baselines unchanged.
+Same adapter applies to predecessor and every successor condition.
+
+Final checks: **89 focused / 209 broader offline tests passed**, exit 0; scaffold passed.
+The existing public five-way benchmark-launch test was excluded under the no-benchmark
+scope. One durable public-CLI synthetic run used 5 responses/5 real Docker tools and
+passed direct post-edit and independent 4/4 acceptance; actual provider requests 0.
+All 9,040 protected historical files, 22 handoff/baseline files and 124 frozen source
+entries unchanged. No benchmark/evaluator execution, commit/push/merge/publication.
+
+Report: results/action-wire-v1.3-20261011/REPORT.md.
+Amendment: protocol_amendments/swebench-interface-v1.3.md.
+Future config: configs/functional-confirmation12-v1.3.json, canonical SHA
+a833849a3b6706b17c96ed60e2e3252b89fa57e03418c8720cce8b067e781f61.
+Pending authorization template has user/provider permission false; no production
+guard exists. Fresh authorization and current pricing/environment checks are
+required before any real-model confirmation. The v1.2 failure remains historical.
+
+## Historical v1.2 functional scope closed 2026-10-11
+
+**One newly authorized functional attempt failed after one response and zero tools.**
+The model returned valid JSON but nested `limit` in an unsupported `args` wrapper;
+local action contract 3.0 rejected it with `invalid bounded listing fields`.
+No inspection, source edit or model test occurred. Independent controller acceptance
+still fails 2/4 cases. The repaired callback was not reached in this live attempt.
+Functional readiness remains unconfirmed; no retry or SWE-bench was run.
+
+Provider and conservative cost: **$0.00026** (578 input / 18 output tokens).
+Held reservations $0; the one-attempt $0.50 authorization is closed. Current catalog
+pricing was checked before inference. New guard: runs/functional-confirmation12-v1.2-20261011.
+Report: results/functional-confirmation12-v1.2-live-20261011/REPORT.md.
+20 focused offline tests passed for the new binding; all 8,996 protected historical
+files and preflight runtime hashes remain unchanged. No commit/push/merge/publication.
+
+## Historical offline sprint completed 2026-10-11
 
 **P0–P5 done in the authorized offline scope. No paid provider inference authorized or
 performed; actual new API spending $0. Old ledgers/guards closed and unchanged.**

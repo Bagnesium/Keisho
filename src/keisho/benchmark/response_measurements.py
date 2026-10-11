@@ -4,10 +4,12 @@ import json
 
 from jsonschema import Draft202012Validator
 
-from keisho.core import canonical_json
-from keisho.pilot.response_policy import agent_response_format, parse_auxiliary
+from keisho.core import canonical_json, require
+from keisho.pilot.action_wire import VERSION as ACTION_WIRE_VERSION, canonicalize_action
+from keisho.pilot.response_policy import agent_response_format, parse_auxiliary, validate_recordable_json
 
 VERSION = 'response-measurements/1.0'
+ACTION_WIRE_MEASUREMENT_VERSION = 'response-measurements/2.0'
 
 
 def capture_response(raw, number, payload, status, redacted):
@@ -18,11 +20,15 @@ def capture_response(raw, number, payload, status, redacted):
         'upstream_untouched_output_attested': False})
 
 
-def assess_text(text, known, validate_action, action_contract_version='2.0'):
+def assess_text(text, known, validate_action, action_contract_version='2.0', action_wire_version=None):
+    require(action_wire_version in (None, ACTION_WIRE_VERSION), 'unsupported action wire version')
     row = {'json_syntax_valid': None, 'response_structure_valid': None,
            'action_schema_valid': None, 'auxiliary_annotations_valid': None,
            'safety_valid': None, 'proposed_action': None, 'annotations': None,
            'diagnostics': []}
+    if action_wire_version is not None:
+        row.update(action_wire_version=action_wire_version, wire_action_schema_valid=None,
+                   canonical_action_schema_valid=None, canonical_action=None, action_wire_assessment=None)
     def error(stage, reason):
         row['diagnostics'].append({'stage': stage, 'reason': reason})
     if not isinstance(text, str):
@@ -49,6 +55,20 @@ def assess_text(text, known, validate_action, action_contract_version='2.0'):
         row['response_structure_valid'] = False
         error('response_structure', 'ambiguous duplicate JSON keys: ' + ', '.join(duplicates))
         return row  # Never interpret a selected duplicate as the model's action.
+    if action_wire_version is not None:
+        try:
+            validate_recordable_json(data)
+        except ValueError as exc:
+            row['response_structure_valid'] = False
+            error('encoding', str(exc))
+            if isinstance(data,dict) and 'action' in data:
+                try:
+                    validate_recordable_json(data['action'])
+                except ValueError:
+                    pass
+                else:
+                    row['proposed_action'] = data['action']
+            return row
     row['response_structure_valid'] = (isinstance(data, dict) and set(data) == {'action', 'claims'}
         and isinstance(data['action'], dict) and isinstance(data['claims'], list) and len(data['claims']) <= 8)
     if not row['response_structure_valid']:
@@ -56,17 +76,27 @@ def assess_text(text, known, validate_action, action_contract_version='2.0'):
     if not isinstance(data, dict): return row
     if 'action' in data:
         row['proposed_action'] = data['action']
-        validator = Draft202012Validator(agent_response_format(action_contract_version)['json_schema']['schema']['properties']['action'])
-        errors = list(validator.iter_errors(data['action']))
-        row['action_schema_valid'] = not errors
-        for exc in errors: error('action_schema', exc.message)
-        if not errors:
-            try:
-                if data['action']['tool'] != 'finish': validate_action(data['action'])
-                row['safety_valid'] = True
-            except (ValueError, TypeError) as exc:
-                row['safety_valid'] = False
-                error('safety', str(exc))
+        if action_wire_version is not None:
+            assessment = canonicalize_action(data['action'], validate_action)
+            row.update(action_schema_valid=assessment['wire_schema_valid'],
+                       wire_action_schema_valid=assessment['wire_schema_valid'],
+                       canonical_action_schema_valid=assessment['canonical_schema_valid'],
+                       canonical_action=assessment['canonical_action'],
+                       safety_valid=assessment['safety_valid'], action_wire_assessment=assessment)
+            if assessment['rejection_reason'] is not None:
+                error(assessment['validation_stage'], assessment['rejection_reason'])
+        else:
+            validator = Draft202012Validator(agent_response_format(action_contract_version)['json_schema']['schema']['properties']['action'])
+            errors = list(validator.iter_errors(data['action']))
+            row['action_schema_valid'] = not errors
+            for exc in errors: error('action_schema', exc.message)
+            if not errors:
+                try:
+                    if data['action']['tool'] != 'finish': validate_action(data['action'])
+                    row['safety_valid'] = True
+                except (ValueError, TypeError) as exc:
+                    row['safety_valid'] = False
+                    error('safety', str(exc))
     if 'claims' in data:
         try:
             # Assess the original claims independently; this constructed envelope
@@ -81,13 +111,16 @@ def assess_text(text, known, validate_action, action_contract_version='2.0'):
     return row
 
 
-def summarize(rows, transmitted_requests):
+def summarize(rows, transmitted_requests, action_wire_version=None):
     received = [row for row in rows if row['model_response_received']]
     n = len(received)
     def rate(count): return count / n if n else None
     measurements = {}
-    for field in ('json_syntax_valid', 'response_structure_valid', 'action_schema_valid',
-                  'auxiliary_annotations_valid', 'safety_valid'):
+    validity_fields = ('json_syntax_valid', 'response_structure_valid', 'action_schema_valid',
+                       'auxiliary_annotations_valid', 'safety_valid')
+    if action_wire_version is not None:
+        validity_fields += ('wire_action_schema_valid', 'canonical_action_schema_valid')
+    for field in validity_fields:
         invalid = sum(r[field] is False for r in received)
         unknown = sum(r[field] is None for r in received)
         measurements[field] = {'valid_count': sum(r[field] is True for r in received),
@@ -100,15 +133,23 @@ def summarize(rows, transmitted_requests):
         'json_syntax_valid', 'response_structure_valid', 'action_schema_valid', 'auxiliary_annotations_valid', 'safety_valid')) for r in received)
     measurements['responses_with_any_invalid_component'] = {'count': invalid_any, 'rate': rate(invalid_any),
         'denominator_actual_responses': n, 'auxiliary_exclusion_does_not_imply_action_rejection': True}
-    return {'version': VERSION, 'transmitted_requests': transmitted_requests,
+    report = {'version': ACTION_WIRE_MEASUREMENT_VERSION if action_wire_version is not None else VERSION,
+        'transmitted_requests': transmitted_requests,
         'actual_responses_received': n, 'missing_model_responses': transmitted_requests - n,
         'rate_denominator': 'actual model responses received, not requests or planned calls',
         'zero_denominator_rate': 'null', 'measurements': measurements,
         'successful_execution': 'completed read/list/write; shell completed with exit 0; finish is not a tool execution',
         'annotation_validity_is_truth': False, 'rows': rows}
+    if action_wire_version is not None:
+        report.update(action_wire_version=action_wire_version, wire_action_contract_version='4.0',
+                      internal_action_contract_version='3.0',
+                      action_schema_valid_definition='accepted wire action schema, before canonicalization and safety',
+                      audit_assessment_boundary='static wire/canonical/safety assessment; runtime admission is recorded separately')
+    return report
 
 
-def measure_run(raw, validate_action, *, role='predecessor', action_contract_version='2.0'):
+def measure_run(raw, validate_action, *, role='predecessor', action_contract_version='2.0', action_wire_version=None):
+    require(action_wire_version in (None, ACTION_WIRE_VERSION), 'unsupported action wire version')
     events, _ = raw._read_chain()
     payloads = {e.id: json.loads(e.payload_json) for e in events}
     rows = []
@@ -125,7 +166,12 @@ def measure_run(raw, validate_action, *, role='predecessor', action_contract_ver
                 known.add(feedback['event_id'])
         row = {'call': number, 'model_response_received': False, 'response_rejected': False,
                'action_rejected': False, 'tool_execution_completed': False, 'tool_execution_successful': False,
-               **assess_text(None, known, validate_action, action_contract_version)}
+               **assess_text(None, known, validate_action, action_contract_version, action_wire_version)}
+        prefix = f'{role}_call_{number:03d}'
+        if action_wire_version is not None:
+            for suffix, field in (('action-wire','action_wire_audit'), ('action-admission','action_admission_audit')):
+                path = raw.path / f'{prefix}-{suffix}.json'
+                row[field] = json.loads(path.read_text()) if path.exists() else None
         response_path = raw.path / f'wire-response-{number:03d}.json'
         if not response_path.exists():
             row['diagnostics'] = [{'stage': 'transport', 'reason': 'no HTTP response body received/captured'}]
@@ -142,13 +188,12 @@ def measure_run(raw, validate_action, *, role='predecessor', action_contract_ver
             row['diagnostics'] = [{'stage': 'transport', 'reason': 'received HTTP body has no model message; missing response, not invalid model JSON'}]
             rows.append(row)
             continue
-        row.update(assess_text(message.get('content'), known, validate_action, action_contract_version))
+        row.update(assess_text(message.get('content'), known, validate_action, action_contract_version, action_wire_version))
         row['model_response_received'] = True
         row['service_returned_model'] = service.get('model')
         row['service_reported_upstream'] = service.get('provider')
         row['finish_reason'] = choices[0].get('finish_reason')
         row['response_artifact'] = response_path.name
-        prefix = f'{role}_call_{number:03d}'
         for suffix in ('failure', 'protocol-failure', 'action-failure'):
             failure = raw.path / f'{prefix}-{suffix}.json'
             if failure.exists():
@@ -168,7 +213,7 @@ def measure_run(raw, validate_action, *, role='predecessor', action_contract_ver
         row['action_rejected'] = isinstance(action, dict) and (row['response_rejected'] or bool(result and 'invalid_action' in result))
         if row['action_rejected']: row['response_rejected'] = True
         rows.append(row)
-    report = summarize(rows, len(wire_requests))
+    report = summarize(rows, len(wire_requests), action_wire_version)
     report['generation_calls_logged'] = len(list(raw.path.glob(f'{role}_call_*-request.json')))
     report['calls_not_transmitted'] = report['generation_calls_logged'] - len(wire_requests)
     report['rejected_action_definition'] = 'an identifiable action proposal withheld by generation/response/safety admission or runtime rejection; not necessarily malformed'

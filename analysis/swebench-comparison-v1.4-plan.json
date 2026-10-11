@@ -1,0 +1,60 @@
+{
+  "offline_only": true,
+  "provider_requests": 0,
+  "credential_validation_requests": 0,
+  "new_spending_authorized": false,
+  "config_sha256": "e6a5ad8c56043924890b393363cee457ae88b6e7dbf14d6a1fa97f2ac4a14b2f",
+  "task_sha256": "1ece7acf4065ac5399dfc0781af941c52b5498c5192e51fcf4d3bd59512bf125",
+  "catalog_sha256": "985fa9336cdd1cb022acac45f789e5c1ddcbf9e42efb8a3639527231930979e0",
+  "response_policy": "auxiliary-claims/2.0",
+  "response_format_sha256": "376bde7986cc2f8fd182f04e745c607933760bea7c306ea6e8e992b7f70be25a",
+  "agent_prompt_sha256": "4f99b6495be87680583af9460943a26fbd389ee017007e289e7fbe1a5dfc527d",
+  "schema_native_tokens": 0,
+  "first_request_upper_bound": 4782,
+  "cap_usd_proposed": "10.00",
+  "maximum_noncached_costs_usd": {
+    "predecessor": "0.19946304",
+    "successor": "7.9087680",
+    "note_generation": "0.032256"
+  },
+  "total_envelope_usd": "8.14048704",
+  "largest_request_reservation_usd": "0.0844032",
+  "assumptions": "Recorded frozen rates, no cache discounts, possible 5% BYOK fee. Existing cumulative/token/call bounds and two note calls retained; JSON-object mode has no schema payload. Full-history overflow stops without truncation. No paid inference authorized; current public pricing must pass live preflight.",
+  "endpoint_schema_support_in_saved_catalog": {
+    "openai/gpt-4.1-mini": {
+      "endpoint": "OpenAI | openai/gpt-4.1-mini-2025-04-14",
+      "supported_parameters": [
+        "seed",
+        "max_tokens",
+        "response_format",
+        "structured_outputs",
+        "tools",
+        "tool_choice",
+        "temperature",
+        "top_p"
+      ]
+    },
+    "openai/gpt-4.1": {
+      "endpoint": "OpenAI | openai/gpt-4.1-2025-04-14",
+      "supported_parameters": [
+        "seed",
+        "max_tokens",
+        "response_format",
+        "structured_outputs",
+        "tools",
+        "tool_choice",
+        "temperature",
+        "top_p"
+      ]
+    }
+  },
+  "version": "swebench-plan/1.4",
+  "action_wire_version": "flat-or-args/1.0",
+  "wire_action_contract_sha256": "b17d5737b9f67e70f8b21ea6e7d27a800b726acee86d4fe1b88f7e975e678d95",
+  "internal_action_contract_sha256": "48af7498236adb94a9e291c17269239ef998c1eda977dfd13e7dc1c14da73388",
+  "intervention": "Prospective shared prompt-only annotation semantics clarification plus clean audited official-base cumulative patch export. No annotation format/parser, action, memory representation, baseline, task, model, routing or numeric budget changes. No paid inference or benchmark authorized.",
+  "annotation_guidance_version": "annotation-guidance/1.0",
+  "annotation_guidance_sha256": "4355a256a11dc729a2c6d35e95b770ae041777a1c96d19217003222406f25d1e",
+  "patch_export_policy": "source-and-artifacts/2.0",
+  "experiment_manifest_sha256": "b1bd32a720c195fadc92b2e39818a3f4a3a1cb1d633abfe639358fc523f461cd"
+}

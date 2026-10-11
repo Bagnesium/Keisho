@@ -227,6 +227,43 @@ class ResponseMeasurementTests(unittest.TestCase):
             with self.assertRaises((ValidationError,KeyError)):
                 execute_confirmation12(CONFIG,old,ROOT/config['run_dir'],approve_live=True)
 
+    def test_version12_binding_rejects_mutation_old_authorization_and_reuse(self):
+        from contextlib import redirect_stdout
+        import scripts.benchmark_functional_check as script
+        from tests.test_functional_public import prepare
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t).resolve()
+            config=prepare(root,config_name='functional-confirmation12-v1.2.json')
+            path=root/'configs/functional-confirmation12-v1.2.json'
+            auth=root/'authorization.json'
+            destination=root/config['run_dir']
+            with patch.object(script,'ROOT',root),patch.object(script,'http_transport',side_effect=AssertionError('network prohibited')), \
+                 patch.object(script,'check_public_catalog',side_effect=AssertionError('network prohibited')):
+                output=io.StringIO()
+                with redirect_stdout(output):
+                    self.assertEqual(execute_confirmation12(path,auth,destination,approve_live=True,dry_run=True),0)
+                report=json.loads(output.getvalue())
+                self.assertTrue(report['live_admission'])
+                self.assertEqual(report['listing_policy'],'bounded-listing/1.0')
+                self.assertEqual(report['action_contract_version'],'3.0')
+                self.assertEqual(report['provider_requests'],0)
+                self.assertFalse(destination.exists())
+                changed=root/'changed.json'
+                changed.write_text(json.dumps({**config,'budgets':{**config['budgets'],'model_calls':13}}))
+                with self.assertRaisesRegex(ValidationError,'configuration changed'):
+                    execute_confirmation12(changed,auth,destination,approve_live=True,dry_run=True)
+                original=json.loads(auth.read_text())
+                auth.write_text(json.dumps({**original,'version':'functional-confirmation12/1.0'}))
+                with self.assertRaisesRegex(ValidationError,'authorization does not bind'):
+                    execute_confirmation12(path,auth,destination,approve_live=True,dry_run=True)
+                auth.write_text(json.dumps({**original,'cap_usd':'0.10'}))
+                with self.assertRaisesRegex(ValidationError,'cap insufficient'):
+                    execute_confirmation12(path,auth,destination,approve_live=True,dry_run=True)
+                auth.write_text(json.dumps(original))
+                destination.mkdir(parents=True)
+                with self.assertRaisesRegex(ValidationError,'already claimed'):
+                    execute_confirmation12(path,auth,destination,approve_live=True,dry_run=True)
+
     def test_prepared_execution_path_uses_real_loop_and_archives_before_adapter(self):
         import scripts.benchmark_functional_check as script
         config=json.loads(CONFIG.read_text())

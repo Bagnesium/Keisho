@@ -1,0 +1,12 @@
+{
+  "copy_kind": "exact byte-for-byte archived capture; never rewritten",
+  "fixture_path": "tests/data/action-wire-v13-response.json",
+  "historical_charge_usd": "0.00026",
+  "historical_model_responses": 1,
+  "historical_status": "failed",
+  "historical_tool_actions": 0,
+  "prospective_admission_is_historical_success": false,
+  "source_path": "runs/functional-confirmation12-v1.2-20261011/wire-response-001.json",
+  "source_sha256": "416621486868d09b5d194cfaa0094a5448bbc51a8d10343825a7acc517ab01fd",
+  "version": "action-wire-v13-offline-fixture/1.0"
+}

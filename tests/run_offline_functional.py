@@ -11,9 +11,10 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--mode',default='complete',choices=['complete','invalid_json','invalid_action','provider_failure','infrastructure','task_failure','budget'])
+    parser.add_argument('--config-name',default='functional-confirmation12-v1.json')
     args=parser.parse_args()
     root=args.output.resolve();root.mkdir(parents=True,exist_ok=False)
-    prepare(root,args.mode)
+    prepare(root,args.mode,args.config_name)
     result,run=launch(root)
     print(result.stdout+result.stderr,end='')
     print(json.dumps({'synthetic_engineering_check':True,'actual_provider_requests':0,
