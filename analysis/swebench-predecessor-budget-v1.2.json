@@ -1,0 +1,75 @@
+{
+  "version": "predecessor-budget-review/1.2",
+  "configuration_changed": false,
+  "config_sha256": "f4c7733335e0991aebdc59ac393b8a347207b452accc1119831273f77691d425",
+  "first_request_upper_bound": 4227,
+  "frozen_budgets": {
+    "model_calls": 48,
+    "tool_calls": 36,
+    "output_tokens": 2048,
+    "total_tokens": 180000,
+    "request_input_tokens": 32000,
+    "context_tokens": 128000
+  },
+  "sensitivity": [
+    {
+      "history_growth_tokens_per_action": 256,
+      "actual_output_assumed": 256,
+      "admitted_calls": 23,
+      "conservative_consumed": 167877,
+      "next_request_upper": 10115
+    },
+    {
+      "history_growth_tokens_per_action": 256,
+      "actual_output_assumed": 2048,
+      "admitted_calls": 20,
+      "conservative_consumed": 174140,
+      "next_request_upper": 9347
+    },
+    {
+      "history_growth_tokens_per_action": 512,
+      "actual_output_assumed": 256,
+      "admitted_calls": 19,
+      "conservative_consumed": 172729,
+      "next_request_upper": 13955
+    },
+    {
+      "history_growth_tokens_per_action": 512,
+      "actual_output_assumed": 2048,
+      "admitted_calls": 17,
+      "conservative_consumed": 176307,
+      "next_request_upper": 12931
+    },
+    {
+      "history_growth_tokens_per_action": 1024,
+      "actual_output_assumed": 256,
+      "admitted_calls": 15,
+      "conservative_consumed": 174765,
+      "next_request_upper": 19587
+    },
+    {
+      "history_growth_tokens_per_action": 1024,
+      "actual_output_assumed": 2048,
+      "admitted_calls": 13,
+      "conservative_consumed": 161447,
+      "next_request_upper": 17539
+    },
+    {
+      "history_growth_tokens_per_action": 2048,
+      "actual_output_assumed": 256,
+      "admitted_calls": 11,
+      "conservative_consumed": 161953,
+      "next_request_upper": 26755
+    },
+    {
+      "history_growth_tokens_per_action": 2048,
+      "actual_output_assumed": 2048,
+      "admitted_calls": 10,
+      "conservative_consumed": 154910,
+      "next_request_upper": 24707
+    }
+  ],
+  "assumptions": "Consumed usage equals input upper bound plus actual output; each next request reserves the full output cap. Growth includes retained prior response, tool result and message framing. No history removal. Analytical sensitivity, not model behavior.",
+  "conclusion": "Targeted 8-12 action investigation/edit/validation is plausible; 48 calls is only a ceiling. Moderate growth allows 13-15 actions and larger retained content 10-11. No numeric budget adjustment is applied. A broader study should prospectively test 180k versus 240k predecessor tokens, with identical downstream budgets and recomputed end-to-end spending envelope; this alternative is a proposal only.",
+  "new_provider_calls": 0
+}
