@@ -1,0 +1,36 @@
+{
+  "kind": "offline-development-source-manifest",
+  "python": "3.14.2 (v3.14.2:df793163d58, Dec  5 2025, 12:18:06) [Clang 16.0.0 (clang-1600.0.26.6)]",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "architecture": "arm64",
+  "packages": {
+    "tiktoken": "0.12.0",
+    "jsonschema": "4.26.0"
+  },
+  "files": {
+    "scripts/benchmark_functional_check.py": "8f530fef9fe8ff1d7e6364cab326cf029980fa9a2b10aeb9a56df2f3efb45d95",
+    "scripts/agent_decision_diagnostic.py": "9d775930ef0b49876d74dbdda5608e206c4447588484215734b9a93b1c112623",
+    "src/keisho/benchmark/inspection.py": "bd4f07192670820cd5cf031cfcae67ebb293bc26f42453cc0774d17a4a5dd8ec",
+    "src/keisho/benchmark/listing.py": "21da57b09d1bdac7d75057d101cb5161b5391238b05da5293d8e2754486c2a33",
+    "src/keisho/benchmark/environment.py": "b6450143ecd8ebf46700d11c562f15aa40314059694135ca8d456bfb04514a08",
+    "src/keisho/benchmark/comparison.py": "06c7074bb17014c873b311bbd9188b0e4d4f8357f084f2538e5f8da63b6cc4a8",
+    "src/keisho/benchmark/response_measurements.py": "71972e9389bbc7361680191106bd382dfffd42481f83c2762fafc0a60cef1a8d",
+    "src/keisho/benchmark/evaluator.py": "0018f64044cec9018a62f399fc04946227e4b97c0822288f862beb4fa9f773f6",
+    "src/keisho/pilot/response_policy.py": "8b7a041fe0a5d3862fcb7a5be953e9787ac3abe2a27d5c96f2bf70d5ed4bbdd9",
+    "src/keisho/pilot/agent.py": "86b19bbda558d76a7394844a4ece6e1baf5d3b926a1ba30d6ce51341f1728015",
+    "src/keisho/handoff/workspace.py": "b26c3e3ce4508d63c48eb4ba41fa7b29125664ccb844e4f211cc1de3ba5d4cbb",
+    "pyproject.toml": "353d5a09d4a348694b9b2dfa1225fdd1f256689eadd79aa229daebfc9bfa9a6d",
+    "tests/test_response_policy.py": "012ac749aff9318bfeb22bf23034e5d16bccaab8259a72ce49d350bbd2d61902",
+    "tests/test_response_measurements.py": "77fdb898ef056615fb3ae4fcbfc4f24d34cc7fd17f435de0e21e76568eb7e16e",
+    "tests/test_functional_public.py": "9f626ba355573050a5b564c098a02acbceced2bbc6a804046e75dfd260b9bc01",
+    "tests/test_bounded_listing.py": "d2a022b684fd7abf9b6f25f824d6fe00d83088a47c56038b3b8f268d1abc618c",
+    "tests/test_benchmark_launcher.py": "9c6880e01fe905760a21413363718891a3c83e578bb7afc4656651feea204ded",
+    "tests/test_benchmark_v12.py": "5df3bd4ff8618c4cd663fb40d604b949d457cb65893391bc0bd328fcf2767b7d",
+    "tests/test_benchmark_real_offline.py": "e151cbd139bd3993d0560b3699236d6dc89a766c3cd908374e953e6bbd03a3b6",
+    "tests/offline_launch/sitecustomize.py": "f12b2588fe587ff44413906a34f2726177541d8c311eb5dfd7d29f08964a9ed1",
+    "tests/offline_launch/functional_injection.py": "582f7161401ed2748ecfd211a3fa774db0f1848b4b964a8fd86ed7c08dba703b",
+    "tests/offline_launch/benchmark_injection.py": "5b76886dc3aacace099972d1981e475bf83e5c85fb341bdfcbc0870553ee1594",
+    "tests/run_offline_functional.py": "4b1d75fbb793e5d6027c67c623272d8479faf44f435dee3d55cefb19044cbc84",
+    "tests/run_offline_benchmark.py": "804afc339ed367603a35e0ea6a9059ad785b08560de2aa4de24b3c8120f63faa"
+  }
+}

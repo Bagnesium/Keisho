@@ -1,0 +1,137 @@
+{
+  "kind": "final-read-only-artifact-verification",
+  "historical_files_unchanged": 4992,
+  "implementation_hashes_match": true,
+  "config_and_plan_pins_match": true,
+  "verified_seals": [
+    "runs/offline-sprint-five-way-02/runs/five-way-synthetic",
+    "runs/offline-sprint-five-way-02/runs/five-way-synthetic/predecessor",
+    "runs/offline-sprint-five-way-02/runs/five-way-synthetic/note-generation",
+    "runs/offline-sprint-five-way-02/runs/five-way-synthetic/FULL_HISTORY",
+    "runs/offline-sprint-five-way-02/runs/five-way-synthetic/KEISHO_2K",
+    "runs/offline-sprint-five-way-02/runs/five-way-synthetic/REPOSITORY_ONLY",
+    "runs/offline-sprint-five-way-02/runs/five-way-synthetic/STRUCTURED_NOTES_2K",
+    "runs/offline-sprint-five-way-02/runs/five-way-synthetic/SUMMARY_2K",
+    "results/offline-reliability-sprint-20261011/functional-complete/runs/functional-confirmation12-v1"
+  ],
+  "documents": [
+    "research/BASELINE_COMPARISON.md",
+    "research/RESEARCH_PLAN.md",
+    "research/REPRODUCIBILITY.md",
+    "paper/OUTLINE.md",
+    "paper/METHODS_DRAFT.md",
+    "paper/RESULTS_PENDING.md",
+    "protocol_amendments/swebench-interface-v1.2.md",
+    "BENCHMARK_PROGRESS.md",
+    "results/offline-reliability-sprint-20261011/REPORT.md"
+  ],
+  "broken_local_markdown_links": [],
+  "passed_commands": {
+    "sprint-final-focused-02": {
+      "command": [
+        "env",
+        "PYTHONPATH=src",
+        "python3",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "unittest",
+        "tests.test_functional_public",
+        "tests.test_benchmark_real_offline",
+        "tests.test_benchmark_v12",
+        "tests.test_bounded_listing",
+        "tests.test_agent_wire_contract",
+        "tests.test_response_measurements",
+        "tests.test_response_policy",
+        "tests.test_benchmark_launcher",
+        "tests.test_benchmark",
+        "-v"
+      ],
+      "cwd": "/Users/bagnesium/Documents/GitHub/Keisho",
+      "started_at_unix": 1791729725.135999,
+      "automatic_retries": 0,
+      "exit_code": 0,
+      "ended_at_unix": 1791729816.0176299
+    },
+    "sprint-final-broad-01": {
+      "command": [
+        "env",
+        "PYTHONPATH=src",
+        "python3",
+        "-W",
+        "error::ResourceWarning",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "cwd": "/Users/bagnesium/Documents/GitHub/Keisho",
+      "started_at_unix": 1791729726.285173,
+      "automatic_retries": 0,
+      "exit_code": 0,
+      "ended_at_unix": 1791729841.3495371
+    },
+    "sprint-final-real-dry-run": {
+      "command": [
+        ".cache/swebench-evaluator/venv/bin/python",
+        "scripts/benchmark_compare.py",
+        "--config",
+        "configs/swebench-comparison-v1.2.json",
+        "--plan",
+        "analysis/swebench-comparison-v1.2-plan.json",
+        "--authorization",
+        "analysis/swebench-comparison-v1.2-authorization-template.json",
+        "--run-dir",
+        "runs/swebench-integration/exploratory-v1.2-pending",
+        "--dry-run"
+      ],
+      "cwd": "/Users/bagnesium/Documents/GitHub/Keisho",
+      "started_at_unix": 1791730040.0331259,
+      "automatic_retries": 0,
+      "exit_code": 0,
+      "ended_at_unix": 1791730040.474114
+    },
+    "sprint-final-scaffold": {
+      "command": [
+        "python3",
+        "scripts/check_scaffold.py"
+      ],
+      "cwd": "/Users/bagnesium/Documents/GitHub/Keisho",
+      "started_at_unix": 1791730040.523453,
+      "automatic_retries": 0,
+      "exit_code": 0,
+      "ended_at_unix": 1791730044.7560189
+    },
+    "sprint-p3-five-way-02": {
+      "command": [
+        "python3",
+        "tests/run_offline_benchmark.py",
+        "--output",
+        "runs/offline-sprint-five-way-02",
+        "--official-checkpoint-grade"
+      ],
+      "cwd": "/Users/bagnesium/Documents/GitHub/Keisho",
+      "started_at_unix": 1791728492.179302,
+      "automatic_retries": 0,
+      "exit_code": 0,
+      "ended_at_unix": 1791728600.24468
+    },
+    "sprint-p1-durable-complete": {
+      "command": [
+        "python3",
+        "tests/run_offline_functional.py",
+        "--output",
+        "results/offline-reliability-sprint-20261011/functional-complete"
+      ],
+      "cwd": "/Users/bagnesium/Documents/GitHub/Keisho",
+      "started_at_unix": 1791727535.228127,
+      "automatic_retries": 0,
+      "exit_code": 0,
+      "ended_at_unix": 1791727541.510975
+    }
+  },
+  "new_provider_requests": 0,
+  "actual_provider_cost_usd": "0"
+}

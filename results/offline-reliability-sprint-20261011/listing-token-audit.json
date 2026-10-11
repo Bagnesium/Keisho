@@ -1,0 +1,14 @@
+{
+  "actual_historical_requests": 10,
+  "original_inventory_paths": 312,
+  "legacy_first_result_tokens": 2598,
+  "bounded_first_page_tokens": 1051,
+  "bounded_duplicate_marker_tokens": 264,
+  "original_native_message_content_tokens_total": 150852,
+  "reconstructed_native_message_content_tokens_total": 47217,
+  "difference_content_tokens": 103635,
+  "reconstructed_only": true,
+  "original_telemetry_changed": false,
+  "new_provider_calls": 0,
+  "assumptions": "same original prompt and ten original assistant responses; replace only tool listings with deterministic 100-entry/8192-byte pages and explicit repeated-page references; unknown hash placeholders; native message-content counts omit server framing and schema charges; not a prediction of model behavior"
+}
