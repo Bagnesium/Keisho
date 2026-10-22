@@ -49,6 +49,10 @@ V15_SPEC_SHA = 'cb389a1a7a7fed8bc45bf82e931976ab852cb4df607c4184f768de1bd1079d0a
 V15_PLAN_SHA = 'ba04d2a92d8970242cbe4bf0c761af8d7d9c5fa2160c833ddaad3ba0a4117b24'
 V16_SPEC_SHA = '1e75c745e1179f9050858534c98eeeef0014f29c82163f52fac8ef485a84b0f8'
 V16_PLAN_SHA = 'a72ce6ede1559f04bfc5d6e90ed3c39594a1c281f80b496f2e7d53ea0a19c322'
+V17_SPEC_SHA = '223dea1177052e81aa766d10755f5f38051f26217ea7ebf466980097c005ac10'
+V17_PLAN_SHA = 'b0078bc06e620df26694dada8c7a68aea9672c819d40dd1af58fd1d369c360fe'
+V17_SELECTION_PLAN_SHA = '848c1c5acd0445054919442e3a9a37010ea3f41868a4038677eeab7b7ff94255'
+V17_IMAGE_METADATA_SHA = '4b24ae2fc9dcd55db675db37a2723ca6af62a94dd3377389d28a3a37c1f61d68'
 
 SYSTEM = '''You are a coding agent in an isolated repository at /testbed. Solve the original issue.
 Use only the issue and available repository/evidence. Test important changes with public tests.
@@ -149,18 +153,22 @@ def read_input(path):
 def load_frozen_plan(config_path=None, plan_path=None):
     require((config_path is None) == (plan_path is None), 'config and plan must be supplied together')
     config = read_input(config_path or CONFIG)
-    task = read_input(PRESELECT / 'task.json')
+    task_instance = config.get('selected_instance')
+    task_file = (PRESELECT / f"{task_instance}-task.json") if task_instance and (PRESELECT / f"{task_instance}-task.json").exists() else (PRESELECT / 'task.json')
+    task = read_input(task_file)
     plan = read_input(plan_path or PRESELECT / 'plan.json')
     if config_path is not None:
         supported = {SPEC_SHA: PLAN_SHA, NEXT_SPEC_SHA: NEXT_PLAN_SHA, WIRE_SPEC_SHA: WIRE_PLAN_SHA,
                      READINESS_SPEC_SHA: READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
-                     V16_SPEC_SHA: V16_PLAN_SHA}
+                     V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA}
         require(digest(config) in supported, 'configuration differs from frozen supported specification')
         expected_plan = supported[digest(config)]
         require(digest(plan) == expected_plan, 'plan differs from matched frozen plan')
         require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
-        selection = read_input(PRESELECT / 'plan.json')
-        require(digest(selection) == SELECTION_PLAN_SHA, 'frozen selection/order changed')
+        sel_file = (PRESELECT / f"{task_instance}-plan.json") if task_instance and (PRESELECT / f"{task_instance}-plan.json").exists() else (PRESELECT / 'plan.json')
+        selection = read_input(sel_file)
+        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) == V17_SPEC_SHA else SELECTION_PLAN_SHA
+        require(digest(selection) == expected_sel_sha, 'frozen selection/order changed')
         require(selection['task_sha256'] == digest(task) and task['instance_id'] == config['selected_instance'], 'selected task changed')
         require(selection['branch_order'] == random.Random(config['branch_seed']).sample(config['conditions'], len(config['conditions'])), 'branch order changed')
         plan = {**plan, 'branch_order': selection['branch_order'], 'cap_usd': config['cap_usd'],
@@ -168,7 +176,7 @@ def load_frozen_plan(config_path=None, plan_path=None):
     require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
     require(plan['plausibly_fits'] and config['selection']['count'] == 1, 'one comparison must fit cap')
     require(config['automatic_retries'] == 0, 'no automatic paid retries')
-    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA):
+    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA):
         from .experiment_freeze import validate_freeze
         validate_freeze(config, ROOT)
     return config, task, plan
@@ -217,10 +225,10 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
     response_settings(config)
     authorization = read_input(authorization_path)
     require(authorization['cap_usd'] == config['cap_usd'] == '10.00', 'authorization cap changed')
-    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA):
+    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA):
         expected_plan = {NEXT_SPEC_SHA:NEXT_PLAN_SHA, WIRE_SPEC_SHA:WIRE_PLAN_SHA,
                          READINESS_SPEC_SHA:READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
-                         V16_SPEC_SHA: V16_PLAN_SHA}[digest(config)]
+                         V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA}[digest(config)]
         require(authorization.get('version')=='swebench-authorization/2.0' and
             authorization.get('config_sha256')==digest(config) and authorization.get('plan_sha256')==expected_plan and
             authorization.get('attempts')==1 and isinstance(authorization.get('authorization_id'),str) and authorization['authorization_id'].strip(),
@@ -354,10 +362,13 @@ def runtime_preflight(binding, *, dry=False):
     installed = Path(swebench.__file__).parent
     for module in ('harness/run_evaluation.py', 'harness/grading.py', 'harness/reporting.py', 'harness/utils.py'):
         require(hashlib.sha256((source / module).read_bytes()).digest() == hashlib.sha256((installed / module).read_bytes()).digest(), 'installed official evaluator modified')
-    image_metadata = read_input(PRIVATE / 'prepared-task-image.json')
-    require(digest(image_metadata) == IMAGE_METADATA_SHA and image_metadata['instance_id'] == task['instance_id'] and
+    meta_file = (PRIVATE / f"{task['instance_id']}-prepared-task-image.json") if (PRIVATE / f"{task['instance_id']}-prepared-task-image.json").exists() else (PRIVATE / 'prepared-task-image.json')
+    image_metadata = read_input(meta_file)
+    expected_image_sha = V17_IMAGE_METADATA_SHA if task['instance_id'] == 'sympy__sympy-20590' else IMAGE_METADATA_SHA
+    require(digest(image_metadata) == expected_image_sha and image_metadata['instance_id'] == task['instance_id'] and
             image_metadata['base_commit'] == task['base_commit'] and image_metadata['environment_verified'], 'prepared task environment changed')
-    require(hashlib.sha256((PRIVATE / 'selected-task-evaluator.jsonl').read_bytes()).hexdigest() == image_metadata['evaluator_dataset_sha256'], 'private evaluator row changed')
+    eval_file = (PRIVATE / f"{task['instance_id']}-selected-task-evaluator.jsonl") if (PRIVATE / f"{task['instance_id']}-selected-task-evaluator.jsonl").exists() else (PRIVATE / 'selected-task-evaluator.jsonl')
+    require(hashlib.sha256(eval_file.read_bytes()).hexdigest() == image_metadata['evaluator_dataset_sha256'], 'private evaluator row changed')
     require(json.loads(docker('image', 'inspect', image_metadata['image_id']).stdout)[0]['Id'] == image_metadata['image_id'], 'prepared image unavailable')
     require(not (PRIVATE / 'predictions' / binding.run_dir.name).exists(), 'occupied private prediction namespace')
     # Reuse the existing gate and its full reservation, without making a request.
@@ -486,7 +497,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
         prediction_dir.mkdir(parents=True, exist_ok=False)
         image_metadata = ctx['image_metadata']
         require(image_metadata['instance_id'] == task['instance_id'] and image_metadata['environment_verified'], 'task environment not validated')
-        dataset = PRIVATE / 'selected-task-evaluator.jsonl'
+        dataset = (PRIVATE / f"{task['instance_id']}-selected-task-evaluator.jsonl") if (PRIVATE / f"{task['instance_id']}-selected-task-evaluator.jsonl").exists() else (PRIVATE / 'selected-task-evaluator.jsonl')
         require(hashlib.sha256(dataset.read_bytes()).hexdigest() == image_metadata['evaluator_dataset_sha256'], 'private evaluator row changed')
         image = image_metadata['image_id']
         require(json.loads(docker('image', 'inspect', image).stdout)[0]['Id'] == image, 'prepared image unavailable')

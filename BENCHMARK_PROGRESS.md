@@ -1,3 +1,33 @@
+# Keisho benchmark progress — prospective v1.7 defined (task sympy__sympy-20590) 2026-10-22
+
+**v1.7 prospective specification defined:**
+1. Task switch to `sympy__sympy-20590`:
+   - Target file: `sympy/core/symbol.py` (~60 lines around `Symbol` class definition).
+   - Expected turn count: ~4 turns (read, reproduce, edit, test). Eliminates exploratory wander in large multi-module codebases.
+   - Preserves identical five-way experimental comparison conditions and evaluation harness.
+2. Successor request input ceiling raised:
+   - `successor_budgets.request_input_tokens` raised from 32,000 to **64,000** tokens.
+   - Rationale: Parity with predecessor request input ceiling prevents `FULL_HISTORY` admission failure when predecessor handoff conversation exceeds 32k tokens.
+3. Model configuration confirmed:
+   - Successors use `openai/gpt-4.1-2025-04-14` across **all 5 conditions** (Frontier GPT-4.1, $2.00 in / $8.00 out per 1M tokens).
+   - Predecessor uses `openai/gpt-4.1-2025-04-14`.
+   - Note generation uses `openai/gpt-4.1-mini-2025-04-14` (2 calls).
+4. Budget and cost envelope under $10 cap:
+   - Predecessor max envelope: **$1.4593** (400,000 tokens).
+   - Note generation max envelope: **$0.0591** (64,000 input ceiling, 2 calls).
+   - Successors max envelope: **$7.9088** (5 conditions × $1.5818).
+   - Combined settled maximum conservative envelope: **$9.4272** <= **$10.00**.
+   - Peak in-flight reservation headroom: **$0.1516** (64k input + 2k output).
+   - In-flight peak worst case: **$9.5788**, leaving **$0.4212** safety margin beneath $10.00.
+   - Expected cost on `sympy__sympy-20590`: **$0.50 – $1.20**.
+5. Frozen artifacts:
+   - Config `configs/swebench-comparison-v1.7.json` (SHA `223dea1177052e81aa766d10755f5f38051f26217ea7ebf466980097c005ac10`)
+   - Plan `analysis/swebench-comparison-v1.7-plan.json` (SHA `b0078bc06e620df26694dada8c7a68aea9672c819d40dd1af58fd1d369c360fe`)
+   - Manifest `analysis/swebench-experiment-v1.7-manifest.json` (SHA `04f1f26bb26ef6d05fa7050ce2c3955ed18bff44356f7f3a4f5127df35538b91`)
+   - Task specification `runs/swebench-integration/preselection/sympy__sympy-20590-task.json` (SHA `edc429b5c441e91fe9e661cf7c4ca721892cb60e89cb375c09dfcbb7b935b378`)
+   - Preselection plan `runs/swebench-integration/preselection/sympy__sympy-20590-plan.json` (SHA `5133378bb3f0d5c888e796a2a4e606c2cd6aa480f491d62ed5d01fd5f202e9a6`)
+   - Docker image metadata `.cache/swebench-evaluator/sympy__sympy-20590-prepared-task-image.json` (SHA `4b24ae2fc9dcd55db675db37a2723ca6af62a94dd3377389d28a3a37c1f61d68`)
+
 # Keisho benchmark progress — v1.5 live run 001 recorded; prospective v1.6 defined 2026-10-22
 
 **Two predecessor failures recorded and disclosed; all ten successor conditions unstarted:**
