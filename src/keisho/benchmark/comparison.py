@@ -53,6 +53,8 @@ V17_SPEC_SHA = '223dea1177052e81aa766d10755f5f38051f26217ea7ebf466980097c005ac10
 V17_PLAN_SHA = 'b0078bc06e620df26694dada8c7a68aea9672c819d40dd1af58fd1d369c360fe'
 V17_SELECTION_PLAN_SHA = '848c1c5acd0445054919442e3a9a37010ea3f41868a4038677eeab7b7ff94255'
 V17_IMAGE_METADATA_SHA = '4b24ae2fc9dcd55db675db37a2723ca6af62a94dd3377389d28a3a37c1f61d68'
+V18_SPEC_SHA = '36f640ca8d78c64cacc63cb4294ba375ff871feb9bddc0ecb77eaa26c8255fe1'
+V18_PLAN_SHA = 'f1a92e0d7a35b6f9fed6fb3064537e272b71284400b084f878c7f2d374593f38'
 
 SYSTEM = '''You are a coding agent in an isolated repository at /testbed. Solve the original issue.
 Use only the issue and available repository/evidence. Test important changes with public tests.
@@ -160,14 +162,15 @@ def load_frozen_plan(config_path=None, plan_path=None):
     if config_path is not None:
         supported = {SPEC_SHA: PLAN_SHA, NEXT_SPEC_SHA: NEXT_PLAN_SHA, WIRE_SPEC_SHA: WIRE_PLAN_SHA,
                      READINESS_SPEC_SHA: READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
-                     V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA}
+                     V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
+                     V18_SPEC_SHA: V18_PLAN_SHA}
         require(digest(config) in supported, 'configuration differs from frozen supported specification')
         expected_plan = supported[digest(config)]
         require(digest(plan) == expected_plan, 'plan differs from matched frozen plan')
         require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
         sel_file = (PRESELECT / f"{task_instance}-plan.json") if task_instance and (PRESELECT / f"{task_instance}-plan.json").exists() else (PRESELECT / 'plan.json')
         selection = read_input(sel_file)
-        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) == V17_SPEC_SHA else SELECTION_PLAN_SHA
+        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA) else SELECTION_PLAN_SHA
         require(digest(selection) == expected_sel_sha, 'frozen selection/order changed')
         require(selection['task_sha256'] == digest(task) and task['instance_id'] == config['selected_instance'], 'selected task changed')
         require(selection['branch_order'] == random.Random(config['branch_seed']).sample(config['conditions'], len(config['conditions'])), 'branch order changed')
@@ -176,7 +179,7 @@ def load_frozen_plan(config_path=None, plan_path=None):
     require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
     require(plan['plausibly_fits'] and config['selection']['count'] == 1, 'one comparison must fit cap')
     require(config['automatic_retries'] == 0, 'no automatic paid retries')
-    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA):
+    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA):
         from .experiment_freeze import validate_freeze
         validate_freeze(config, ROOT)
     return config, task, plan
@@ -225,10 +228,11 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
     response_settings(config)
     authorization = read_input(authorization_path)
     require(authorization['cap_usd'] == config['cap_usd'] == '10.00', 'authorization cap changed')
-    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA):
+    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA):
         expected_plan = {NEXT_SPEC_SHA:NEXT_PLAN_SHA, WIRE_SPEC_SHA:WIRE_PLAN_SHA,
                          READINESS_SPEC_SHA:READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
-                         V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA}[digest(config)]
+                         V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
+                         V18_SPEC_SHA: V18_PLAN_SHA}[digest(config)]
         require(authorization.get('version')=='swebench-authorization/2.0' and
             authorization.get('config_sha256')==digest(config) and authorization.get('plan_sha256')==expected_plan and
             authorization.get('attempts')==1 and isinstance(authorization.get('authorization_id'),str) and authorization['authorization_id'].strip(),
@@ -560,7 +564,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
                 write_prediction(prediction, task, config['successor_model'], final_patch)
                 branch.write_artifact('prediction.json', {'model_patch': final_patch, 'from_base_commit': task['base_commit'], 'instance_id': task['instance_id']})
                 branch.freeze()
-                status = ('interrupted' if execution.reason in ('model_failure', 'invalid_run', 'infrastructure_failure') else
+                status = ('interrupted' if execution.reason in ('model_failure', 'invalid_run', 'infrastructure_failure', 'repeated_tool_failure') else
                           'budget_stopped' if execution.reason in ('budget_exhausted', 'time_budget_exhausted') else 'completed')
                 result = {'status': status, **execution_result(execution)}
                 result['official_evaluation'] = evaluate(PRIVATE, config, task, condition, prediction, run_namespace=binding.run_dir.name)

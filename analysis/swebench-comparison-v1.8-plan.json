@@ -1,0 +1,61 @@
+{
+  "offline_only": true,
+  "provider_requests": 0,
+  "credential_validation_requests": 0,
+  "new_spending_authorized": false,
+  "config_sha256": "36f640ca8d78c64cacc63cb4294ba375ff871feb9bddc0ecb77eaa26c8255fe1",
+  "task_sha256": "edc429b5c441e91fe9e661cf7c4ca721892cb60e89cb375c09dfcbb7b935b378",
+  "catalog_sha256": "985fa9336cdd1cb022acac45f789e5c1ddcbf9e42efb8a3639527231930979e0",
+  "response_policy": "auxiliary-claims/2.0",
+  "response_format_sha256": "376bde7986cc2f8fd182f04e745c607933760bea7c306ea6e8e992b7f70be25a",
+  "agent_prompt_sha256": "4f99b6495be87680583af9460943a26fbd389ee017007e289e7fbe1a5dfc527d",
+  "schema_native_tokens": 0,
+  "first_request_upper_bound": 2279,
+  "cap_usd_proposed": "10.00",
+  "maximum_noncached_costs_usd": {
+    "predecessor": "1.45931520",
+    "successor": "7.9087680",
+    "note_generation": "0.059136"
+  },
+  "total_envelope_usd": "9.42721920",
+  "largest_request_reservation_usd": "0.1516032",
+  "assumptions": "Recorded frozen rates, no cache discounts, possible 5% BYOK fee. Predecessor total tokens at 400,000; predecessor request input tokens at 64,000; successor request input tokens raised to 64,000; note generation input allowance at 64,000; tool output bounded under bounded-output/1.0; task switched to sympy__sympy-20590. Full-history overflow stops without truncation. No paid inference authorized; current public pricing must pass live preflight.",
+  "endpoint_schema_support_in_saved_catalog": {
+    "openai/gpt-4.1-mini": {
+      "endpoint": "OpenAI | openai/gpt-4.1-mini-2025-04-14",
+      "supported_parameters": [
+        "seed",
+        "max_tokens",
+        "response_format",
+        "structured_outputs",
+        "tools",
+        "tool_choice",
+        "temperature",
+        "top_p"
+      ]
+    },
+    "openai/gpt-4.1": {
+      "endpoint": "OpenAI | openai/gpt-4.1-2025-04-14",
+      "supported_parameters": [
+        "seed",
+        "max_tokens",
+        "response_format",
+        "structured_outputs",
+        "tools",
+        "tool_choice",
+        "temperature",
+        "top_p"
+      ]
+    }
+  },
+  "version": "swebench-plan/1.8",
+  "action_wire_version": "flat-or-args/1.0",
+  "wire_action_contract_sha256": "b17d5737b9f67e70f8b21ea6e7d27a800b726acee86d4fe1b88f7e975e678d95",
+  "internal_action_contract_sha256": "48af7498236adb94a9e291c17269239ef998c1eda977dfd13e7dc1c14da73388",
+  "intervention": "read_file and write_file non-fatal observations, path escapes fatal InvalidAction, 3-consecutive-failure stop with reason repeated_tool_failure, task sympy__sympy-20590, 64k request input token ceilings, gpt-4.1 predecessor and successors.",
+  "annotation_guidance_version": "annotation-guidance/1.0",
+  "annotation_guidance_sha256": "4355a256a11dc729a2c6d35e95b770ae041777a1c96d19217003222406f25d1e",
+  "patch_export_policy": "source-and-artifacts/2.0",
+  "tool_output_policy": "bounded-output/1.0",
+  "experiment_manifest_sha256": "b8518bc41abfc3a71dfa5c864cbbf2ac3962b5fb6121cffed82452cb96bab37a"
+}

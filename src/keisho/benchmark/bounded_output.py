@@ -36,27 +36,33 @@ class BoundedRepositorySession(RepositorySession):
         elif tool == 'read_file':
             r = docker('exec', self.name, 'cat', '/testbed/' + action['path'], check=False)
             if r.returncode != 0:
-                raise InvalidAction('read failed')
-            content = r.stdout.decode(errors='replace')
-            content_bytes = content.encode('utf-8')
-            if len(content_bytes) > MAX_BOUNDED_OUTPUT_BYTES:
-                half = MAX_BOUNDED_OUTPUT_BYTES // 2
-                head = content_bytes[:half].decode('utf-8', errors='replace')
-                tail = content_bytes[-half:].decode('utf-8', errors='replace')
-                omitted = len(content_bytes) - len(head.encode('utf-8')) - len(tail.encode('utf-8'))
-                truncated_text = f"{head}\n[... file content truncated {omitted} bytes ...]\n{tail}"
-                result = {'path': action['path'], 'content': truncated_text,
-                          'truncated': True, 'total_content_bytes': len(content_bytes)}
+                err = (r.stderr or r.stdout).decode(errors='replace').strip() or 'read failed'
+                result = {'path': action['path'], 'error': err}
             else:
-                result = {'path': action['path'], 'content': content}
+                content = r.stdout.decode(errors='replace')
+                content_bytes = content.encode('utf-8')
+                if len(content_bytes) > MAX_BOUNDED_OUTPUT_BYTES:
+                    half = MAX_BOUNDED_OUTPUT_BYTES // 2
+                    head = content_bytes[:half].decode('utf-8', errors='replace')
+                    tail = content_bytes[-half:].decode('utf-8', errors='replace')
+                    omitted = len(content_bytes) - len(head.encode('utf-8')) - len(tail.encode('utf-8'))
+                    truncated_text = f"{head}\n[... file content truncated {omitted} bytes ...]\n{tail}"
+                    result = {'path': action['path'], 'content': truncated_text,
+                              'truncated': True, 'total_content_bytes': len(content_bytes)}
+                else:
+                    result = {'path': action['path'], 'content': content}
         elif tool == 'write_file':
             content = action['content']
             if not isinstance(content, str) or len(content.encode()) > self.output_bytes:
                 raise InvalidAction('file write exceeds fixed byte limit')
             import base64
             code = "from pathlib import Path; import base64; p=Path('/testbed')/" + repr(action['path']) + "; p.parent.mkdir(parents=True,exist_ok=True); p.write_bytes(base64.b64decode(" + repr(base64.b64encode(content.encode()).decode()) + "))"
-            docker('exec', self.name, 'python3', '-c', code)
-            result = {'path': action['path'], 'content_sha256': hashlib.sha256(content.encode()).hexdigest()}
+            r = docker('exec', self.name, 'python3', '-c', code, check=False)
+            if r.returncode != 0:
+                err = (r.stderr or r.stdout).decode(errors='replace').strip() or 'write failed'
+                result = {'path': action['path'], 'error': err}
+            else:
+                result = {'path': action['path'], 'content_sha256': hashlib.sha256(content.encode()).hexdigest()}
         else:
             if not isinstance(action['command'], str) or not 0 < len(action['command']) <= 8192:
                 raise InvalidAction('command exceeds fixed bounds')

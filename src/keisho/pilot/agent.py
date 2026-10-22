@@ -103,6 +103,19 @@ def parse_output(text: str, known_evidence_ids: set[str], policy=STRICT, action_
     return data
 
 
+def is_path_escape(action, reason=""):
+    text = str(reason).lower()
+    if "escape" in text or "unsafe repository path" in text or "unsafe listing prefix" in text:
+        return True
+    if isinstance(action, dict):
+        for key in ("path", "prefix"):
+            val = action.get(key)
+            if isinstance(val, str):
+                if val.startswith("/") or any(part == ".." for part in val.replace("\\", "/").split("/")):
+                    return True
+    return False
+
+
 def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_text: str, system_prompt: str,
               handoff_text: str, seed: int, budgets: Budgets, role="successor", checkpoint_tools: int | None = None,
               checkpoint_predicate=None, time_limit_seconds: float | None = None, response_policy=STRICT,
@@ -123,6 +136,7 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
     if handoff_text:
         recorder.emit(f"{role}_handoff", EventKind.USER_MESSAGE, "user", {"content": handoff_text})
     calls, tools, consumed, known = [], 0, 0, set()
+    consecutive_failures = 0
     reason = "budget_exhausted"
     def audit_admission(number, action, result, rejection_reason=None):
         if action_wire_version is not None:
@@ -180,8 +194,25 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
             if wire_report['validation_result'] != 'accepted':
                 recorder.raw.write_artifact(f'{role}_call_{number:03d}-action-failure.json',
                     {'reason':wire_report['rejection_reason'], 'tool_executed':False, 'automatic_retry':False})
-                reason = 'invalid_run'
-                break
+                if is_path_escape(action, wire_report['rejection_reason']):
+                    reason = 'invalid_run'
+                    break
+                if tools >= budgets.tool_calls:
+                    audit_admission(number, action, 'not_executed', 'tool call budget exhausted')
+                    break
+                tools += 1
+                tool_id, result_id = f"{role}_tool_{tools:03d}", f"{role}_result_{tools:03d}"
+                recorder.emit(tool_id, EventKind.TOOL_CALL, role, {"action": action}, (call.response_event_id,))
+                audit_admission(number, action, 'rejected', wire_report['rejection_reason'])
+                result = {"error": wire_report['rejection_reason'], "invalid_action": wire_report['rejection_reason']}
+                recorder.emit(result_id, EventKind.TOOL_RESULT, role, result, (tool_id,))
+                known.add(result_id)
+                messages.append(Message("user", canonical_json({"event_id": result_id, "tool_result": result})))
+                consecutive_failures += 1
+                if consecutive_failures >= 3:
+                    reason = "repeated_tool_failure"
+                    break
+                continue
             action = wire_report['canonical_action']
         if action.get("tool") == "finish":
             if set(action) != {"tool", "answer"} or not isinstance(action["answer"], str):
@@ -198,8 +229,25 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
             except InvalidAction as exc:
                 recorder.raw.write_artifact(f'{role}_call_{number:03d}-action-failure.json',
                                            {'reason': str(exc), 'tool_executed': False, 'automatic_retry': False})
-                reason = 'invalid_run'
-                break
+                if is_path_escape(action, str(exc)):
+                    reason = 'invalid_run'
+                    break
+                if tools >= budgets.tool_calls:
+                    audit_admission(number, action, 'not_executed', 'tool call budget exhausted')
+                    break
+                tools += 1
+                tool_id, result_id = f"{role}_tool_{tools:03d}", f"{role}_result_{tools:03d}"
+                recorder.emit(tool_id, EventKind.TOOL_CALL, role, {"action": action}, (call.response_event_id,))
+                audit_admission(number, action, 'rejected', str(exc))
+                result = {"error": str(exc), "invalid_action": str(exc)}
+                recorder.emit(result_id, EventKind.TOOL_RESULT, role, result, (tool_id,))
+                known.add(result_id)
+                messages.append(Message("user", canonical_json({"event_id": result_id, "tool_result": result})))
+                consecutive_failures += 1
+                if consecutive_failures >= 3:
+                    reason = "repeated_tool_failure"
+                    break
+                continue
         if tools >= budgets.tool_calls:
             audit_admission(number, action, 'not_executed', 'tool call budget exhausted')
             break
@@ -210,9 +258,19 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
             result = session.execute(action)
         except InvalidAction as exc:
             audit_admission(number, action, 'rejected', str(exc))
-            recorder.emit(result_id, EventKind.TOOL_RESULT, role, {"invalid_action": str(exc)}, (tool_id,))
-            reason = "invalid_run"
-            break
+            if is_path_escape(action, str(exc)):
+                recorder.emit(result_id, EventKind.TOOL_RESULT, role, {"invalid_action": str(exc)}, (tool_id,))
+                reason = "invalid_run"
+                break
+            result = {"error": str(exc), "invalid_action": str(exc)}
+            recorder.emit(result_id, EventKind.TOOL_RESULT, role, result, (tool_id,))
+            known.add(result_id)
+            messages.append(Message("user", canonical_json({"event_id": result_id, "tool_result": result})))
+            consecutive_failures += 1
+            if consecutive_failures >= 3:
+                reason = "repeated_tool_failure"
+                break
+            continue
         except IsolationUnavailable:
             audit_admission(number, action, 'infrastructure_failure', 'isolation unavailable; no completed tool result')
             recorder.emit(result_id, EventKind.TOOL_RESULT, role, {'infrastructure_failure':'isolation unavailable; no completed tool result'}, (tool_id,))
@@ -232,6 +290,15 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
         recorder.emit(result_id, EventKind.TOOL_RESULT, role, result, (tool_id,))
         known.add(result_id)
         messages.append(Message("user", canonical_json({"event_id": result_id, "tool_result": result})))
+        if action.get("tool") in ("read_file", "write_file") and "error" in result:
+            consecutive_failures += 1
+            if consecutive_failures >= 3:
+                reason = "repeated_tool_failure"
+                break
+        elif action.get("tool") == "shell":
+            consecutive_failures = 0
+        else:
+            consecutive_failures = 0
         if checkpoint_predicate is not None and checkpoint_predicate(action, result):
             reason = "checkpoint"
             break

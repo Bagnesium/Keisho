@@ -1,3 +1,44 @@
+# Keisho benchmark progress — v1.7 live run 001 recorded; prospective v1.8 defined 2026-10-22
+
+**Four predecessor failures recorded and disclosed; all twenty successor conditions unstarted:**
+1. **v1.4 attempt 001 (`runs/swebench-v1.4-five-way-once-001`, $0.0164 spend)**:
+   Halted at Call 6 (`reason: budget_exhausted`). `openai/gpt-4.1-mini-2025-04-14` created an
+   uncompressed Zarr array generating 202 chunk files. Unbounded inventory metadata (41 KB / 18k tokens)
+   flooded the conversational context, exceeding the 32,000 request input ceiling on Call 7 without
+   touching `xarray/`. All five successors unstarted.
+2. **v1.5 attempt 001 (`runs/swebench-v1.5-five-way-once-001`, $0.1129 spend)**:
+   Halted at Call 13 (`reason: budget_exhausted`). With `bounded-output/1.0` active and predecessor
+   aligned to `openai/gpt-4.1-2025-04-14`, the predecessor accurately inspected xarray formatting logic
+   but exhausted its 180,000 total token budget before completing a patch. Successors unstarted.
+3. **v1.6 attempt 001 (`runs/swebench-v1.6-five-way-once-001`, $0.1272 spend)**:
+   Halted at Call 10 (`reason: budget_exhausted`). Predecessor request input exceeded the 32,000
+   request input ceiling on Call 11 while total token budget remained under 140,000 tokens. Successors unstarted.
+4. **v1.7 attempt 001 (`runs/swebench-v1.7-five-way-once-001`, $0.0342 spend)**:
+   Halted at Call 8 (`reason: invalid_run`). Predecessor attempted `read_file` on `sympy/core/atomic.py`
+   (SymPy module is named `sympy/core/atom.py`). Container `cat` returned exit 1, raising fatal `InvalidAction('read failed')`.
+   All five successors unstarted.
+
+**v1.8 prospective specification defined:**
+1. **Non-fatal file tool error observations**:
+   - `read_file` failures (non-existent file, directory, or permissions) return `{'path': path, 'error': error_text}` observation.
+   - `write_file` execution failures return `{'path': path, 'error': error_text}` observation.
+2. **Agent error observation recovery**:
+   - In `agent.py`, non-escape rejected or failed tool actions emit an error observation into history and allow the agent to continue.
+3. **Fatal path escape defense**:
+   - Path escape attempts (`..` traversal or absolute paths outside repository) remain fatal `InvalidAction` and immediately terminate with `reason: invalid_run`.
+4. **Consecutive failure ceiling (`repeated_tool_failure`)**:
+   - 3 consecutive failed or rejected tool calls terminate the run with `reason: repeated_tool_failure`.
+   - Normal shell and test command executions (including non-zero test exits) remain normal observations and reset the consecutive failure counter.
+5. **Budgets, models, and cost envelope under $10 cap**:
+   - Predecessor & successors: `openai/gpt-4.1-2025-04-14`.
+   - Task: `sympy__sympy-20590`.
+   - Request input token ceiling: 64,000 for both predecessor and successors. Predecessor total tokens: 400,000.
+   - Settled maximum conservative envelope: **$9.4272** <= **$10.00**. Peak reservation envelope: **$9.5788** ($0.4212 safety margin).
+6. **Frozen artifacts**:
+   - Config `configs/swebench-comparison-v1.8.json` (SHA `36f640ca8d78c64cacc63cb4294ba375ff871feb9bddc0ecb77eaa26c8255fe1`)
+   - Plan `analysis/swebench-comparison-v1.8-plan.json` (SHA `f1a92e0d7a35b6f9fed6fb3064537e272b71284400b084f878c7f2d374593f38`)
+   - Manifest `analysis/swebench-experiment-v1.8-manifest.json` (SHA `b8518bc41abfc3a71dfa5c864cbbf2ac3962b5fb6121cffed82452cb96bab37a`)
+
 # Keisho benchmark progress — prospective v1.7 defined (task sympy__sympy-20590) 2026-10-22
 
 **v1.7 prospective specification defined:**
