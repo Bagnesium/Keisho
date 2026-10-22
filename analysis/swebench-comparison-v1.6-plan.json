@@ -3,7 +3,7 @@
   "provider_requests": 0,
   "credential_validation_requests": 0,
   "new_spending_authorized": false,
-  "config_sha256": "9fa31697e8afb50662828e1eaaa87041e13eba900db1bea61c9576becb0aca25",
+  "config_sha256": "64fa6d56bb0af4317be2696d8a6fc183a720ac73a960f73e113eda95430adf23",
   "task_sha256": "1ece7acf4065ac5399dfc0781af941c52b5498c5192e51fcf4d3bd59512bf125",
   "catalog_sha256": "985fa9336cdd1cb022acac45f789e5c1ddcbf9e42efb8a3639527231930979e0",
   "response_policy": "auxiliary-claims/2.0",
@@ -18,8 +18,8 @@
     "note_generation": "0.032256"
   },
   "total_envelope_usd": "9.40033920",
-  "largest_request_reservation_usd": "0.0844032",
-  "assumptions": "Recorded frozen rates, no cache discounts, possible 5% BYOK fee. Predecessor total tokens raised to 400,000; tool output bounded under bounded-output/1.0. Full-history overflow stops without truncation. No paid inference authorized; current public pricing must pass live preflight.",
+  "largest_request_reservation_usd": "0.1516032",
+  "assumptions": "Recorded frozen rates, no cache discounts, possible 5% BYOK fee. Predecessor total tokens raised to 400,000; predecessor request input tokens raised to 64,000; tool output bounded under bounded-output/1.0. Full-history overflow stops without truncation. No paid inference authorized; current public pricing must pass live preflight.",
   "endpoint_schema_support_in_saved_catalog": {
     "openai/gpt-4.1-mini": {
       "endpoint": "OpenAI | openai/gpt-4.1-mini-2025-04-14",
@@ -52,10 +52,10 @@
   "action_wire_version": "flat-or-args/1.0",
   "wire_action_contract_sha256": "b17d5737b9f67e70f8b21ea6e7d27a800b726acee86d4fe1b88f7e975e678d95",
   "internal_action_contract_sha256": "48af7498236adb94a9e291c17269239ef998c1eda977dfd13e7dc1c14da73388",
-  "intervention": "Prospective predecessor total token ceiling raise (from 180,000 to 400,000) on top of bounded-output/1.0 and gpt-4.1 to permit extended codebase inspection and checkpoint localization under $10 cap.",
+  "intervention": "Prospective predecessor total token ceiling raise (from 180,000 to 400,000) and request input token ceiling raise (from 32,000 to 64,000) on top of bounded-output/1.0 and gpt-4.1 to permit extended codebase inspection and checkpoint localization under $10 cap.",
   "annotation_guidance_version": "annotation-guidance/1.0",
   "annotation_guidance_sha256": "4355a256a11dc729a2c6d35e95b770ae041777a1c96d19217003222406f25d1e",
   "patch_export_policy": "source-and-artifacts/2.0",
   "tool_output_policy": "bounded-output/1.0",
-  "experiment_manifest_sha256": "b950db5c507655380b95fe5f42815305f4ab17cf9985ed26b5d160095ec31779"
+  "experiment_manifest_sha256": "61b46c1b3c84431ad9067cd43c93187c190365126272dd25556390a14905031d"
 }

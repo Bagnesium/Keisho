@@ -102,7 +102,8 @@
     "source-and-artifacts/2.0 cumulative patch export and audit",
     "bounded-output/1.0 tool result and inventory bounding",
     "predecessor model aligned to openai/gpt-4.1-2025-04-14",
-    "predecessor total token ceiling raised from 180000 to 400000"
+    "predecessor total token ceiling raised from 180000 to 400000",
+    "predecessor request input token ceiling raised from 32000 to 64000"
   ],
   "official_harness_commit": "02e7a74ffd0b707aab73d203fe87bdc7c76afc8e",
   "baseline_author_code_commit": "5179b1d759be466600c453da8b9078341967ec17"

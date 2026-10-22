@@ -1,8 +1,8 @@
 {
   "version": "swebench-authorization/2.0",
   "authorization_id": "PENDING-V16-NEW-USER-AUTHORIZATION",
-  "config_sha256": "9fa31697e8afb50662828e1eaaa87041e13eba900db1bea61c9576becb0aca25",
-  "plan_sha256": "535437f6c108afa78323050d9cac13633ac679ad48d01b528f454b96188a62c9",
+  "config_sha256": "64fa6d56bb0af4317be2696d8a6fc183a720ac73a960f73e113eda95430adf23",
+  "plan_sha256": "47b209c9fe95f7a14031303d081828876c6fd8cd8166ceb23b1202eb46993b40",
   "cap_usd": "10.00",
   "attempts": 1,
   "provider_inference_authorized": false,

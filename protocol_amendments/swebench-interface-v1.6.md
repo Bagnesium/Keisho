@@ -12,16 +12,19 @@ Two prior exploratory attempts failed to reach the predecessor checkpoint:
 
 1. **Predecessor cumulative token ceiling raise**:
    - `predecessor_budgets.total_tokens` is raised from 180,000 to **400,000** tokens.
-   - Everything else remains strictly identical to v1.5:
-     - Task: `pydata__xarray-6721`
-     - Predecessor model: `openai/gpt-4.1-2025-04-14`
-     - Successor model: `openai/gpt-4.1-2025-04-14`
-     - Generation model: `openai/gpt-4.1-mini-2025-04-14`
-     - Tool bounding: `bounded-output/1.0` (8,192 byte command output cap, 25 changed paths cap)
-     - Successor budgets: 64 calls, 360,000 total tokens
-2. **Predecessor limit analysis**:
-   - Note on `request_input_tokens`: With `bounded-output/1.0` adding ~2,000–2,500 tokens per turn, context growth reaches ~32,000 request input tokens at approximately turn 16–17. This single-request ceiling remains unchanged at 32,000, serving as the next binding constraint if the agent does not formulate an edit.
-3. **Budget & spending envelope under $10 cap**:
-   - Predecessor maximum cost rises to **$1.4593** (from $0.9973).
-   - Combined five-way maximum conservative envelope: **$9.4003** + **$0.0844** reservation = **$9.4847** <= **$10.00**.
-   - Preserves **$0.5153** safety margin beneath the strict $10.00 cap.
+2. **Predecessor single-request input token ceiling raise**:
+   - `predecessor_budgets.request_input_tokens` is raised from 32,000 to **64,000** tokens.
+   - *Rationale*: In v1.5-001, request input reached 24,449 tokens at Call 13. With `bounded-output/1.0` adding ~2,000–2,500 tokens of conversation history per tool turn, keeping `request_input_tokens` at 32,000 would have halted the agent around turn 16–17 prior to code modification. Raising the ceiling to 64,000 permits 25+ inspection turns while remaining well within `gpt-4.1`'s 128k native context limit.
+3. **Identical invariant baselines**:
+   - Task: `pydata__xarray-6721`
+   - Predecessor model: `openai/gpt-4.1-2025-04-14`
+   - Successor model: `openai/gpt-4.1-2025-04-14`
+   - Generation model: `openai/gpt-4.1-mini-2025-04-14`
+   - Tool bounding: `bounded-output/1.0` (8,192 byte command output cap, 25 changed paths cap, 12,288 byte payload cap)
+   - Successor budgets: 64 calls, 360,000 total tokens, 32,000 request input tokens
+4. **Budget & spending envelope under $10 cap**:
+   - Predecessor maximum cost (400,000 tokens): **$1.4593** (from $0.9973 in v1.5).
+   - Single-request pre-call admission reservation headroom (64k input + 2k output): **$0.1516** (from $0.0844).
+   - Combined five-way settled maximum conservative envelope: **$9.4003** <= **$10.00**.
+   - Worst-case in-flight envelope including reservation: **$9.5519** <= **$10.00**.
+   - Preserves **$0.4481** safety margin beneath the strict $10.00 cap.

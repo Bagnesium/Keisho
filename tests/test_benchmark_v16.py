@@ -23,17 +23,18 @@ class Version16Tests(unittest.TestCase):
                                    'experiment_manifest', 'experiment_manifest_sha256'})
         self.assertEqual(digest(self.config), c.V16_SPEC_SHA)
 
-        # Check that ONLY total_tokens changed within predecessor_budgets
+        # Check that ONLY total_tokens and request_input_tokens changed within predecessor_budgets
         budget_changed = {k for k in self.config['predecessor_budgets'].keys() | self.prior['predecessor_budgets'].keys()
                           if self.config['predecessor_budgets'].get(k) != self.prior['predecessor_budgets'].get(k)}
-        self.assertEqual(budget_changed, {'total_tokens'})
+        self.assertEqual(budget_changed, {'total_tokens', 'request_input_tokens'})
         self.assertEqual(self.config['predecessor_budgets']['total_tokens'], 400000)
         self.assertEqual(self.prior['predecessor_budgets']['total_tokens'], 180000)
+        self.assertEqual(self.config['predecessor_budgets']['request_input_tokens'], 64000)
+        self.assertEqual(self.prior['predecessor_budgets']['request_input_tokens'], 32000)
 
         # Invariant limits
         self.assertEqual(self.config['predecessor_budgets']['model_calls'], 48)
         self.assertEqual(self.config['predecessor_budgets']['tool_calls'], 36)
-        self.assertEqual(self.config['predecessor_budgets']['request_input_tokens'], 32000)
         self.assertEqual(self.config['predecessor_budgets']['context_tokens'], 128000)
         self.assertEqual(self.config['predecessor_budgets']['output_tokens'], 2048)
 
@@ -55,7 +56,7 @@ class Version16Tests(unittest.TestCase):
                                                 'KEISHO_2K', 'STRUCTURED_NOTES_2K'])
         self.assertTrue(plan['plausibly_fits'])
         self.assertEqual(plan['total_envelope_usd'], '9.40033920')
-        self.assertEqual(plan['largest_request_reservation_usd'], '0.0844032')
+        self.assertEqual(plan['largest_request_reservation_usd'], '0.1516032')
 
     def test_pending_binding_never_calls_preflight_or_claims_guard(self):
         with tempfile.TemporaryDirectory() as t:
@@ -82,6 +83,7 @@ class Version16Tests(unittest.TestCase):
             self.assertTrue(out['dry_run'])
             self.assertEqual(out['tool_output_policy'], 'bounded-output/1.0')
             self.assertEqual(self.config['predecessor_budgets']['total_tokens'], 400000)
+            self.assertEqual(self.config['predecessor_budgets']['request_input_tokens'], 64000)
             self.assertEqual(out['cost_envelope_usd'], '9.40033920')
             self.assertFalse(out['guard_created'])
 

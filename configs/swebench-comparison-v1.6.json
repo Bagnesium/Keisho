@@ -33,7 +33,7 @@
     "tool_calls": 36,
     "output_tokens": 2048,
     "total_tokens": 400000,
-    "request_input_tokens": 32000,
+    "request_input_tokens": 64000,
     "context_tokens": 128000
   },
   "successor_budgets": {
@@ -80,5 +80,5 @@
   "patch_export_policy": "source-and-artifacts/2.0",
   "tool_output_policy": "bounded-output/1.0",
   "experiment_manifest": "analysis/swebench-experiment-v1.6-manifest.json",
-  "experiment_manifest_sha256": "b950db5c507655380b95fe5f42815305f4ab17cf9985ed26b5d160095ec31779"
+  "experiment_manifest_sha256": "61b46c1b3c84431ad9067cd43c93187c190365126272dd25556390a14905031d"
 }

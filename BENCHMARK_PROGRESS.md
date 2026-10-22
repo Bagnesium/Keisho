@@ -15,18 +15,23 @@
    the run stopped deterministically before issuing an edit/test action. All five successors unstarted.
    Reconciled reservations: $0.00.
 
-**v1.6 prospective specification defined:**
-1. Predecessor total token ceiling raised: `predecessor_budgets.total_tokens` raised from 180,000 to
-   **400,000** tokens. All other limits strictly unchanged (`model_calls: 48`, `request_input_tokens: 32000`,
-   `context_tokens: 128000`, `output_tokens: 2048`, `time_limit_seconds: 1800`, `bounded-output/1.0`,
-   `gpt-4.1`, task `pydata__xarray-6721`, and all successor budgets).
-2. Binding limit analysis: With bounded outputs (~2,000-2,500 tokens/turn), the trajectory will reach the
-   unchanged 32,000 `request_input_tokens` ceiling around turn 16-17 if no edit is formulated.
-3. Cost envelope under $10 cap: Predecessor max envelope is $1.4593. Combined five-way maximum envelope
-   is **$9.4003** + **$0.0844** reservation headroom = **$9.4847**, leaving **$0.5153** margin under the $10.00 cap.
-4. Frozen config `configs/swebench-comparison-v1.6.json` (SHA `9fa31697e8afb50662828e1eaaa87041e13eba900db1bea61c9576becb0aca25`),
-   matched plan `analysis/swebench-comparison-v1.6-plan.json` (SHA `535437f6c108afa78323050d9cac13633ac679ad48d01b528f454b96188a62c9`),
-   84-component manifest `analysis/swebench-experiment-v1.6-manifest.json` (SHA `b950db5c507655380b95fe5f42815305f4ab17cf9985ed26b5d160095ec31779`).
+**v1.6 prospective specification amended:**
+1. Predecessor token ceilings raised:
+   - `predecessor_budgets.total_tokens` raised from 180,000 to **400,000** tokens.
+   - `predecessor_budgets.request_input_tokens` raised from 32,000 to **64,000** tokens.
+   - Rationale: In v1.5-001, request input reached 24,449 tokens at Call 13. With `bounded-output/1.0` adding
+     ~2,000–2,500 tokens of cumulative conversation history per tool turn, keeping `request_input_tokens` at 32,000
+     would have halted the agent around turn 16–17 prior to code modification. Raising the ceiling to 64,000
+     permits 25+ inspection turns while remaining well within `gpt-4.1`'s 128k native context limit.
+   - All other limits strictly unchanged (`model_calls: 48`, `tool_calls: 36`, `context_tokens: 128000`,
+     `output_tokens: 2048`, `time_limit_seconds: 1800`, `bounded-output/1.0`, `gpt-4.1`, task `pydata__xarray-6721`,
+     and all successor budgets).
+2. Cost envelope under $10 cap: Predecessor max envelope is $1.4593. Combined five-way settled maximum envelope
+   is **$9.4003**. With single-request reservation headroom of **$0.1516** (64k input + 2k output), worst-case
+   in-flight envelope is **$9.5519**, preserving **$0.4481** margin under the $10.00 cap.
+3. Frozen config `configs/swebench-comparison-v1.6.json` (SHA `64fa6d56bb0af4317be2696d8a6fc183a720ac73a960f73e113eda95430adf23`),
+   matched plan `analysis/swebench-comparison-v1.6-plan.json` (SHA `47b209c9fe95f7a14031303d081828876c6fd8cd8166ceb23b1202eb46993b40`),
+   84-component manifest `analysis/swebench-experiment-v1.6-manifest.json` (SHA `61b46c1b3c84431ad9067cd43c93187c190365126272dd25556390a14905031d`).
 
 # Keisho benchmark progress — v1.4 live run 001 recorded; prospective v1.5 defined 2026-10-22
 
