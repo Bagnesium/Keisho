@@ -1,0 +1,14 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "swebench-v1.7-20261022-once-001",
+  "recorded_at_utc": "2026-10-22T15:15:00.000000+00:00",
+  "config_sha256": "223dea1177052e81aa766d10755f5f38051f26217ea7ebf466980097c005ac10",
+  "plan_sha256": "b0078bc06e620df26694dada8c7a68aea9672c819d40dd1af58fd1d369c360fe",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": true,
+  "automatic_retries": 0,
+  "models_or_provider_fallbacks": false,
+  "user_authorization": "I approve the v1.7 five-way run on sympy__sympy-20590, dollar cap $10. Disclosed prior failed runs: v1.4-001 ($0.016), v1.5-001 ($0.113), v1.6-001 ($0.127), all stopped before any successor ran. Re-check current model pricing and show me the estimate, then launch with --approve-live and --dollar-cap 10, no automatic retries, stop immediately at the cap. Do not change code. Commit only the authorization file locally, do not push. Do not poll in a loop, check once when it finishes. Report per-condition results, official evaluation outcome, total spend, OBSERVED vs HYPOTHESIS.",
+  "note": "Fresh explicit user authorization for one bounded five-way SWE-bench v1.7 comparison block on sympy__sympy-20590. Dollar cap $10.00. Automatic retries: 0. Fallbacks disabled. Predecessor total tokens: 400,000, request input tokens: 64,000. Successor request input tokens: 64,000."
+}
