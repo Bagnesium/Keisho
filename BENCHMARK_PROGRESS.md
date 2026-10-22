@@ -1,3 +1,28 @@
+# Keisho benchmark progress — v1.4 live run 001 recorded; prospective v1.5 defined 2026-10-22
+
+**v1.4 live attempt 001 halted at predecessor (checkpoint_not_reached); spend $0.0164.**
+Authorized under a $10.00 cap, run `runs/swebench-v1.4-five-way-once-001` executed 6 model calls
+and 6 Docker tool actions with `openai/gpt-4.1-mini-2025-04-14`. The model created a standalone
+reproduction script `fix_xarray_chunks.py` generating an uncompressed Zarr store with 202 chunk
+files. Unbounded inventory tracking in Keisho recorded all 202 paths and hashes in the tool
+result, expanding the payload to 41,253 bytes (~17,997 tokens). On Call 7 admission, projected
+request input tokens exceeded the 32,000 ceiling (`request_input_tokens`), triggering a
+deterministic stop (`reason: budget_exhausted`). Because zero edits were made to `xarray/`,
+no checkpoint was eligible. All five successor conditions (`FULL_HISTORY`, `SUMMARY_2K`,
+`REPOSITORY_ONLY`, `KEISHO_2K`, `STRUCTURED_NOTES_2K`) remained unstarted and ungraded.
+Actual provider spend was $0.0164184 (noncached accounted: $0.0257496); unreconciled reservations $0.
+No automatic retries, guard resets, or code edits were performed.
+
+**v1.5 prospective specification defined:**
+1. Tool bounding policy `bounded-output/1.0`: raw command output truncated at 8,192 bytes with
+   explicit metadata; changed paths in conversational tool results bounded at 25 entries;
+   total serialized tool result payload capped at 12,288 bytes (~3,000 tokens).
+2. Predecessor model upgraded to `openai/gpt-4.1-2025-04-14` (aligned with successors).
+3. Frozen config `configs/swebench-comparison-v1.5.json` (SHA `cb389a1a7a7fed8bc45bf82e931976ab852cb4df607c4184f768de1bd1079d0a`),
+   matched plan `analysis/swebench-comparison-v1.5-plan.json` (SHA `ba04d2a92d8970242cbe4bf0c761af8d7d9c5fa2160c833ddaad3ba0a4117b24`),
+   84-component manifest `analysis/swebench-experiment-v1.5-manifest.json` (SHA `b9a56b9e82e5c3bf2508f505dd06449fe3221df80f652a2ec19f3689b1e2d1fa`).
+   Total envelope $8.93833920 plus $0.08440320 reservation = $9.02274240 <= $10.00 cap.
+
 # Keisho benchmark progress — offline v1.4 research freeze complete 2026-10-11
 
 **All four offline workstreams completed; new provider usage $0.** Added shared

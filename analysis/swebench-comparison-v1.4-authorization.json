@@ -1,0 +1,14 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "swebench-v1.4-20261022-once-001",
+  "recorded_at_utc": "2026-10-22T12:37:30.000000+00:00",
+  "config_sha256": "e6a5ad8c56043924890b393363cee457ae88b6e7dbf14d6a1fa97f2ac4a14b2f",
+  "plan_sha256": "60cb7044d642bb37234a5b01d8e096a74474de023bd450d585553ea46c49e2ff",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": true,
+  "automatic_retries": 0,
+  "models_or_provider_fallbacks": false,
+  "user_authorization": "I approve the five-way run, dollar cap $10. Re-check current model pricing first and show me the cost estimate. Then launch with --approve-live and --dollar-cap 10, no automatic retries, stop immediately at the cap. Report: per-condition results, total spend, and which numbers are OBSERVED vs HYPOTHESIS. Do not push or change code.",
+  "note": "Fresh explicit user authorization for one bounded five-way SWE-bench comparison block. Dollar cap $10.00. Automatic retries: 0. Fallbacks disabled."
+}

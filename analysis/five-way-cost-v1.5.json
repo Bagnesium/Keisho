@@ -1,0 +1,60 @@
+{
+  "version": "five-way-cost/1.5",
+  "prepared_date": "2026-10-22",
+  "offline_only": true,
+  "provider_requests": 0,
+  "spending_authorized": false,
+  "experiment_config": "configs/swebench-comparison-v1.5.json",
+  "experiment_config_keisho_digest": "cb389a1a7a7fed8bc45bf82e931976ab852cb4df607c4184f768de1bd1079d0a",
+  "matched_launch_plan": "analysis/swebench-comparison-v1.5-plan.json",
+  "matched_launch_plan_keisho_digest": "ba04d2a92d8970242cbe4bf0c761af8d7d9c5fa2160c833ddaad3ba0a4117b24",
+  "runtime_manifest": "analysis/swebench-experiment-v1.5-manifest.json",
+  "runtime_manifest_keisho_digest": "b9a56b9e82e5c3bf2508f505dd06449fe3221df80f652a2ec19f3689b1e2d1fa",
+  "pricing_evidence": {
+    "source": "OpenRouter live catalog check",
+    "checked_at_utc": "2026-10-22T12:36:03+00:00",
+    "authenticated": false,
+    "public_source": "https://openrouter.ai/api/v1/models"
+  },
+  "rates_usd_per_million": {
+    "openai/gpt-4.1-mini-2025-04-14": {"input": "0.40", "cached_input": "0.10", "output": "1.60"},
+    "openai/gpt-4.1-2025-04-14": {"input": "2.00", "cached_input": "0.50", "output": "8.00"}
+  },
+  "cache_discounts_assumed": false,
+  "conservative_multiplier": "1.05",
+  "expected_scenario": {
+    "interpretation": "Illustrative utilization assumptions, not an empirically established forecast",
+    "predecessor": {"model": "openai/gpt-4.1-2025-04-14", "calls": 12, "input_tokens": 96000, "output_tokens": 12000, "cost_usd": "0.302400"},
+    "summary_generation": {"model": "openai/gpt-4.1-mini-2025-04-14", "calls": 1, "input_tokens": 12000, "output_tokens": 1000, "cost_usd": "0.006720"},
+    "structured_generation": {"model": "openai/gpt-4.1-mini-2025-04-14", "calls": 1, "input_tokens": 12000, "output_tokens": 1200, "cost_usd": "0.007056"},
+    "keisho_compilation": {"calls": 0, "input_tokens": 0, "output_tokens": 0, "cost_usd": "0"},
+    "each_successor": {"model": "openai/gpt-4.1-2025-04-14", "calls": 20, "input_tokens": 200000, "output_tokens": 20000, "cost_usd": "0.588000"},
+    "successor_count": 5,
+    "total_calls": 114,
+    "total_input_tokens": 1120000,
+    "total_output_tokens": 114200,
+    "total_cost_usd": "3.256176"
+  },
+  "conservative_maximum": {
+    "formula": "O=min(total_tokens,model_calls*output_cap); cost=1.05*((total_tokens-O)*input_rate+O*output_rate)/1000000",
+    "predecessor": {"calls": 48, "total_tokens": 180000, "input_tokens_at_maximum": 81696, "output_tokens_at_maximum": 98304, "cost_usd": "0.99731520"},
+    "summary_generation": {"calls": 1, "input_tokens": 32000, "output_tokens": 1600, "cost_usd": "0.01612800"},
+    "structured_generation": {"calls": 1, "input_tokens": 32000, "output_tokens": 1600, "cost_usd": "0.01612800"},
+    "keisho_compilation": {"calls": 0, "input_tokens": 0, "output_tokens": 0, "cost_usd": "0"},
+    "each_successor": {"calls": 64, "total_tokens": 360000, "input_tokens_at_maximum": 228928, "output_tokens_at_maximum": 131072, "cost_usd": "1.58175360"},
+    "successor_count": 5,
+    "total_calls": 370,
+    "total_tool_calls": 276,
+    "total_cost_usd": "8.93833920",
+    "largest_request_reservation_usd": "0.08440320",
+    "envelope_plus_reservation_usd": "9.02274240",
+    "reservation_is_extra_charge": false
+  },
+  "proposed_total_cap_usd": "10.00",
+  "tool_bounding_policy": "bounded-output/1.0",
+  "tool_bounding_rules": {
+    "max_command_output_bytes": 8192,
+    "max_changed_paths": 25,
+    "max_tool_result_bytes": 12288
+  }
+}
