@@ -26,12 +26,12 @@
    - All other limits strictly unchanged (`model_calls: 48`, `tool_calls: 36`, `context_tokens: 128000`,
      `output_tokens: 2048`, `time_limit_seconds: 1800`, `bounded-output/1.0`, `gpt-4.1`, task `pydata__xarray-6721`,
      and all successor budgets).
-2. Cost envelope under $10 cap: Predecessor max envelope is $1.4593. Combined five-way settled maximum envelope
-   is **$9.4003**. With single-request reservation headroom of **$0.1516** (64k input + 2k output), worst-case
-   in-flight envelope is **$9.5519**, preserving **$0.4481** margin under the $10.00 cap.
-3. Frozen config `configs/swebench-comparison-v1.6.json` (SHA `64fa6d56bb0af4317be2696d8a6fc183a720ac73a960f73e113eda95430adf23`),
-   matched plan `analysis/swebench-comparison-v1.6-plan.json` (SHA `47b209c9fe95f7a14031303d081828876c6fd8cd8166ceb23b1202eb46993b40`),
-   84-component manifest `analysis/swebench-experiment-v1.6-manifest.json` (SHA `61b46c1b3c84431ad9067cd43c93187c190365126272dd25556390a14905031d`).
+2. Cost envelope under $10 cap: Predecessor max envelope is $1.4593, note generation at 64k bound is $0.0591. Combined
+   five-way settled maximum envelope is **$9.4272**. With single-request reservation headroom of **$0.1516** (64k input + 2k output),
+   worst-case in-flight envelope is **$9.5788**, preserving **$0.4212** margin under the $10.00 cap.
+3. Frozen config `configs/swebench-comparison-v1.6.json` (SHA `1e75c745e1179f9050858534c98eeeef0014f29c82163f52fac8ef485a84b0f8`),
+   matched plan `analysis/swebench-comparison-v1.6-plan.json` (SHA `a72ce6ede1559f04bfc5d6e90ed3c39594a1c281f80b496f2e7d53ea0a19c322`),
+   84-component manifest `analysis/swebench-experiment-v1.6-manifest.json` (SHA `a14ba06811ac1bdf5abb50745b81076a15b57fd2789fa857c2b6e7cf81d54ce6`).
 
 # Keisho benchmark progress — v1.4 live run 001 recorded; prospective v1.5 defined 2026-10-22
 

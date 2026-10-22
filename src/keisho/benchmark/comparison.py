@@ -47,8 +47,8 @@ READINESS_SPEC_SHA = 'e6a5ad8c56043924890b393363cee457ae88b6e7dbf14d6a1fa97f2ac4
 READINESS_PLAN_SHA = '60cb7044d642bb37234a5b01d8e096a74474de023bd450d585553ea46c49e2ff'
 V15_SPEC_SHA = 'cb389a1a7a7fed8bc45bf82e931976ab852cb4df607c4184f768de1bd1079d0a'
 V15_PLAN_SHA = 'ba04d2a92d8970242cbe4bf0c761af8d7d9c5fa2160c833ddaad3ba0a4117b24'
-V16_SPEC_SHA = '64fa6d56bb0af4317be2696d8a6fc183a720ac73a960f73e113eda95430adf23'
-V16_PLAN_SHA = '47b209c9fe95f7a14031303d081828876c6fd8cd8166ceb23b1202eb46993b40'
+V16_SPEC_SHA = '1e75c745e1179f9050858534c98eeeef0014f29c82163f52fac8ef485a84b0f8'
+V16_PLAN_SHA = 'a72ce6ede1559f04bfc5d6e90ed3c39594a1c281f80b496f2e7d53ea0a19c322'
 
 SYSTEM = '''You are a coding agent in an isolated repository at /testbed. Solve the original issue.
 Use only the issue and available repository/evidence. Test important changes with public tests.
@@ -295,7 +295,7 @@ def make_handoffs(task, predecessor, inventory, base_inventory, note_models, con
         messages = tuple(Message(m['role'], m['content']) for m in generation_messages(kind, evidence, adapter_version, deterministic))
         request = ModelRequest(messages, config['branch_seed'], config['generation_output_tokens'], 0.0)
         model = note_models(kind,audit=note_run) if observable_audit_enabled(config) else note_models(kind)
-        require(request_upper_bound(model, request) <= 32000, 'note evidence exceeds frozen input budget; no truncation')
+        require(request_upper_bound(model, request) <= 64000, 'note evidence exceeds frozen input budget; no truncation')
         response, call = logged_generate(model, request, recorder, kind, CallPurpose.SUMMARY, n)
         note_run.write_artifact(kind + '-call.json', call)
         require(response is not None and response.finish_reason == 'stop', 'note generation failed; no retry')
@@ -461,7 +461,8 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
         adapter = OpenRouterChatModel(identity, authorized=True, tokenizer=native, mode=mode, response_model_ids=allowed,
                  agent_response_format=output_format if mode == 'agent' else None,
                  transport=transport)
-        return BudgetedModel(adapter, ledger, stage or role, identity)
+        input_cap = config.get(role + '_budgets', {}).get('request_input_tokens', 64000)
+        return BudgetedModel(adapter, ledger, stage or role, identity, input_cap=input_cap)
     def session_for(image,raw):
         if config.get('tool_output_policy') == 'bounded-output/1.0':
             from .bounded_output import BoundedRepositorySession

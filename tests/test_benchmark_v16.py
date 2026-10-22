@@ -55,7 +55,7 @@ class Version16Tests(unittest.TestCase):
         self.assertEqual(plan['branch_order'], ['FULL_HISTORY', 'SUMMARY_2K', 'REPOSITORY_ONLY',
                                                 'KEISHO_2K', 'STRUCTURED_NOTES_2K'])
         self.assertTrue(plan['plausibly_fits'])
-        self.assertEqual(plan['total_envelope_usd'], '9.40033920')
+        self.assertEqual(plan['total_envelope_usd'], '9.42721920')
         self.assertEqual(plan['largest_request_reservation_usd'], '0.1516032')
 
     def test_pending_binding_never_calls_preflight_or_claims_guard(self):
@@ -84,7 +84,7 @@ class Version16Tests(unittest.TestCase):
             self.assertEqual(out['tool_output_policy'], 'bounded-output/1.0')
             self.assertEqual(self.config['predecessor_budgets']['total_tokens'], 400000)
             self.assertEqual(self.config['predecessor_budgets']['request_input_tokens'], 64000)
-            self.assertEqual(out['cost_envelope_usd'], '9.40033920')
+            self.assertEqual(out['cost_envelope_usd'], '9.42721920')
             self.assertFalse(out['guard_created'])
 
 

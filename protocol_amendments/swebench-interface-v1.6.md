@@ -24,7 +24,8 @@ Two prior exploratory attempts failed to reach the predecessor checkpoint:
    - Successor budgets: 64 calls, 360,000 total tokens, 32,000 request input tokens
 4. **Budget & spending envelope under $10 cap**:
    - Predecessor maximum cost (400,000 tokens): **$1.4593** (from $0.9973 in v1.5).
+   - Note generation maximum cost (64,000 input ceiling, 2 calls): **$0.0591** (from $0.0323).
    - Single-request pre-call admission reservation headroom (64k input + 2k output): **$0.1516** (from $0.0844).
-   - Combined five-way settled maximum conservative envelope: **$9.4003** <= **$10.00**.
-   - Worst-case in-flight envelope including reservation: **$9.5519** <= **$10.00**.
-   - Preserves **$0.4481** safety margin beneath the strict $10.00 cap.
+   - Combined five-way settled maximum conservative envelope: **$9.4272** <= **$10.00**.
+   - Worst-case in-flight envelope including reservation: **$9.5788** <= **$10.00**.
+   - Preserves **$0.4212** safety margin beneath the strict $10.00 cap.

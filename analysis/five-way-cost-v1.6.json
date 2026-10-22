@@ -5,11 +5,11 @@
   "provider_requests": 0,
   "spending_authorized": false,
   "experiment_config": "configs/swebench-comparison-v1.6.json",
-  "experiment_config_keisho_digest": "64fa6d56bb0af4317be2696d8a6fc183a720ac73a960f73e113eda95430adf23",
+  "experiment_config_keisho_digest": "1e75c745e1179f9050858534c98eeeef0014f29c82163f52fac8ef485a84b0f8",
   "matched_launch_plan": "analysis/swebench-comparison-v1.6-plan.json",
-  "matched_launch_plan_keisho_digest": "47b209c9fe95f7a14031303d081828876c6fd8cd8166ceb23b1202eb46993b40",
+  "matched_launch_plan_keisho_digest": "a72ce6ede1559f04bfc5d6e90ed3c39594a1c281f80b496f2e7d53ea0a19c322",
   "runtime_manifest": "analysis/swebench-experiment-v1.6-manifest.json",
-  "runtime_manifest_keisho_digest": "61b46c1b3c84431ad9067cd43c93187c190365126272dd25556390a14905031d",
+  "runtime_manifest_keisho_digest": "a14ba06811ac1bdf5abb50745b81076a15b57fd2789fa857c2b6e7cf81d54ce6",
   "pricing_evidence": {
     "source": "OpenRouter live catalog check",
     "checked_at_utc": "2026-10-22T13:17:40+00:00",
@@ -83,15 +83,15 @@
     },
     "summary_generation": {
       "calls": 1,
-      "input_tokens": 32000,
+      "input_tokens": 64000,
       "output_tokens": 1600,
-      "cost_usd": "0.01612800"
+      "cost_usd": "0.02956800"
     },
     "structured_generation": {
       "calls": 1,
-      "input_tokens": 32000,
+      "input_tokens": 64000,
       "output_tokens": 1600,
-      "cost_usd": "0.01612800"
+      "cost_usd": "0.02956800"
     },
     "keisho_compilation": {
       "calls": 0,
@@ -109,17 +109,17 @@
     "successor_count": 5,
     "total_calls": 370,
     "total_tool_calls": 276,
-    "total_cost_usd": "9.40033920",
+    "total_cost_usd": "9.42721920",
     "largest_request_reservation_usd": "0.15160320",
-    "envelope_plus_reservation_usd": "9.55194240",
+    "envelope_plus_reservation_usd": "9.57882240",
     "reservation_is_extra_charge": false
   },
   "proposed_total_cap_usd": "10.00",
-  "margin_under_cap_usd": "0.44805760",
+  "margin_under_cap_usd": "0.42117760",
   "predecessor_budget_analysis": {
     "total_tokens": 400000,
     "model_calls_ceiling": 48,
     "request_input_tokens_ceiling": 64000,
-    "binding_constraint_note": "Request input tokens ceiling raised from 32,000 to 64,000 to prevent premature context saturation during repository inspection turns before checkpoint localization. With 64,000 ceiling, predecessor can comfortably execute 25+ tool inspection turns before hitting per-request input ceiling."
+    "binding_constraint_note": "Request input tokens ceiling raised to 64,000 across predecessor and note generation to prevent premature context saturation during repository inspection turns and handoff packaging. Spending control limit in spending.py line 38 relaxed to 64,000."
   }
 }

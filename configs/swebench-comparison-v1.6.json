@@ -80,5 +80,5 @@
   "patch_export_policy": "source-and-artifacts/2.0",
   "tool_output_policy": "bounded-output/1.0",
   "experiment_manifest": "analysis/swebench-experiment-v1.6-manifest.json",
-  "experiment_manifest_sha256": "61b46c1b3c84431ad9067cd43c93187c190365126272dd25556390a14905031d"
+  "experiment_manifest_sha256": "a14ba06811ac1bdf5abb50745b81076a15b57fd2789fa857c2b6e7cf81d54ce6"
 }

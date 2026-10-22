@@ -35,7 +35,7 @@ class SpendLedger:
     def reserve(self, stage, model_id, input_cap, output_cap, text_bound, request_sha256=None, *, api_metadata=None):
         if self.stopped:
             raise ProviderFailure("shared calibration spending control already stopped")
-        require(0 < text_bound <= input_cap <= 32000 and 0 < output_cap <= 2048, "request exceeds reserved token bounds")
+        require(0 < text_bound <= input_cap <= 64000 and 0 < output_cap <= 2048, "request exceeds reserved token bounds")
         rate_in, _, rate_out = self.prices[model_id]
         maximum = self.multiplier * (input_cap * rate_in + output_cap * rate_out) / Decimal(1_000_000)
         if self.accounted + self.held + maximum > self.cap:

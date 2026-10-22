@@ -75,7 +75,7 @@
     "src/keisho/pilot/runner.py": "4f94c2b9bf7dcc184ab35a69a56b2c602b549b071e88a8b147f82db6ae7869fb",
     "src/keisho/pilot/sandbox.py": "19dde2d1a344fe8dc67c491790cce003e4e2b734b7bf4f92b20bf248ff57df48",
     "src/keisho/pilot/scoring.py": "b96aded811f4c522ff98c40d1ddf3050b446d31a9213f17d6ea6f90be945cbaf",
-    "src/keisho/pilot/spending.py": "27eb677b8857fb43482988a0f72e9f8c539e867b9043d4f86ff212e4e17d3adc",
+    "src/keisho/pilot/spending.py": "52f640731ae9e86ff96a81b538c7f45ac526c89bc4e6ae47f98d29a72ba0daca",
     "src/keisho/pilot/state_builder.py": "6ebdefdedf1a52a60568c08292f7ee7662555c280c3e134ac1e54983dda7396a",
     "src/keisho/pilot/tasks.py": "d053d95fc900d7d985cf95ea421403e19fb05cc005070509cf62cb23fcea2a11",
     "src/keisho/pilot/token_audit.py": "3dac06593338286237f60aae8f3793bc45966f36c8876ff327c0f1493ec7a761",
