@@ -55,6 +55,8 @@ V17_SELECTION_PLAN_SHA = '848c1c5acd0445054919442e3a9a37010ea3f41868a4038677eeab
 V17_IMAGE_METADATA_SHA = '4b24ae2fc9dcd55db675db37a2723ca6af62a94dd3377389d28a3a37c1f61d68'
 V18_SPEC_SHA = '36f640ca8d78c64cacc63cb4294ba375ff871feb9bddc0ecb77eaa26c8255fe1'
 V18_PLAN_SHA = 'f1a92e0d7a35b6f9fed6fb3064537e272b71284400b084f878c7f2d374593f38'
+V19_SPEC_SHA = '22b651027c1b07f3787f9b8f96e4b18a4e65f62f530b60392b3478689257e6d5'
+V19_PLAN_SHA = '3575f9bc53998a5f0638ec96ce9fe8a78268ec99a09d493c9f76cc6d38a3adfd'
 
 SYSTEM = '''You are a coding agent in an isolated repository at /testbed. Solve the original issue.
 Use only the issue and available repository/evidence. Test important changes with public tests.
@@ -84,10 +86,13 @@ Request another page or a narrower prefix to discover further paths. Exact uncha
 Cursors become stale after repository changes; restart the listing when told so. Listing names do not establish file contents or task completion.
 '''
 SYSTEM_V4 = SYSTEM_V3 + ANNOTATION_GUIDANCE
+WORKFLOW_GUIDANCE = '''Workflow: 1. Read the issue and locate the relevant code with targeted shell searches (grep, head) instead of reading whole modules. 2. Reproduce the problem with a short script or an existing test when practical. 3. Make the smallest edit that fixes it; make your first edit by turn 12. 4. Run the relevant public tests. 5. When tests pass, call finish with a short summary. Do not spend more than a third of your budget exploring.
+'''
+SYSTEM_V5 = SYSTEM_V4 + WORKFLOW_GUIDANCE
 
 
 def observable_audit_enabled(config):
-    return config.get('agent_prompt_version') in ('benchmark-agent/3.0', 'benchmark-agent/4.0')
+    return config.get('agent_prompt_version') in ('benchmark-agent/3.0', 'benchmark-agent/4.0', 'benchmark-agent/5.0')
 
 
 def response_settings(config):
@@ -95,6 +100,23 @@ def response_settings(config):
     require(policy in (STRICT, AUXILIARY), 'unsupported benchmark response policy')
     if policy == STRICT:
         return SYSTEM, policy, None
+    if config.get('agent_prompt_version') == 'benchmark-agent/5.0':
+        require(config.get('annotation_guidance_version') == ANNOTATION_GUIDANCE_VERSION
+            and config.get('annotation_guidance_sha256') == digest(ANNOTATION_GUIDANCE)
+            and config.get('agent_prompt_sha256') == digest(SYSTEM_V5), 'version-5 agent prompt pin changed')
+        require(config.get('action_wire_version') == 'flat-or-args/1.0'
+            and config.get('action_contract_version') == '4.0'
+            and config.get('internal_action_contract_version') == '3.0'
+            and config.get('internal_action_contract_sha256') == digest(agent_response_format('3.0')['json_schema']['schema'])
+            and config.get('action_contract_sha256') == digest(agent_response_format('4.0')['json_schema']['schema'])
+            and config.get('agent_output_format') == 'json_object/3.0'
+            and config.get('agent_output_format_sha256') == digest({'type':'json_object'})
+            and config.get('listing_policy') == 'bounded-listing/1.0'
+            and config.get('execution_contract_version') in ('agent-runtime/3.2', 'agent-runtime/3.3')
+            and config.get('patch_export_policy') == 'source-and-artifacts/2.0', 'version-5 shared interface changed')
+        if config.get('tool_output_policy'):
+            require(config['tool_output_policy'] == 'bounded-output/1.0', 'version-5 tool output policy changed')
+        return SYSTEM_V5, policy, None
     if config.get('agent_prompt_version') == 'benchmark-agent/4.0':
         require(config.get('annotation_guidance_version') == ANNOTATION_GUIDANCE_VERSION
             and config.get('annotation_guidance_sha256') == digest(ANNOTATION_GUIDANCE)
@@ -163,14 +185,14 @@ def load_frozen_plan(config_path=None, plan_path=None):
         supported = {SPEC_SHA: PLAN_SHA, NEXT_SPEC_SHA: NEXT_PLAN_SHA, WIRE_SPEC_SHA: WIRE_PLAN_SHA,
                      READINESS_SPEC_SHA: READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                      V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
-                     V18_SPEC_SHA: V18_PLAN_SHA}
+                     V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA}
         require(digest(config) in supported, 'configuration differs from frozen supported specification')
         expected_plan = supported[digest(config)]
         require(digest(plan) == expected_plan, 'plan differs from matched frozen plan')
         require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
         sel_file = (PRESELECT / f"{task_instance}-plan.json") if task_instance and (PRESELECT / f"{task_instance}-plan.json").exists() else (PRESELECT / 'plan.json')
         selection = read_input(sel_file)
-        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA) else SELECTION_PLAN_SHA
+        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA) else SELECTION_PLAN_SHA
         require(digest(selection) == expected_sel_sha, 'frozen selection/order changed')
         require(selection['task_sha256'] == digest(task) and task['instance_id'] == config['selected_instance'], 'selected task changed')
         require(selection['branch_order'] == random.Random(config['branch_seed']).sample(config['conditions'], len(config['conditions'])), 'branch order changed')
@@ -179,7 +201,7 @@ def load_frozen_plan(config_path=None, plan_path=None):
     require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
     require(plan['plausibly_fits'] and config['selection']['count'] == 1, 'one comparison must fit cap')
     require(config['automatic_retries'] == 0, 'no automatic paid retries')
-    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA):
+    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA):
         from .experiment_freeze import validate_freeze
         validate_freeze(config, ROOT)
     return config, task, plan
@@ -228,11 +250,11 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
     response_settings(config)
     authorization = read_input(authorization_path)
     require(authorization['cap_usd'] == config['cap_usd'] == '10.00', 'authorization cap changed')
-    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA):
+    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA):
         expected_plan = {NEXT_SPEC_SHA:NEXT_PLAN_SHA, WIRE_SPEC_SHA:WIRE_PLAN_SHA,
                          READINESS_SPEC_SHA:READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                          V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
-                         V18_SPEC_SHA: V18_PLAN_SHA}[digest(config)]
+                         V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA}[digest(config)]
         require(authorization.get('version')=='swebench-authorization/2.0' and
             authorization.get('config_sha256')==digest(config) and authorization.get('plan_sha256')==expected_plan and
             authorization.get('attempts')==1 and isinstance(authorization.get('authorization_id'),str) and authorization['authorization_id'].strip(),

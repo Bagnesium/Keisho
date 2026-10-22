@@ -1,3 +1,45 @@
+# Keisho benchmark progress — v1.8 live run 001 recorded; prospective v1.9 defined 2026-10-22
+
+**Five predecessor failures recorded and disclosed; all twenty-five successor conditions unstarted:**
+1. **v1.4 attempt 001 (`runs/swebench-v1.4-five-way-once-001`, $0.0164 spend)**:
+   Halted at Call 6 (`reason: budget_exhausted`). `openai/gpt-4.1-mini-2025-04-14` created an
+   uncompressed Zarr array generating 202 chunk files. Unbounded inventory metadata (41 KB / 18k tokens)
+   flooded the conversational context, exceeding the 32,000 request input ceiling on Call 7 without
+   touching `xarray/`. All five successors unstarted.
+2. **v1.5 attempt 001 (`runs/swebench-v1.5-five-way-once-001`, $0.1129 spend)**:
+   Halted at Call 13 (`reason: budget_exhausted`). With `bounded-output/1.0` active and predecessor
+   aligned to `openai/gpt-4.1-2025-04-14`, the predecessor accurately inspected xarray formatting logic
+   but exhausted its 180,000 total token budget before completing a patch. Successors unstarted.
+3. **v1.6 attempt 001 (`runs/swebench-v1.6-five-way-once-001`, $0.1272 spend)**:
+   Halted at Call 10 (`reason: budget_exhausted`). Predecessor request input exceeded the 32,000
+   request input ceiling on Call 11 while total token budget remained under 140,000 tokens. Successors unstarted.
+4. **v1.7 attempt 001 (`runs/swebench-v1.7-five-way-once-001`, $0.0342 spend)**:
+   Halted at Call 8 (`reason: invalid_run`). Predecessor attempted `read_file` on `sympy/core/atomic.py`
+   (SymPy module is named `sympy/core/atom.py`). Container `cat` returned exit 1, raising fatal `InvalidAction('read failed')`.
+   All five successors unstarted.
+5. **v1.8 attempt 001 (`runs/swebench-v1.8-five-way-once-001`, $0.2541 actual / $0.7777 accounted spend)**:
+   Halted at Call 22 (`reason: budget_exhausted`). Predecessor successfully recovered from non-fatal missing file
+   observations (`atom.py` and `atomic.py` on Calls 10-11) and an invalid-parameter wire rejection on Call 20.
+   However, lacking pacing guidance, the model spent all 22 calls reading inheritance chains without attempting a source
+   modification or executing tests, exhausting its 400,000 token budget before triggering the checkpoint. All five successors unstarted.
+
+**v1.9 prospective specification defined:**
+1. **Workflow guidance in system prompt (`benchmark-agent/5.0`)**:
+   - Agent prompt updated to `SYSTEM_V5` (SHA `bcede4362a8ba0c4e8cfb2104f87ad418eaee92923f7d1f7fe522af01005c5fe`) across predecessor and all 5 conditions.
+   - Appends verbatim workflow pacing guidance: targeted shell search, reproduce problem, make smallest edit by turn 12, test, finish, limit exploration to 1/3 budget.
+2. **Byte-identical claims and interface invariants**:
+   - `auxiliary-claims/2.0` claims rules, tool definitions, listing policy, and output formatting remain strictly byte-identical to `SYSTEM_V4`.
+3. **Budgets, models, and cost envelope under $10 cap**:
+   - Task: `sympy__sympy-20590`.
+   - Models: `openai/gpt-4.1-2025-04-14` across predecessor and successors; `openai/gpt-4.1-mini-2025-04-14` generation.
+   - First request upper bound: 2,380 tokens.
+   - Predecessor total tokens: 400,000. Request input token ceiling: 64,000.
+   - Settled maximum conservative envelope: **$9.4272** <= **$10.00**. Peak in-flight reservation: **$9.5788** ($0.4212 margin).
+4. **Frozen artifacts**:
+   - Config `configs/swebench-comparison-v1.9.json` (SHA `22b651027c1b07f3787f9b8f96e4b18a4e65f62f530b60392b3478689257e6d5`)
+   - Plan `analysis/swebench-comparison-v1.9-plan.json` (SHA `3575f9bc53998a5f0638ec96ce9fe8a78268ec99a09d493c9f76cc6d38a3adfd`)
+   - Manifest `analysis/swebench-experiment-v1.9-manifest.json` (SHA `214999165c2f1231d67bbc0a119a17a612c6e713971c1b370919652174116e5c`)
+
 # Keisho benchmark progress — v1.7 live run 001 recorded; prospective v1.8 defined 2026-10-22
 
 **Four predecessor failures recorded and disclosed; all twenty successor conditions unstarted:**
