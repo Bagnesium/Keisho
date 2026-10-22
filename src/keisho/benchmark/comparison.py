@@ -47,6 +47,8 @@ READINESS_SPEC_SHA = 'e6a5ad8c56043924890b393363cee457ae88b6e7dbf14d6a1fa97f2ac4
 READINESS_PLAN_SHA = '60cb7044d642bb37234a5b01d8e096a74474de023bd450d585553ea46c49e2ff'
 V15_SPEC_SHA = 'cb389a1a7a7fed8bc45bf82e931976ab852cb4df607c4184f768de1bd1079d0a'
 V15_PLAN_SHA = 'ba04d2a92d8970242cbe4bf0c761af8d7d9c5fa2160c833ddaad3ba0a4117b24'
+V16_SPEC_SHA = '9fa31697e8afb50662828e1eaaa87041e13eba900db1bea61c9576becb0aca25'
+V16_PLAN_SHA = '535437f6c108afa78323050d9cac13633ac679ad48d01b528f454b96188a62c9'
 
 SYSTEM = '''You are a coding agent in an isolated repository at /testbed. Solve the original issue.
 Use only the issue and available repository/evidence. Test important changes with public tests.
@@ -151,7 +153,8 @@ def load_frozen_plan(config_path=None, plan_path=None):
     plan = read_input(plan_path or PRESELECT / 'plan.json')
     if config_path is not None:
         supported = {SPEC_SHA: PLAN_SHA, NEXT_SPEC_SHA: NEXT_PLAN_SHA, WIRE_SPEC_SHA: WIRE_PLAN_SHA,
-                     READINESS_SPEC_SHA: READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA}
+                     READINESS_SPEC_SHA: READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
+                     V16_SPEC_SHA: V16_PLAN_SHA}
         require(digest(config) in supported, 'configuration differs from frozen supported specification')
         expected_plan = supported[digest(config)]
         require(digest(plan) == expected_plan, 'plan differs from matched frozen plan')
@@ -165,7 +168,7 @@ def load_frozen_plan(config_path=None, plan_path=None):
     require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
     require(plan['plausibly_fits'] and config['selection']['count'] == 1, 'one comparison must fit cap')
     require(config['automatic_retries'] == 0, 'no automatic paid retries')
-    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA):
+    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA):
         from .experiment_freeze import validate_freeze
         validate_freeze(config, ROOT)
     return config, task, plan
@@ -214,9 +217,10 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
     response_settings(config)
     authorization = read_input(authorization_path)
     require(authorization['cap_usd'] == config['cap_usd'] == '10.00', 'authorization cap changed')
-    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA):
+    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA):
         expected_plan = {NEXT_SPEC_SHA:NEXT_PLAN_SHA, WIRE_SPEC_SHA:WIRE_PLAN_SHA,
-                         READINESS_SPEC_SHA:READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA}[digest(config)]
+                         READINESS_SPEC_SHA:READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
+                         V16_SPEC_SHA: V16_PLAN_SHA}[digest(config)]
         require(authorization.get('version')=='swebench-authorization/2.0' and
             authorization.get('config_sha256')==digest(config) and authorization.get('plan_sha256')==expected_plan and
             authorization.get('attempts')==1 and isinstance(authorization.get('authorization_id'),str) and authorization['authorization_id'].strip(),

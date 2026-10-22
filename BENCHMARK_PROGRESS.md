@@ -1,3 +1,33 @@
+# Keisho benchmark progress — v1.5 live run 001 recorded; prospective v1.6 defined 2026-10-22
+
+**Two predecessor failures recorded and disclosed; all ten successor conditions unstarted:**
+1. **v1.4 attempt 001 (`runs/swebench-v1.4-five-way-once-001`, $0.0164 spend)**:
+   Halted at Call 6 (`reason: budget_exhausted`). `openai/gpt-4.1-mini-2025-04-14` created an
+   uncompressed Zarr array generating 202 chunk files. Unbounded inventory metadata (41 KB / 18k tokens)
+   flooded the conversational context, exceeding the 32,000 request input ceiling on Call 7 without
+   touching `xarray/`. All five successors unstarted.
+2. **v1.5 attempt 001 (`runs/swebench-v1.5-five-way-once-001`, $0.1129 spend)**:
+   Halted at Call 13 (`reason: budget_exhausted`). With `bounded-output/1.0` active and predecessor
+   upgraded to `openai/gpt-4.1-2025-04-14`, the agent navigated `xarray/core/` and inspected 5 major
+   modules (`dataset.py`, `common.py`, `variable.py`, `dataarray.py`, `indexing.py`). All 8 oversized
+   reads (up to 326 KB) were cleanly truncated to 8,192 bytes. However, cumulative token consumption
+   reached 166,195 tokens. Because Call 14 would exceed the frozen `budgets.total_tokens: 180,000` ceiling,
+   the run stopped deterministically before issuing an edit/test action. All five successors unstarted.
+   Reconciled reservations: $0.00.
+
+**v1.6 prospective specification defined:**
+1. Predecessor total token ceiling raised: `predecessor_budgets.total_tokens` raised from 180,000 to
+   **400,000** tokens. All other limits strictly unchanged (`model_calls: 48`, `request_input_tokens: 32000`,
+   `context_tokens: 128000`, `output_tokens: 2048`, `time_limit_seconds: 1800`, `bounded-output/1.0`,
+   `gpt-4.1`, task `pydata__xarray-6721`, and all successor budgets).
+2. Binding limit analysis: With bounded outputs (~2,000-2,500 tokens/turn), the trajectory will reach the
+   unchanged 32,000 `request_input_tokens` ceiling around turn 16-17 if no edit is formulated.
+3. Cost envelope under $10 cap: Predecessor max envelope is $1.4593. Combined five-way maximum envelope
+   is **$9.4003** + **$0.0844** reservation headroom = **$9.4847**, leaving **$0.5153** margin under the $10.00 cap.
+4. Frozen config `configs/swebench-comparison-v1.6.json` (SHA `9fa31697e8afb50662828e1eaaa87041e13eba900db1bea61c9576becb0aca25`),
+   matched plan `analysis/swebench-comparison-v1.6-plan.json` (SHA `535437f6c108afa78323050d9cac13633ac679ad48d01b528f454b96188a62c9`),
+   84-component manifest `analysis/swebench-experiment-v1.6-manifest.json` (SHA `b950db5c507655380b95fe5f42815305f4ab17cf9985ed26b5d160095ec31779`).
+
 # Keisho benchmark progress — v1.4 live run 001 recorded; prospective v1.5 defined 2026-10-22
 
 **v1.4 live attempt 001 halted at predecessor (checkpoint_not_reached); spend $0.0164.**
