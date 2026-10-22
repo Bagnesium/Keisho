@@ -1,3 +1,52 @@
+# Keisho benchmark progress — v1.9 live run 001 recorded; prospective v2.0 defined 2026-10-22
+
+**Six predecessor failures recorded and disclosed; all thirty successor conditions unstarted:**
+1. **v1.4 attempt 001 (`runs/swebench-v1.4-five-way-once-001`, $0.0164 spend)**:
+   Halted at Call 6 (`reason: budget_exhausted`). `openai/gpt-4.1-mini-2025-04-14` created an
+   uncompressed Zarr array generating 202 chunk files. Unbounded inventory metadata (41 KB / 18k tokens)
+   flooded the conversational context, exceeding the 32,000 request input ceiling on Call 7 without
+   touching `xarray/`. All five successors unstarted.
+2. **v1.5 attempt 001 (`runs/swebench-v1.5-five-way-once-001`, $0.1129 spend)**:
+   Halted at Call 13 (`reason: budget_exhausted`). With `bounded-output/1.0` active and predecessor
+   aligned to `openai/gpt-4.1-2025-04-14`, the predecessor accurately inspected xarray formatting logic
+   but exhausted its 180,000 total token budget before completing a patch. Successors unstarted.
+3. **v1.6 attempt 001 (`runs/swebench-v1.6-five-way-once-001`, $0.1272 spend)**:
+   Halted at Call 10 (`reason: budget_exhausted`). Predecessor request input exceeded the 32,000
+   request input ceiling on Call 11 while total token budget remained under 140,000 tokens. Successors unstarted.
+4. **v1.7 attempt 001 (`runs/swebench-v1.7-five-way-once-001`, $0.0342 spend)**:
+   Halted at Call 8 (`reason: invalid_run`). Predecessor attempted `read_file` on `sympy/core/atomic.py`
+   (SymPy module is named `sympy/core/atom.py`). Container `cat` returned exit 1, raising fatal `InvalidAction('read failed')`.
+   All five successors unstarted.
+5. **v1.8 attempt 001 (`runs/swebench-v1.8-five-way-once-001`, $0.2541 actual / $0.7777 accounted spend)**:
+   Halted at Call 22 (`reason: budget_exhausted`). Predecessor successfully recovered from non-fatal missing file
+   observations (`atom.py` and `atomic.py` on Calls 10-11) and an invalid-parameter wire rejection on Call 20.
+   However, lacking pacing guidance, the model spent all 22 calls reading inheritance chains without attempting a source
+   modification or executing tests, exhausting its 400,000 token budget before triggering the checkpoint. All five successors unstarted.
+6. **v1.9 attempt 001 (`runs/swebench-v1.9-five-way-once-001`, $0.7397 spend)**:
+   Halted at Call 29 (`reason: finished`, `checkpoint_not_reached`). With `benchmark-agent/5.0` workflow pacing guidance,
+   `openai/gpt-4.1-2025-04-14` correctly identified the bug in `sympy/core/symbol.py` (Call 10) and diagnosed the `_assumptions`
+   issue, but called `finish` without ever making a source edit or running tests. Because no source edit occurred,
+   the checkpoint was never triggered. All five successors unstarted.
+
+**v2.0 prospective specification defined:**
+1. **Model transition to OpenAI GPT-6**:
+   - Predecessor and all 5 successors: `openai/gpt-6-sol-20260922` ($2.00 / $10.00 per 1M tokens).
+   - Note generators: `openai/gpt-6-luna-20260922` ($0.10 / $0.50 per 1M tokens) replacing `gpt-4.1-mini`.
+2. **Reasoning tokens and effort**:
+   - Reasoning tokens billed as completion tokens and included in full worst-case cost envelope.
+   - Lowest allowed reasoning effort explicitly set: `reasoning = {"effort": "none"}`. `temperature` parameter stripped.
+3. **Proportional token budget reduction under $10 cap (3.104% margin)**:
+   - Preserving 10:9 ratio (scaled by 69%):
+     - Predecessor total tokens: **276,000** (was 400,000).
+     - Successor total tokens: **248,400** (was 360,000).
+   - Request input ceiling unchanged at 64,000 tokens; output limit at 2,048 tokens.
+   - Settled maximum conservative envelope: **$9.5337** <= **$10.00**.
+   - Peak in-flight envelope including reservation: **$9.6896** ($0.3104 margin / 3.104%).
+4. **Frozen artifacts**:
+   - Config `configs/swebench-comparison-v2.0.json` (SHA `829974249ab8a502e04315512c7b2bb07f12ae087a485c4f6a4ac108f325f2a7`)
+   - Plan `analysis/swebench-comparison-v2.0-plan.json` (SHA `763d0a022424b72148e48ea8dd55057ced6b45c1466651bec03b04715805dd40`)
+   - Manifest `analysis/swebench-experiment-v2.0-manifest.json` (SHA `b2da6a3d2fc3401f02b7596f937067843d8dc1866746cb0ee30253f2b453865b`)
+
 # Keisho benchmark progress — v1.8 live run 001 recorded; prospective v1.9 defined 2026-10-22
 
 **Five predecessor failures recorded and disclosed; all twenty-five successor conditions unstarted:**

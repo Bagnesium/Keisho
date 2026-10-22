@@ -1,0 +1,65 @@
+{
+  "version": "2.0.0",
+  "kind": "prospective OpenRouter SWE-bench evaluation; separately authorized",
+  "task_id": "sympy__sympy-20590",
+  "task_sha256": "edc429b5c441e91fe9e661cf7c4ca721892cb60e89cb375c09dfcbb7b935b378",
+  "seed": 20261007,
+  "max_blocks": 1,
+  "max_predecessor_trajectories": 1,
+  "max_successor_branches": 5,
+  "pilot_config": "pilot.yaml",
+  "pilot_config_sha256": "defa4fb8229c205430febfd1e6afd5a7eb85b89c2d361d9715520796cb50e862",
+  "dollar_cap_usd": "10.00",
+  "automatic_retries": 0,
+  "paid_calls_authorized": false,
+  "successor_conditioning": false,
+  "provider": "openrouter",
+  "catalog_path": "runs/swebench-integration/preselection/provider-catalog-v2.0.json",
+  "catalog_sha256": "c2401039b8759242b9d59dcd388eedc906ce1856d136197aa6bcc6f202fa574b",
+  "models": {
+    "predecessor": {
+      "request_model_id": "openai/gpt-6-sol",
+      "model_id": "openai/gpt-6-sol-20260922",
+      "accepted_response_model_ids": [
+        "openai/gpt-6-sol",
+        "openai/gpt-6-sol-20260922"
+      ]
+    },
+    "successor": {
+      "request_model_id": "openai/gpt-6-sol",
+      "model_id": "openai/gpt-6-sol-20260922",
+      "accepted_response_model_ids": [
+        "openai/gpt-6-sol",
+        "openai/gpt-6-sol-20260922"
+      ]
+    },
+    "generation": {
+      "request_model_id": "openai/gpt-6-luna",
+      "model_id": "openai/gpt-6-luna-20260922",
+      "accepted_response_model_ids": [
+        "openai/gpt-6-luna",
+        "openai/gpt-6-luna-20260922"
+      ]
+    }
+  },
+  "routing": {
+    "only": [
+      "openai"
+    ],
+    "order": [
+      "openai"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true
+  },
+  "identity_policy": "exact requested public ID or catalog-confirmed canonical ID; OpenAI provider required; upstream snapshot attestation unavailable",
+  "reservation_multiplier": "1.05",
+  "automatic_model_selection": false,
+  "model_fallbacks": false,
+  "tls": {
+    "ca_file": "../.cache/certificates/openrouter-ca-v1.2.0.pem",
+    "ca_sha256": "9cc2a774b5198dcff14d9be1e66091f538975d867ce029a96bce15a55dfd730f",
+    "certificate_verification": true,
+    "hostname_verification": true
+  }
+}

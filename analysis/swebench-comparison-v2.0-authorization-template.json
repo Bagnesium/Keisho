@@ -1,0 +1,10 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "PENDING-V20-NEW-USER-AUTHORIZATION",
+  "config_sha256": "829974249ab8a502e04315512c7b2bb07f12ae087a485c4f6a4ac108f325f2a7",
+  "plan_sha256": "763d0a022424b72148e48ea8dd55057ced6b45c1466651bec03b04715805dd40",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": false,
+  "note": "Template only. Create a fresh explicit authorization record after approval; never overwrite this template or reuse a historical guard. Predecessor and successor models openai/gpt-6-sol-20260922, generation model openai/gpt-6-luna-20260922, reasoning effort none, predecessor total tokens 276,000, successor total tokens 248,400, 64k request input ceilings, benchmark-agent/5.0 workflow guidance, non-fatal read/write observations, fatal path escapes, repeated_tool_failure at 3 consecutive failures. All five conditions use the same annotation/action/bounding policy. No inference authorized."
+}

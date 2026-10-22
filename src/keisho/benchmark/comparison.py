@@ -57,6 +57,51 @@ V18_SPEC_SHA = '36f640ca8d78c64cacc63cb4294ba375ff871feb9bddc0ecb77eaa26c8255fe1
 V18_PLAN_SHA = 'f1a92e0d7a35b6f9fed6fb3064537e272b71284400b084f878c7f2d374593f38'
 V19_SPEC_SHA = '22b651027c1b07f3787f9b8f96e4b18a4e65f62f530b60392b3478689257e6d5'
 V19_PLAN_SHA = '3575f9bc53998a5f0638ec96ce9fe8a78268ec99a09d493c9f76cc6d38a3adfd'
+V20_SPEC_SHA = '829974249ab8a502e04315512c7b2bb07f12ae087a485c4f6a4ac108f325f2a7'
+V20_PLAN_SHA = '763d0a022424b72148e48ea8dd55057ced6b45c1466651bec03b04715805dd40'
+V20_PROVIDER_SHA = '4cb5191d5859035445e7d69daf7dd6b20f45aaac030d44eaa42fe8bd8b32ccd5'
+
+from keisho.agents.providers import openai_chat, openrouter_chat
+
+openrouter_chat.MODEL_PRICES.update({
+    "openai/gpt-6-sol-20260922": (Decimal("2.00"), Decimal("0.20"), Decimal("10.00")),
+    "openai/gpt-6-luna-20260922": (Decimal("0.10"), Decimal("0.01"), Decimal("0.50")),
+    "openai/gpt-6-sol": (Decimal("2.00"), Decimal("0.20"), Decimal("10.00")),
+    "openai/gpt-6-luna": (Decimal("0.10"), Decimal("0.01"), Decimal("0.50")),
+})
+openai_chat.MODEL_PRICES.update({
+    "gpt-6-sol-20260922": (Decimal("2.00"), Decimal("0.20"), Decimal("10.00")),
+    "gpt-6-luna-20260922": (Decimal("0.10"), Decimal("0.01"), Decimal("0.50")),
+    "openai/gpt-6-sol-20260922": (Decimal("2.00"), Decimal("0.20"), Decimal("10.00")),
+    "openai/gpt-6-luna-20260922": (Decimal("0.10"), Decimal("0.01"), Decimal("0.50")),
+})
+
+V20_MODEL_ALIASES = {
+    "openai/gpt-6-sol-20260922": "openai/gpt-6-sol",
+    "openai/gpt-6-luna-20260922": "openai/gpt-6-luna",
+    "openai/gpt-4.1-mini-2025-04-14": "openai/gpt-4.1-mini",
+    "openai/gpt-4.1-2025-04-14": "openai/gpt-4.1",
+}
+
+
+class V20OpenRouterChatModel(OpenRouterChatModel):
+    def __init__(self, model_id, *, authorized=False, api_key=None, transport=openrouter_chat.transport, tokenizer=None, mode="agent", response_model_ids=None, agent_response_format=None):
+        super(OpenRouterChatModel, self).__init__(model_id, authorized=authorized, api_key=api_key, transport=transport, tokenizer=tokenizer, mode=mode, agent_response_format=agent_response_format)
+        allowed = (model_id,) if response_model_ids is None else tuple(response_model_ids)
+        alias = V20_MODEL_ALIASES.get(model_id, model_id)
+        require(allowed in ((model_id,), (alias, model_id)), "only the exact catalog-confirmed same-model pair is allowed")
+        self._response_model_ids = allowed
+
+    def body(self, message):
+        body = super(OpenRouterChatModel, self).body(message)
+        body["model"] = V20_MODEL_ALIASES.get(self._id, self._id)
+        body["max_tokens"] = body.pop("max_completion_tokens")
+        body.pop("store", None)
+        body.pop("service_tier", None)
+        body.pop("temperature", None)
+        body["reasoning"] = {"effort": "none"}
+        body.update(provider=openrouter_chat.routing(self._id), stream=False, plugins=[])
+        return body
 
 SYSTEM = '''You are a coding agent in an isolated repository at /testbed. Solve the original issue.
 Use only the issue and available repository/evidence. Test important changes with public tests.
@@ -185,14 +230,15 @@ def load_frozen_plan(config_path=None, plan_path=None):
         supported = {SPEC_SHA: PLAN_SHA, NEXT_SPEC_SHA: NEXT_PLAN_SHA, WIRE_SPEC_SHA: WIRE_PLAN_SHA,
                      READINESS_SPEC_SHA: READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                      V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
-                     V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA}
+                     V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA,
+                     V20_SPEC_SHA: V20_PLAN_SHA}
         require(digest(config) in supported, 'configuration differs from frozen supported specification')
         expected_plan = supported[digest(config)]
         require(digest(plan) == expected_plan, 'plan differs from matched frozen plan')
         require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
         sel_file = (PRESELECT / f"{task_instance}-plan.json") if task_instance and (PRESELECT / f"{task_instance}-plan.json").exists() else (PRESELECT / 'plan.json')
         selection = read_input(sel_file)
-        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA) else SELECTION_PLAN_SHA
+        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA) else SELECTION_PLAN_SHA
         require(digest(selection) == expected_sel_sha, 'frozen selection/order changed')
         require(selection['task_sha256'] == digest(task) and task['instance_id'] == config['selected_instance'], 'selected task changed')
         require(selection['branch_order'] == random.Random(config['branch_seed']).sample(config['conditions'], len(config['conditions'])), 'branch order changed')
@@ -201,7 +247,7 @@ def load_frozen_plan(config_path=None, plan_path=None):
     require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
     require(plan['plausibly_fits'] and config['selection']['count'] == 1, 'one comparison must fit cap')
     require(config['automatic_retries'] == 0, 'no automatic paid retries')
-    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA):
+    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA):
         from .experiment_freeze import validate_freeze
         validate_freeze(config, ROOT)
     return config, task, plan
@@ -250,11 +296,12 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
     response_settings(config)
     authorization = read_input(authorization_path)
     require(authorization['cap_usd'] == config['cap_usd'] == '10.00', 'authorization cap changed')
-    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA):
+    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA):
         expected_plan = {NEXT_SPEC_SHA:NEXT_PLAN_SHA, WIRE_SPEC_SHA:WIRE_PLAN_SHA,
                          READINESS_SPEC_SHA:READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                          V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
-                         V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA}[digest(config)]
+                         V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA,
+                         V20_SPEC_SHA: V20_PLAN_SHA}[digest(config)]
         require(authorization.get('version')=='swebench-authorization/2.0' and
             authorization.get('config_sha256')==digest(config) and authorization.get('plan_sha256')==expected_plan and
             authorization.get('attempts')==1 and isinstance(authorization.get('authorization_id'),str) and authorization['authorization_id'].strip(),
@@ -367,17 +414,36 @@ def execution_result(execution):
 def runtime_preflight(binding, *, dry=False):
     config, task, plan = binding.config, binding.task, binding.plan
     setup = validate_setup(config)  # Before creating a paid-run guard or any model.
-    catalog = read_input(PRESELECT / 'provider-catalog.json')
-    validate_catalog(catalog)
-    if response_settings(config)[2] is not None:
-        for alias in ('openai/gpt-4.1-mini', 'openai/gpt-4.1'):
-            endpoint = next(e for e in catalog['endpoints'][alias]['data']['endpoints'] if e['tag'] == 'openai')
-            require('structured_outputs' in endpoint['supported_parameters'], 'frozen endpoint lacks schema support')
+    catalog_path = (PRESELECT / 'provider-catalog-v2.0.json') if config.get('version') == 'swebench-handoff/2.0' else (PRESELECT / 'provider-catalog.json')
+    catalog = read_input(catalog_path)
+    if config.get('version') == 'swebench-handoff/2.0':
+        for alias in ('openai/gpt-6-sol', 'openai/gpt-6-luna'):
+            canonical = openrouter_chat.MODEL_ALIASES.get(alias, alias)
+            model_entry = next((row for row in catalog["models"] if row["id"] == alias), None)
+            require(model_entry is not None, "catalog model missing")
+            endpoints = catalog["endpoints"][alias]["data"]["endpoints"]
+            selected = [row for row in endpoints if row["tag"] == "openai" and row["provider_name"] == "OpenAI"]
+            require(len(selected) == 1, "exact OpenAI endpoint missing or ambiguous")
+            endpoint = selected[0]
+            require({"max_tokens", "seed", "response_format"} <= set(endpoint["supported_parameters"]), "required parameters unsupported")
+            require("structured_outputs" in endpoint["supported_parameters"], "frozen endpoint lacks schema support")
+            require(endpoint["context_length"] >= 128000 and endpoint["max_completion_tokens"] >= 2048, "catalog request limits below frozen budgets")
+            inputs, cached, outputs = openrouter_chat.MODEL_PRICES[canonical if canonical in openrouter_chat.MODEL_PRICES else alias]
+            price = endpoint["pricing"]
+            require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
+            require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
+    else:
+        validate_catalog(catalog)
+        if response_settings(config)[2] is not None:
+            for alias in ('openai/gpt-4.1-mini', 'openai/gpt-4.1'):
+                endpoint = next(e for e in catalog['endpoints'][alias]['data']['endpoints'] if e['tag'] == 'openai')
+                require('structured_outputs' in endpoint['supported_parameters'], 'frozen endpoint lacks schema support')
     require(digest(catalog) == plan['catalog_sha256'], 'pricing/catalog pin changed')
     credentials = load_project_env(ROOT, environ=dict(__import__('os').environ) if dry else None)['present']
     require(credentials['OPENROUTER_API_KEY'], 'configured provider credential missing')
     provider = read_input(ROOT / 'configs' / config['provider_config'])
-    require(digest(provider) == PROVIDER_SHA, 'frozen provider mapping/routing changed')
+    expected_prov_sha = V20_PROVIDER_SHA if digest(config) == V20_SPEC_SHA else PROVIDER_SHA
+    require(digest(provider) == expected_prov_sha, 'frozen provider mapping/routing changed')
     ca = (ROOT / 'configs' / provider['tls']['ca_file']).resolve()
     require(ca.is_file() and hashlib.sha256(ca.read_bytes()).hexdigest() == provider['tls']['ca_sha256'], 'pinned verified CA missing/changed')
     native = NativeTokenizer()
@@ -478,7 +544,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
     index.write_artifact('public-catalog-preflight.json', public_catalog)
     def model(role, mode='agent', stage=None, audit=None):
         identity = config[role + '_model']
-        allowed = provider['models']['successor' if (role == 'successor' or config[role + '_model'] == config['successor_model']) else 'predecessor']['accepted_response_model_ids']
+        allowed = provider['models'].get(role, provider['models']['successor' if (role == 'successor' or config[role + '_model'] == config['successor_model']) else 'predecessor'])['accepted_response_model_ids']
         transport=partial(http_transport, base_url=BASE_URL, provider='OpenRouter', ca_file=ca)
         if audit is not None:
             from .response_measurements import capture_response
@@ -495,7 +561,8 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
                     observer=lambda payload,status,redacted:audit.write_artifact(f'{prefix}wire-response-{number:03d}.json',
                         {'body_base64':base64.b64encode(payload).decode(),'http_status':status,'credential_redaction_applied':redacted,'headers_recorded':False})
                 return http_transport(body,key,base_url=BASE_URL,provider='OpenRouter',ca_file=ca,response_observer=observer)
-        adapter = OpenRouterChatModel(identity, authorized=True, tokenizer=native, mode=mode, response_model_ids=allowed,
+        model_cls = V20OpenRouterChatModel if config.get('version') == 'swebench-handoff/2.0' else OpenRouterChatModel
+        adapter = model_cls(identity, authorized=True, tokenizer=native, mode=mode, response_model_ids=allowed,
                  agent_response_format=output_format if mode == 'agent' else None,
                  transport=transport)
         input_cap = config.get(role + '_budgets', {}).get('request_input_tokens', 64000)
