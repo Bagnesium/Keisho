@@ -344,6 +344,7 @@ def validate_final_source_freeze(authorization):
     return freeze
 
 
+def claim_launch(binding):
     # RawRun mkdir is exclusive and atomic. The authorization-wide claim is
     # independent of output name and remains after errors, including before API use.
     safe_destination(binding.run_dir)

@@ -40,7 +40,11 @@ src = re.sub(r"V22_SPEC_SHA = '[^']*'", f"V22_SPEC_SHA = '{digest(cfg)}'", src)
 src = re.sub(r"V22_PLAN_SHA = '[^']*'", f"V22_PLAN_SHA = '{digest(plan)}'", src)
 (ROOT / 'src/keisho/benchmark/comparison.py').write_text(src)
 
-freeze = {'version': 'swebench-final-source-freeze/1.0', 'freeze_status': 'FROZEN',
+freeze = {'version': 'swebench-final-source-freeze/1.0', 'freeze_status': 'FROZEN', 'revision': 2,
+          'supersedes': {'record': 'analysis/swebench-v2.2-final-source-freeze-superseded-r1.json',
+                         'digest': '8e11770df318af7b37172d72281a06a90945d6a48b9662026fdbdefdc9081c97',
+                         'reason': 'r1 pinned a comparison.py missing the def claim_launch(binding) line (lost in 94b4fe2); '
+                                   'the one v2.2 live launch (2026-10-23 14:36 UTC+5) failed with NameError before any claim or model call; spend 0.'},
           'config_sha256': digest(cfg), 'plan_sha256': digest(plan),
           'files': {f: sha(f) for f in ('scripts/benchmark_compare.py', 'src/keisho/benchmark/comparison.py',
                     'src/keisho/benchmark/experiment_freeze.py', 'src/keisho/benchmark/notes_reader.py')}}
