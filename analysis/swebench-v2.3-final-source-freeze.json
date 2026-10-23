@@ -6,7 +6,7 @@
   "plan_sha256": "d63822276d60359bb67190a73e166d54ee05a409c34d46c1840dcfff0b10a685",
   "files": {
     "scripts/benchmark_compare.py": "86e3920ab5dca82a2177b2e85f4a3018f09e230e25758ed60b6d3458310101b4",
-    "src/keisho/benchmark/comparison.py": "fad3c6ea168dcf165e2b890e85a237b562eae7c620c6b73b836c0d8957f02110",
+    "src/keisho/benchmark/comparison.py": "0b034f634c5be7935b5684a4906a38ad92e528d1caf649831b520b0b121ba094",
     "src/keisho/benchmark/experiment_freeze.py": "704cdcb4b4a0959cb150745012dd78b42700d4eeb9e6a64069c1e9883d1c130a",
     "src/keisho/benchmark/notes_reader.py": "0de635927c595b7a6a21a31020c402becb35bebaadad6f56ffbc6f6e9aa53d44"
   }

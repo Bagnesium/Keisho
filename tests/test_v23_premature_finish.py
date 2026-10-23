@@ -209,3 +209,14 @@ class ExecuteNamesDefined(unittest.TestCase):
         used = {n.id for n in ast.walk(tree) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load)}
         missing = sorted(u for u in used if u not in local and not hasattr(c, u) and not hasattr(builtins, u))
         self.assertEqual(missing, [])
+
+
+class V23RateLookup(unittest.TestCase):
+    def test_catalog_alias_and_dated_ids_resolve(self):
+        from decimal import Decimal
+        cfg = json.loads((c.ROOT / 'configs/swebench-comparison-v2.3.json').read_text())
+        self.assertEqual(c.reservation_input_rate(cfg, 'openai/gpt-6-sol', 'openai/gpt-6-sol'), Decimal('2.5'))
+        self.assertEqual(c.reservation_input_rate(cfg, 'openai/gpt-6-luna'), Decimal('0.125'))
+        self.assertEqual(c.reservation_input_rate(cfg, 'openai/gpt-6-sol-20260922'), Decimal('2.5'))
+        with self.assertRaises(Exception):
+            c.reservation_input_rate(cfg, 'openai/gpt-4.1')

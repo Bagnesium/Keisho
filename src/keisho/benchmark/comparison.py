@@ -495,7 +495,7 @@ def runtime_preflight(binding, *, dry=False):
             price = endpoint["pricing"]
             require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
             if config and config.get('version') == V23_VERSION:
-                require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= Decimal(config['reservation_input_rates_per_million'][canonical]), "catalog cache-write price exceeds reserved input rate")
+                require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= reservation_input_rate(config, canonical, alias), "catalog cache-write price exceeds reserved input rate")
             require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
     else:
         validate_catalog(catalog)
@@ -542,7 +542,7 @@ class CacheWriteReservingLedger(SpendLedger):
         self.reservation_input_rates = {m: Decimal(r) for m, r in reservation_input_rates.items()}
 
     def reserve(self, stage, model_id, input_cap, output_cap, text_bound, request_sha256=None, *, api_metadata=None):
-        rate = self.reservation_input_rates.get(model_id)
+        rate = _lookup_rate(self.reservation_input_rates, model_id)
         require(rate is not None and rate >= self.prices[model_id][0], 'no cache-write reservation rate for model')
         original = self.prices
         self.prices = {**original, model_id: (rate,) + tuple(original[model_id][1:])}
@@ -555,6 +555,19 @@ class CacheWriteReservingLedger(SpendLedger):
 
     def settle(self, record, response):
         return super().settle(record, response)
+
+
+def _lookup_rate(rates, *names):
+    for name in names:
+        if name in rates:
+            return Decimal(rates[name])
+    matches = {Decimal(v) for k, v in rates.items() for name in names if k.startswith(name + '-')}
+    require(len(matches) == 1, 'no unambiguous cache-write reservation rate for model')
+    return matches.pop()
+
+
+def reservation_input_rate(config, *names):
+    return _lookup_rate(config['reservation_input_rates_per_million'], *names)
 
 
 def make_ledger(config, *args, **kwargs):
@@ -591,7 +604,7 @@ def check_public_catalog(ca, config=None):
             price = endpoint["pricing"]
             require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
             if config and config.get('version') == V23_VERSION:
-                require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= Decimal(config['reservation_input_rates_per_million'][canonical]), "catalog cache-write price exceeds reserved input rate")
+                require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= reservation_input_rate(config, canonical, alias), "catalog cache-write price exceeds reserved input rate")
             require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
     else:
         validate_catalog(catalog)

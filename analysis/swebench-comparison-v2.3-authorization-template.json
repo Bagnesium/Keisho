@@ -3,7 +3,7 @@
   "authorization_id": "PENDING-V23-NEW-USER-AUTHORIZATION",
   "config_sha256": "3eb7a52b7a92d01c55f4eb6978e53206b2571f6e4e5ba133826ddad3df6d7aa3",
   "plan_sha256": "d63822276d60359bb67190a73e166d54ee05a409c34d46c1840dcfff0b10a685",
-  "final_source_freeze_sha256": "e0322a35f509783c6e4c8c68eb576ba3d54fca36df0e340a1eb9ccec03d7609a",
+  "final_source_freeze_sha256": "e12168e2b6725a43e197ea1a81b948835c59b3f5a4fa91daaf9e5ab0b0e0e791",
   "cap_usd": "10.00",
   "attempts": 1,
   "provider_inference_authorized": false,
