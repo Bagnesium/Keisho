@@ -1,3 +1,38 @@
+# Keisho benchmark progress — v2.0 live run 001 recorded 2026-10-23
+
+**Seven predecessor failures recorded and disclosed; all thirty-five successor conditions unstarted:**
+1. **v1.4 attempt 001 (`runs/swebench-v1.4-five-way-once-001`, $0.0164 spend)**:
+   Halted at Call 6 (`reason: budget_exhausted`). `openai/gpt-4.1-mini-2025-04-14` created an
+   uncompressed Zarr array generating 202 chunk files. Unbounded inventory metadata (41 KB / 18k tokens)
+   flooded the conversational context, exceeding the 32,000 request input ceiling on Call 7 without
+   touching `xarray/`. All five successors unstarted.
+2. **v1.5 attempt 001 (`runs/swebench-v1.5-five-way-once-001`, $0.1129 spend)**:
+   Halted at Call 13 (`reason: budget_exhausted`). With `bounded-output/1.0` active and predecessor
+   aligned to `openai/gpt-4.1-2025-04-14`, the predecessor accurately inspected xarray formatting logic
+   but exhausted its 180,000 total token budget before completing a patch. Successors unstarted.
+3. **v1.6 attempt 001 (`runs/swebench-v1.6-five-way-once-001`, $0.1272 spend)**:
+   Halted at Call 10 (`reason: budget_exhausted`). Predecessor request input exceeded the 32,000
+   request input ceiling on Call 11 while total token budget remained under 140,000 tokens. Successors unstarted.
+4. **v1.7 attempt 001 (`runs/swebench-v1.7-five-way-once-001`, $0.0342 spend)**:
+   Halted at Call 8 (`reason: invalid_run`). Predecessor attempted `read_file` on `sympy/core/atomic.py`
+   (SymPy module is named `sympy/core/atom.py`). Container `cat` returned exit 1, raising fatal `InvalidAction('read failed')`.
+   All five successors unstarted.
+5. **v1.8 attempt 001 (`runs/swebench-v1.8-five-way-once-001`, $0.2541 actual / $0.7777 accounted spend)**:
+   Halted at Call 22 (`reason: budget_exhausted`). Predecessor successfully recovered from non-fatal missing file
+   observations (`atom.py` and `atomic.py` on Calls 10-11) and an invalid-parameter wire rejection on Call 20.
+   However, lacking pacing guidance, the model spent all 22 calls reading inheritance chains without attempting a source
+   modification or executing tests, exhausting its 400,000 token budget before triggering the checkpoint. All five successors unstarted.
+6. **v1.9 attempt 001 (`runs/swebench-v1.9-five-way-once-001`, $0.7397 spend)**:
+   Halted at Call 29 (`reason: finished`, `checkpoint_not_reached`). With `benchmark-agent/5.0` workflow pacing guidance,
+   `openai/gpt-4.1-2025-04-14` correctly identified the bug in `sympy/core/symbol.py` (Call 10) and diagnosed the `_assumptions`
+   issue, but called `finish` without ever making a source edit or running tests. Because no source edit occurred,
+   the checkpoint was never triggered. All five successors unstarted.
+7. **v2.0 attempt 001 (`runs/swebench-v2.0-five-way-once-001`, $0.0045 actual / $0.0045 accounted spend)**:
+   Halted at Call 1 (`reason: model_failure`). `openai/gpt-6-sol-20260922` prepended conversational preamble prose
+   prior to emitting its JSON action, violating JSON-object wire mode and failing top-level JSON parsing
+   (`JSONDecodeError: Expecting value: line 1 column 1`). No tool actions or code edits were executed. Predecessor stopped
+   immediately without retrying; all five successors unstarted.
+
 # Keisho benchmark progress — v1.9 live run 001 recorded; prospective v2.0 defined 2026-10-22
 
 **Six predecessor failures recorded and disclosed; all thirty successor conditions unstarted:**
