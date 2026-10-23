@@ -63,8 +63,8 @@ V20_PROVIDER_SHA = '4cb5191d5859035445e7d69daf7dd6b20f45aaac030d44eaa42fe8bd8b32
 V21_SPEC_SHA = '0700ede4aed6d884cce2fdb50bdbedcc3bac427a5a195cc3bfdcc16bb437eb5d'
 V21_PLAN_SHA = 'f4fc73c008785a909f12fcb74a16fa0810214a91b22f3894c55442de5b21ef2b'
 # PROPOSAL (unapproved): prospective v2.2 anchors; filled by scripts/v22_proposal_digests.py.
-V22_SPEC_SHA = 'V22_SPEC_PLACEHOLDER'
-V22_PLAN_SHA = 'V22_PLAN_PLACEHOLDER'
+V22_SPEC_SHA = '0ea44d2fa53940bb2db20ac9fba123edc941a39aae7b04f5a85381599460e3be'
+V22_PLAN_SHA = '173633b56fce5f9cf1f5827617acaad60a49887a51aa134e56db8cdfcf57ebca'
 V22_FINAL_SOURCE_FREEZE = 'analysis/swebench-v2.2-final-source-freeze.json'
 
 from keisho.agents.providers import openai_chat, openrouter_chat

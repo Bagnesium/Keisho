@@ -1,0 +1,11 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "PENDING-V22-NEW-USER-AUTHORIZATION",
+  "config_sha256": "0ea44d2fa53940bb2db20ac9fba123edc941a39aae7b04f5a85381599460e3be",
+  "plan_sha256": "173633b56fce5f9cf1f5827617acaad60a49887a51aa134e56db8cdfcf57ebca",
+  "final_source_freeze_sha256": "05d6f5521acc07cf17bc9daec4193b412f9d6c6af81ed48e628472cd67d7603c",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": false,
+  "note": "PROPOSAL TEMPLATE ONLY, unapproved. Create a fresh explicit authorization record after approval; never reuse a guard."
+}
