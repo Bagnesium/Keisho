@@ -1,4 +1,4 @@
-"""Offline consistency checks for the PROPOSED v2.2 freeze (no network, no models, no launch)."""
+"""Offline consistency checks for the v2.2 freeze (no network, no models, no launch)."""
 import json
 import tempfile
 import unittest
@@ -11,7 +11,7 @@ from keisho.core import digest, ValidationError
 L = lambda p: json.loads((c.ROOT / p).read_text())
 
 
-class V22Proposal(unittest.TestCase):
+class V22Freeze(unittest.TestCase):
     def setUp(self):
         self.cfg, self.prior = L('configs/swebench-comparison-v2.2.json'), L('configs/swebench-comparison-v2.1.json')
         self.plan, self.auth = L('analysis/swebench-comparison-v2.2-plan.json'), L('analysis/swebench-comparison-v2.2-authorization-template.json')

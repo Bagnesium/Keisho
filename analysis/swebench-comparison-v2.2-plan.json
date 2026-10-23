@@ -3,7 +3,7 @@
   "provider_requests": 0,
   "credential_validation_requests": 0,
   "new_spending_authorized": false,
-  "config_sha256": "0ea44d2fa53940bb2db20ac9fba123edc941a39aae7b04f5a85381599460e3be",
+  "config_sha256": "e4afa4d3b87aa478f4ffd3c01789a3d98c5d86c1345c6b6eb25370484742ed8a",
   "task_sha256": "edc429b5c441e91fe9e661cf7c4ca721892cb60e89cb375c09dfcbb7b935b378",
   "catalog_sha256": "c2401039b8759242b9d59dcd388eedc906ce1856d136197aa6bcc6f202fa574b",
   "response_policy": "auxiliary-claims/2.0",
@@ -61,6 +61,6 @@
   "annotation_guidance_sha256": "4355a256a11dc729a2c6d35e95b770ae041777a1c96d19217003222406f25d1e",
   "patch_export_policy": "source-and-artifacts/2.0",
   "tool_output_policy": "bounded-output/1.0",
-  "experiment_manifest_sha256": "20860583df679d405742f95fede64d316bd69f8a9e0aea19b691aa67d3e7fed9",
-  "proposal_status": "PROPOSAL pending approval"
+  "experiment_manifest_sha256": "3658f6c13291c7d8d3893821329b36609f992be9443e63504d194a507d147ee1",
+  "freeze_status": "FROZEN; no spending authorized"
 }

@@ -104,5 +104,5 @@
     "swebench-handoff/2.2: schema-specific guarded reader structured-notes-reader/1.0 for STRUCTURED_NOTES_2K note generation (src/keisho/benchmark/notes_reader.py); framing log and failure artifact; zero retries",
     "binding-module pin via final source freeze bound by authorization"
   ],
-  "proposal_status": "PROPOSAL pending Bagi approval; not frozen, not authorized"
+  "freeze_status": "FROZEN 2026-10-23 (Bagi approved v2.2 freeze); live execution NOT authorized"
 }

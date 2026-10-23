@@ -1,6 +1,6 @@
-# PROPOSAL — Specification v2.2 (NOT APPROVED, NOT FROZEN, NOT AUTHORIZED)
+# Specification v2.2 — FROZEN (live execution NOT authorized)
 
-Status: draft prepared 2026-10-23 (Asia/Almaty, UTC+5) on a review branch. `live_execution_authorized: false`; the authorization template
+Status: frozen 2026-10-23 (Asia/Almaty, UTC+5) with Bagi's approval of the v2.2 freeze. `live_execution_authorized: false`; the authorization template
 has `provider_inference_authorized: false`. No provider calls made. v2.1 and all historical records are unchanged.
 
 ## Motivation (prospective, from offline audit; no v2.1 run exists)
@@ -23,9 +23,11 @@ last-wins. Also the binding module `comparison.py` was not hash-pinned.
 Unchanged: task sympy__sympy-20590, five conditions, prompts, models (gpt-6-sol x6 roles, gpt-6-luna x2 notes), reasoning effort none,
 budgets, retries 0, cap $10, envelope $9.53369760, peak $9.68960160.
 
-## Anchors (keisho canonical-JSON digest; regenerate with `python -B scripts/v22_proposal_digests.py`)
-config 0ea44d2fa53940bb2db20ac9fba123edc941a39aae7b04f5a85381599460e3be
-plan 173633b56fce5f9cf1f5827617acaad60a49887a51aa134e56db8cdfcf57ebca
-manifest 20860583df679d405742f95fede64d316bd69f8a9e0aea19b691aa67d3e7fed9
-final source freeze 05d6f5521acc07cf17bc9daec4193b412f9d6c6af81ed48e628472cd67d7603c
+## Anchors (keisho canonical-JSON digest; regenerate with `python -B scripts/v22_freeze_digests.py`)
+config e4afa4d3b87aa478f4ffd3c01789a3d98c5d86c1345c6b6eb25370484742ed8a
+plan 35979af0c8ba6bff3ef87240503f6d7a4e738dbd795cd1b3367b95a807a60346
+manifest 3658f6c13291c7d8d3893821329b36609f992be9443e63504d194a507d147ee1
+final source freeze 8e11770df318af7b37172d72281a06a90945d6a48b9662026fdbdefdc9081c97
 Any later edit to comparison.py/notes_reader.py requires regenerating all of the above.
+
+Launch requires a fresh authorization record binding config, plan and final_source_freeze_sha256 with provider_inference_authorized true.
