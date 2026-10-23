@@ -175,3 +175,37 @@ class V23AttemptLoop(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class V23CacheWriteLedger(unittest.TestCase):
+    def test_reserves_input_at_cache_write_rate(self):
+        cfg = json.loads((c.ROOT / 'configs/swebench-comparison-v2.3.json').read_text())
+        led = c.make_ledger(cfg, cfg['cap_usd'], provider='openrouter', authorized_ceiling_usd='10.00', authorization_scope='swebench-one-comparison')
+        self.assertIsInstance(led, c.CacheWriteReservingLedger)
+        rec = led.reserve('predecessor', cfg['predecessor_model'], 64000, 2048, 1000)
+        from decimal import Decimal
+        self.assertEqual(Decimal(rec['reservation_usd']), Decimal('1.05') * (64000 * Decimal('2.5') + 2048 * Decimal('10')) / 1000000)
+        self.assertEqual(rec['reservation_pricing'], 'cache-write-input')
+        self.assertEqual(led.prices[cfg['predecessor_model']][0], Decimal('2.0'))  # catalog prompt rate restored
+
+    def test_v22_keeps_plain_ledger(self):
+        cfg = json.loads((c.ROOT / 'configs/swebench-comparison-v2.2.json').read_text())
+        self.assertIs(type(c.make_ledger(cfg, cfg['cap_usd'], provider='openrouter', authorized_ceiling_usd='10.00', authorization_scope='swebench-one-comparison')), c.SpendLedger)
+
+
+class ExecuteNamesDefined(unittest.TestCase):
+    def test_every_name_in_execute_is_defined(self):
+        import ast, builtins, inspect, textwrap
+        tree = ast.parse(textwrap.dedent(inspect.getsource(c.execute)))
+        local = set()
+        for n in ast.walk(tree):
+            if isinstance(n, (ast.FunctionDef, ast.Lambda)):
+                a = n.args
+                local |= {x.arg for x in a.args + a.kwonlyargs + a.posonlyargs + ([a.vararg] if a.vararg else []) + ([a.kwarg] if a.kwarg else [])}
+                if isinstance(n, ast.FunctionDef): local.add(n.name)
+            elif isinstance(n, ast.Name) and isinstance(n.ctx, (ast.Store, ast.Del)): local.add(n.id)
+            elif isinstance(n, ast.ExceptHandler) and n.name: local.add(n.name)
+            elif isinstance(n, (ast.Import, ast.ImportFrom)): local |= {(x.asname or x.name).split('.')[0] for x in n.names}
+        used = {n.id for n in ast.walk(tree) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load)}
+        missing = sorted(u for u in used if u not in local and not hasattr(c, u) and not hasattr(builtins, u))
+        self.assertEqual(missing, [])

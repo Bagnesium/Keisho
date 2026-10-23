@@ -80,7 +80,7 @@
   "patch_export_policy": "source-and-artifacts/2.0",
   "tool_output_policy": "bounded-output/1.0",
   "experiment_manifest": "analysis/swebench-experiment-v2.3-manifest.json",
-  "experiment_manifest_sha256": "bd40f7c0b1a1388cbfd56c36876a182a9fe0bde6c88ff22d80051c6858d28313",
+  "experiment_manifest_sha256": "c66b1a305826f8d895e3e4cdb5167a0691afccfeaa2030fc0a8475e380d51ea0",
   "notes_reader_version": "structured-notes-reader/1.0",
   "empty_handoff_user_text": "No handoff context is provided for this run. The repository is available at /testbed; begin work on the issue above using the tools.",
   "early_finish_guard": "premature-finish-guard/1.0",
@@ -90,5 +90,10 @@
     "new_attempt_only_if": "previous attempt finished on its first model call with zero completed tool calls",
     "valid_attempt": "an attempt that completes at least one tool call; only the first valid attempt can reach the checkpoint",
     "disclosure": "every attempt is kept and reported; invalid attempts are never used for handoffs"
-  }
+  },
+  "reservation_input_rates_per_million": {
+    "openai/gpt-6-sol-20260922": "2.5",
+    "openai/gpt-6-luna-20260922": "0.125"
+  },
+  "reservation_pricing": "every input token reserved at the frozen cache-write rate (CacheWriteReservingLedger)"
 }

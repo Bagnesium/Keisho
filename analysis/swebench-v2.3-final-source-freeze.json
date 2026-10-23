@@ -1,12 +1,12 @@
 {
   "version": "swebench-final-source-freeze/1.0",
-  "freeze_status": "PROPOSAL",
+  "freeze_status": "FROZEN",
   "revision": 1,
-  "config_sha256": "9e9446f20b6670b7cebd8fd31a17a8d7bff80ef4f5a394222f308856cc3583ac",
-  "plan_sha256": "dd0d3d03b1f1438bdd2259bc7084cb7cb52ba343bd2727b63fd2ec6702456d2f",
+  "config_sha256": "3eb7a52b7a92d01c55f4eb6978e53206b2571f6e4e5ba133826ddad3df6d7aa3",
+  "plan_sha256": "d63822276d60359bb67190a73e166d54ee05a409c34d46c1840dcfff0b10a685",
   "files": {
     "scripts/benchmark_compare.py": "86e3920ab5dca82a2177b2e85f4a3018f09e230e25758ed60b6d3458310101b4",
-    "src/keisho/benchmark/comparison.py": "fec5a69bf3444e40b9befd4cf9b6e57c4034b13fc054404ba4c93e4720460737",
+    "src/keisho/benchmark/comparison.py": "fad3c6ea168dcf165e2b890e85a237b562eae7c620c6b73b836c0d8957f02110",
     "src/keisho/benchmark/experiment_freeze.py": "704cdcb4b4a0959cb150745012dd78b42700d4eeb9e6a64069c1e9883d1c130a",
     "src/keisho/benchmark/notes_reader.py": "0de635927c595b7a6a21a31020c402becb35bebaadad6f56ffbc6f6e9aa53d44"
   }

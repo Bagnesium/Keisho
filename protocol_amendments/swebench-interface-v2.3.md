@@ -1,6 +1,6 @@
-# SWE-bench interface amendment v2.3 — PROPOSAL (live execution NOT authorized)
+# SWE-bench interface amendment v2.3 — FROZEN 2026-10-23 (live execution requires a separate authorization record)
 
-Status: PROPOSAL. `live_execution_authorized: false`. No v2.3 authorization exists; the
+Status: FROZEN (Bagi delegated the decisions, approved 2026-10-23 15:02 UTC+5). `live_execution_authorized: false` in the config. No v2.3 authorization exists; the
 template carries `PENDING-V23-NEW-USER-AUTHORIZATION`. Supersedes v2.2 on this branch only;
 v2.1/v2.2 frozen records and raw runs are unchanged.
 
@@ -53,7 +53,12 @@ note_generation 0.018480; invalid predecessor attempts (2 × first-request bound
 2048 out) 0.055839. Total 9.805173 + reservation 0.189504 = 9.994677 ≤ 10.00.
 Finding: the v2.2 envelope does not fit $10 if cache-write rates apply.
 
-## 4. Open decisions (Bagi)
+## 4. Frozen decisions
+3 predecessor attempts; same seed; the non-empty user turn applies to the predecessor AND REPOSITORY_ONLY; successor total_tokens 234,000;
+the ledger reserves every input token at the cache-write rate (`CacheWriteReservingLedger`, `reservation_input_rates_per_million`
+sol 2.5 / luna 0.125; the runtime refuses if the catalog cache-write price exceeds it).
+
+## 5. Options that were open before the freeze
 N attempts (1–3); same vs varied seed; apply the user turn to REPOSITORY_ONLY or not; lower the
 successor budget vs raise the cap; price reservations at the cache-write rate in the ledger;
 whether to fund an early-finish rate estimate (N cheap first calls, ~$0.004 each observed,

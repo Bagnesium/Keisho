@@ -106,5 +106,5 @@
     "pre-registered predecessor attempt rule: at most 3 attempts; only a first-call premature finish admits a new attempt; zero automatic retries otherwise",
     "cost envelope recomputed at cache-write input rates; successor total tokens lowered to 234000"
   ],
-  "freeze_status": "PROPOSAL (not frozen; live execution NOT authorized)"
+  "freeze_status": "FROZEN 2026-10-23 (Bagi approved v2.3 freeze); live execution requires a separate authorization record"
 }

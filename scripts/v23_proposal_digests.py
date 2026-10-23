@@ -1,4 +1,4 @@
-"""Regenerate the v2.3 PROPOSAL freeze files offline. Never touches v2.1/v2.2 or historical records.
+"""Regenerate the v2.3 FROZEN freeze files offline. Never touches v2.1/v2.2 or historical records.
 
 All prices below are the frozen catalog rates recorded in the v2.2 run's public-catalog-preflight.json
 (gpt-6-sol / OpenAI: prompt 2.0, input_cache_write 2.5, completion 10.0 USD per million tokens;
@@ -30,7 +30,7 @@ for f in list(m['files']):
     if (ROOT / f).is_file() and not f.startswith(('.cache/', 'runs/')):
         m['files'][f] = sha(f)
 m['files'] = dict(sorted(m['files'].items()))
-m['freeze_status'] = 'PROPOSAL (not frozen; live execution NOT authorized)'
+m['freeze_status'] = 'FROZEN 2026-10-23 (Bagi approved v2.3 freeze); live execution requires a separate authorization record'
 m['binding_module_note'] = ('Binding modules are pinned in analysis/swebench-v2.3-final-source-freeze.json, '
                             'whose digest the authorization record must bind (checked in resolve_binding).')
 m['prospective_changes'] = [
@@ -50,6 +50,8 @@ cfg.update({'version': 'swebench-handoff/2.3', 'supersedes_configuration': 'conf
                                      'new_attempt_only_if': 'previous attempt finished on its first model call with zero completed tool calls',
                                      'valid_attempt': 'an attempt that completes at least one tool call; only the first valid attempt can reach the checkpoint',
                                      'disclosure': 'every attempt is kept and reported; invalid attempts are never used for handoffs'},
+            'reservation_input_rates_per_million': {'openai/gpt-6-sol-20260922': '2.5', 'openai/gpt-6-luna-20260922': '0.125'},
+            'reservation_pricing': 'every input token reserved at the frozen cache-write rate (CacheWriteReservingLedger)',
             'live_execution_authorized': False})
 dump('configs/swebench-comparison-v2.3.json', cfg)
 
@@ -67,7 +69,7 @@ assert total + reserve <= D(cfg['cap_usd']), (total, reserve)
 
 plan = load('analysis/swebench-comparison-v2.2-plan.json')
 plan.update({'version': 'swebench-plan/2.3', 'config_sha256': digest(cfg), 'experiment_manifest_sha256': digest(m),
-             'freeze_status': 'PROPOSAL; no spending authorized', 'new_spending_authorized': False,
+             'freeze_status': 'FROZEN; no spending authorized', 'new_spending_authorized': False,
              'first_request_upper_bound': FIRST_REQUEST_BOUND,
              'maximum_noncached_costs_usd': {'predecessor': q(pred), 'successor': q(succ), 'note_generation': q(gen),
                                              'invalid_predecessor_attempts': q(invalid)},
@@ -86,7 +88,7 @@ src = re.sub(r"V23_SPEC_SHA = '[^']*'", f"V23_SPEC_SHA = '{digest(cfg)}'", src)
 src = re.sub(r"V23_PLAN_SHA = '[^']*'", f"V23_PLAN_SHA = '{digest(plan)}'", src)
 (ROOT / 'src/keisho/benchmark/comparison.py').write_text(src)
 
-freeze = {'version': 'swebench-final-source-freeze/1.0', 'freeze_status': 'PROPOSAL', 'revision': 1,
+freeze = {'version': 'swebench-final-source-freeze/1.0', 'freeze_status': 'FROZEN', 'revision': 1,
           'config_sha256': digest(cfg), 'plan_sha256': digest(plan),
           'files': {f: sha(f) for f in ('scripts/benchmark_compare.py', 'src/keisho/benchmark/comparison.py',
                     'src/keisho/benchmark/experiment_freeze.py', 'src/keisho/benchmark/notes_reader.py')}}
