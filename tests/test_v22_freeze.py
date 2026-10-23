@@ -43,7 +43,7 @@ class V22Freeze(unittest.TestCase):
         with self.assertRaisesRegex(ValidationError, 'bind the final source freeze'):
             c.validate_final_source_freeze(dict(self.auth, final_source_freeze_sha256='0' * 64))
         with tempfile.TemporaryDirectory() as t:
-            fake = Path(t) / 'f.json'
+            fake = Path(t).resolve() / 'f.json'
             fake.write_text(json.dumps(dict(self.freeze, files={'src/keisho/benchmark/comparison.py': '0' * 64})))
             with patch.object(c, 'V22_FINAL_SOURCE_FREEZE', str(fake)):
                 with self.assertRaisesRegex(ValidationError, 'pinned binding module changed'):
