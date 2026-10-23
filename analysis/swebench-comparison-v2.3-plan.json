@@ -1,0 +1,67 @@
+{
+  "offline_only": true,
+  "provider_requests": 0,
+  "credential_validation_requests": 0,
+  "new_spending_authorized": false,
+  "config_sha256": "9e9446f20b6670b7cebd8fd31a17a8d7bff80ef4f5a394222f308856cc3583ac",
+  "task_sha256": "edc429b5c441e91fe9e661cf7c4ca721892cb60e89cb375c09dfcbb7b935b378",
+  "catalog_sha256": "c2401039b8759242b9d59dcd388eedc906ce1856d136197aa6bcc6f202fa574b",
+  "response_policy": "auxiliary-claims/2.0",
+  "response_format_sha256": "376bde7986cc2f8fd182f04e745c607933760bea7c306ea6e8e992b7f70be25a",
+  "agent_prompt_sha256": "bcede4362a8ba0c4e8cfb2104f87ad418eaee92923f7d1f7fe522af01005c5fe",
+  "schema_native_tokens": 0,
+  "first_request_upper_bound": 2444,
+  "cap_usd_proposed": "10.00",
+  "maximum_noncached_costs_usd": {
+    "predecessor": "1.49864400",
+    "successor": "8.23221000",
+    "note_generation": "0.01848000",
+    "invalid_predecessor_attempts": "0.05583900"
+  },
+  "total_envelope_usd": "9.80517300",
+  "largest_request_reservation_usd": "0.18950400",
+  "assumptions": "Frozen catalog rates with every input token charged at the cache-write rate (sol 2.5, luna 0.125 USD/M), no cache-read discount, possible 5% BYOK fee. Predecessor total tokens 276,000; successor total tokens 234000; request input tokens 64,000; note generation input allowance 64,000; up to 2 extra first-call-only predecessor attempts bounded by a 2444-token first request. Task sympy__sympy-20590; gpt-6-sol predecessor and successors; gpt-6-luna note generation; reasoning effort none. No paid inference authorized.",
+  "endpoint_schema_support_in_saved_catalog": {
+    "openai/gpt-6-sol": {
+      "endpoint": "OpenAI | openai/gpt-6-sol-20260922",
+      "supported_parameters": [
+        "reasoning",
+        "include_reasoning",
+        "seed",
+        "max_tokens",
+        "response_format",
+        "structured_outputs",
+        "tools",
+        "tool_choice",
+        "verbosity",
+        "reasoning_effort"
+      ]
+    },
+    "openai/gpt-6-luna": {
+      "endpoint": "OpenAI | openai/gpt-6-luna-20260922",
+      "supported_parameters": [
+        "reasoning",
+        "include_reasoning",
+        "seed",
+        "max_tokens",
+        "response_format",
+        "structured_outputs",
+        "tools",
+        "tool_choice",
+        "verbosity",
+        "reasoning_effort"
+      ]
+    }
+  },
+  "version": "swebench-plan/2.3",
+  "action_wire_version": "flat-or-args/1.0",
+  "wire_action_contract_sha256": "b17d5737b9f67e70f8b21ea6e7d27a800b726acee86d4fe1b88f7e975e678d95",
+  "internal_action_contract_sha256": "48af7498236adb94a9e291c17269239ef998c1eda977dfd13e7dc1c14da73388",
+  "intervention": "Specification v2.3 replaces the empty trailing user message with a constant non-empty turn, adds a premature-finish guard for the predecessor, a pre-registered bound of 3 predecessor attempts, and a cache-write-priced envelope.",
+  "annotation_guidance_version": "annotation-guidance/1.0",
+  "annotation_guidance_sha256": "4355a256a11dc729a2c6d35e95b770ae041777a1c96d19217003222406f25d1e",
+  "patch_export_policy": "source-and-artifacts/2.0",
+  "tool_output_policy": "bounded-output/1.0",
+  "experiment_manifest_sha256": "bd40f7c0b1a1388cbfd56c36876a182a9fe0bde6c88ff22d80051c6858d28313",
+  "freeze_status": "PROPOSAL; no spending authorized"
+}

@@ -1,0 +1,8 @@
+{
+  "source_run": "runs/swebench-v2.2-five-way-once-001/predecessor (Bagi's Mac, read-only copy of fields)",
+  "response_file_sha256": "fd365973cbe20a93c02c4c53c3db748ddec9fc2eb7ec6a55c8be2bfe1891da6f",
+  "request_file_sha256": "67a6f8493ff19638d56ff4b58966d64cc68ea153c77c037406eef24bede7cc9c",
+  "text": "{\"action\":{\"tool\":\"finish\",\"answer\":\"Unable to investigate or modify the repository in this run.\"},\"claims\":[]}",
+  "usage": {"input_tokens": 1322, "output_tokens": 31, "cost_usd": "0.0036115", "openrouter_cache_write_tokens": 1315, "openrouter_cached_tokens": 0},
+  "recorded_request_messages": [["system", 5665], ["user", 758], ["user", 0]]
+}

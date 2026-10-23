@@ -38,6 +38,13 @@ class V22Freeze(unittest.TestCase):
         self.assertIn('src/keisho/benchmark/notes_reader.py', b)
 
     def test_final_source_freeze_pins_binding_modules(self):
+        import hashlib
+        pinned = self.freeze['files']['src/keisho/benchmark/comparison.py']
+        if hashlib.sha256((c.ROOT / 'src/keisho/benchmark/comparison.py').read_bytes()).hexdigest() != pinned:
+            # On v2.3+ branches comparison.py has moved on: the frozen v2.2 binding must refuse (fail closed).
+            with self.assertRaisesRegex(ValidationError, 'pinned binding module changed'):
+                c.validate_final_source_freeze(self.auth)
+            return
         c.validate_final_source_freeze(self.auth)
         self.assertIn('src/keisho/benchmark/comparison.py', self.freeze['files'])
         with self.assertRaisesRegex(ValidationError, 'bind the final source freeze'):

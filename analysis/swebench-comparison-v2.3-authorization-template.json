@@ -1,0 +1,11 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "PENDING-V23-NEW-USER-AUTHORIZATION",
+  "config_sha256": "9e9446f20b6670b7cebd8fd31a17a8d7bff80ef4f5a394222f308856cc3583ac",
+  "plan_sha256": "dd0d3d03b1f1438bdd2259bc7084cb7cb52ba343bd2727b63fd2ec6702456d2f",
+  "final_source_freeze_sha256": "e4c3b095df1d45ddc94b2ef69ba44ac1d247ddc0e8bdf5f65fd5089e4c147d2f",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": false,
+  "note": "TEMPLATE ONLY; no inference authorized. \"attempts\" counts launches; predecessor attempts are governed by the config rule."
+}
