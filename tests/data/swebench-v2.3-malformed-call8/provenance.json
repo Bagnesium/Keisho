@@ -1,0 +1,5 @@
+{"source": "runs/swebench-v2.3-five-way-once-001/predecessor/predecessor_call_008-response.json (Mac, read-only)",
+ "response_file_sha256": "c3a35247ac5b3e5ecee7aff0da8c43c8ad761520309826533b5718c4ef7d4375",
+ "text_sha256": "bab57db481d9e62c740b367644b7a0a3f1f1ae1c36649ad191d7f919416b0561",
+ "recorded_reason": "response must contain action and claims only",
+ "text": "{\"action\":{\"tool\":\"shell\",\"command\":\"python - <<'PY'\\np='sympy/core/tests/test_symbol.py'\\ns=open(p).read(); needle='def test_Dummy():\\\\n'\\nassert needle in s\\ns=s.replace(needle,'''def test_symbol_has_no_dict():\\n    for sym in (Symbol('s'), Symbol('s', real=True), Dummy('s')):\\n        raises(AttributeError, lambda: sym.__dict__)\\n\\n\\n'''+needle,1)\\nopen(p,'w').write(s)\\nPY\\npython -m pytest -q sympy/core/tests/test_symbol.py sympy/printing/tests/test_str.py\",\"claims\":[{\"statement\":\"test_symbol.py contains Symbol and Dummy tests appropriate for a regression assertion.\",\"status\":\"OBSERVED\",\"evidence_ids\":[\"predecessor_result_007\"],\"basis\":\"tool\"}]}  }"}

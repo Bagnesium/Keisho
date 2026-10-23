@@ -71,6 +71,12 @@ V23_SPEC_SHA = '3eb7a52b7a92d01c55f4eb6978e53206b2571f6e4e5ba133826ddad3df6d7aa3
 V23_PLAN_SHA = 'd63822276d60359bb67190a73e166d54ee05a409c34d46c1840dcfff0b10a685'
 V23_FINAL_SOURCE_FREEZE = 'analysis/swebench-v2.3-final-source-freeze.json'
 V23_VERSION = 'swebench-handoff/2.3'
+V24_SPEC_SHA = 'e9fe9eaa098cba683d52a121bf6c23d1995ae9aefb09fce6ce894bbbfae0c7b9'
+V24_PLAN_SHA = '6f68728f10457269cb86410316286d48235ce30276c52ed9934e6a997f266e56'
+V24_FINAL_SOURCE_FREEZE = 'analysis/swebench-v2.4-final-source-freeze.json'
+V24_VERSION = 'swebench-handoff/2.4'
+MALFORMED_RESPONSE_POLICY = 'invalid-action-strike/1.0'
+GUARDED_VERSIONS = (V23_VERSION, V24_VERSION)
 
 from keisho.agents.providers import openai_chat, openrouter_chat
 
@@ -242,14 +248,14 @@ def load_frozen_plan(config_path=None, plan_path=None):
                      READINESS_SPEC_SHA: READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                      V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
                      V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA,
-                     V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA}
+                     V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA, V24_SPEC_SHA: V24_PLAN_SHA}
         require(digest(config) in supported, 'configuration differs from frozen supported specification')
         expected_plan = supported[digest(config)]
         require(digest(plan) == expected_plan, 'plan differs from matched frozen plan')
         require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
         sel_file = (PRESELECT / f"{task_instance}-plan.json") if task_instance and (PRESELECT / f"{task_instance}-plan.json").exists() else (PRESELECT / 'plan.json')
         selection = read_input(sel_file)
-        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA) else SELECTION_PLAN_SHA
+        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA) else SELECTION_PLAN_SHA
         require(digest(selection) == expected_sel_sha, 'frozen selection/order changed')
         require(selection['task_sha256'] == digest(task) and task['instance_id'] == config['selected_instance'], 'selected task changed')
         require(selection['branch_order'] == random.Random(config['branch_seed']).sample(config['conditions'], len(config['conditions'])), 'branch order changed')
@@ -258,7 +264,7 @@ def load_frozen_plan(config_path=None, plan_path=None):
     require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
     require(plan['plausibly_fits'] and config['selection']['count'] == 1, 'one comparison must fit cap')
     require(config['automatic_retries'] == 0, 'no automatic paid retries')
-    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA):
+    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA):
         from .experiment_freeze import validate_freeze
         validate_freeze(config, ROOT)
     return config, task, plan
@@ -307,12 +313,12 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
     response_settings(config)
     authorization = read_input(authorization_path)
     require(authorization['cap_usd'] == config['cap_usd'] == '10.00', 'authorization cap changed')
-    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA):
+    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA):
         expected_plan = {NEXT_SPEC_SHA:NEXT_PLAN_SHA, WIRE_SPEC_SHA:WIRE_PLAN_SHA,
                          READINESS_SPEC_SHA:READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                          V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
                          V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA,
-                         V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA}[digest(config)]
+                         V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA, V24_SPEC_SHA: V24_PLAN_SHA}[digest(config)]
         require(authorization.get('version')=='swebench-authorization/2.0' and
             authorization.get('config_sha256')==digest(config) and authorization.get('plan_sha256')==expected_plan and
             authorization.get('attempts')==1 and isinstance(authorization.get('authorization_id'),str) and authorization['authorization_id'].strip(),
@@ -324,6 +330,8 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
             validate_final_source_freeze(authorization)
         if digest(config) == V23_SPEC_SHA:
             validate_final_source_freeze(authorization, V23_FINAL_SOURCE_FREEZE)
+        if digest(config) == V24_SPEC_SHA:
+            validate_final_source_freeze(authorization, V24_FINAL_SOURCE_FREEZE)
         guard = RUNROOT.parent / ('authorized-' + digest({'authorization_id':authorization['authorization_id']})[:24])
         return LaunchBinding(Path(config_path).resolve(),Path(plan_path).resolve(),Path(authorization_path).resolve(),
             safe_destination(run_dir),guard,config,task,plan,authorization)
@@ -413,7 +421,7 @@ def make_handoffs(task, predecessor, inventory, base_inventory, note_models, con
             require(response.text.strip(), 'empty ordinary summary')
             texts['SUMMARY_2K'] = response.text.strip()
         else:
-            if config.get('version') in ('swebench-handoff/2.2', V23_VERSION):
+            if config.get('version') in ('swebench-handoff/2.2', V23_VERSION, V24_VERSION):
                 from .notes_reader import read_structured_notes
                 fields = json.loads(PROMPTS.read_text())['structured_fields']
                 try:
@@ -447,7 +455,7 @@ def make_handoffs(task, predecessor, inventory, base_inventory, note_models, con
 
 def predecessor_attempt_limit(config):
     """v2.3: pre-registered bound on predecessor attempts; 1 (no further attempt) for every earlier version."""
-    if config.get('version') != V23_VERSION:
+    if config.get('version') not in GUARDED_VERSIONS:
         return 1
     limit = config['predecessor_attempts']['max_attempts']
     require(isinstance(limit, int) and 1 <= limit <= 3, 'predecessor attempt limit must be 1..3')
@@ -460,7 +468,7 @@ def classify_premature_finish(config, info):
     A predecessor finish with zero completed tool calls is a premature finish: the attempt is invalid, its raw records are
     kept, and no handoff is built from it. Only a finish on the very first model call counts toward a new pre-registered
     attempt; a zero-tool finish after rejected actions ends the run."""
-    if config.get('version') != V23_VERSION or info['reason'] != 'finished' or info['tool_calls'] != 0:
+    if config.get('version') not in GUARDED_VERSIONS or info['reason'] != 'finished' or info['tool_calls'] != 0:
         return None
     return {'guard': 'premature-finish-guard/1.0', 'reason': 'finish before any completed tool call',
             'model_calls': info['model_calls'], 'counts_as_invalid_attempt': info['model_calls'] == 1,
@@ -477,9 +485,9 @@ def execution_result(execution):
 def runtime_preflight(binding, *, dry=False):
     config, task, plan = binding.config, binding.task, binding.plan
     setup = validate_setup(config)  # Before creating a paid-run guard or any model.
-    catalog_path = (PRESELECT / 'provider-catalog-v2.0.json') if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3') else (PRESELECT / 'provider-catalog.json')
+    catalog_path = (PRESELECT / 'provider-catalog-v2.0.json') if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3', 'swebench-handoff/2.4') else (PRESELECT / 'provider-catalog.json')
     catalog = read_input(catalog_path)
-    if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3'):
+    if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3', 'swebench-handoff/2.4'):
         for alias in ('openai/gpt-6-sol', 'openai/gpt-6-luna'):
             canonical = openrouter_chat.MODEL_ALIASES.get(alias, alias)
             model_entry = next((row for row in catalog["models"] if row["id"] == alias), None)
@@ -494,7 +502,7 @@ def runtime_preflight(binding, *, dry=False):
             inputs, cached, outputs = openrouter_chat.MODEL_PRICES[canonical if canonical in openrouter_chat.MODEL_PRICES else alias]
             price = endpoint["pricing"]
             require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
-            if config and config.get('version') == V23_VERSION:
+            if config and config.get('version') in GUARDED_VERSIONS:
                 require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= reservation_input_rate(config, canonical, alias), "catalog cache-write price exceeds reserved input rate")
             require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
     else:
@@ -507,7 +515,7 @@ def runtime_preflight(binding, *, dry=False):
     credentials = load_project_env(ROOT, environ=dict(__import__('os').environ) if dry else None)['present']
     require(credentials['OPENROUTER_API_KEY'], 'configured provider credential missing')
     provider = read_input(ROOT / 'configs' / config['provider_config'])
-    expected_prov_sha = V20_PROVIDER_SHA if digest(config) in (V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA) else PROVIDER_SHA
+    expected_prov_sha = V20_PROVIDER_SHA if digest(config) in (V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA) else PROVIDER_SHA
     require(digest(provider) == expected_prov_sha, 'frozen provider mapping/routing changed')
     ca = (ROOT / 'configs' / provider['tls']['ca_file']).resolve()
     require(ca.is_file() and hashlib.sha256(ca.read_bytes()).hexdigest() == provider['tls']['ca_sha256'], 'pinned verified CA missing/changed')
@@ -571,7 +579,7 @@ def reservation_input_rate(config, *names):
 
 
 def make_ledger(config, *args, **kwargs):
-    if config.get('version') == V23_VERSION:
+    if config.get('version') in GUARDED_VERSIONS:
         return CacheWriteReservingLedger(*args, reservation_input_rates=config['reservation_input_rates_per_million'], **kwargs)
     return SpendLedger(*args, **kwargs)
 
@@ -584,7 +592,7 @@ def check_public_catalog(ca, config=None):
         with verified_opener(ca).open(Request(BASE_URL + path, headers={'Accept': 'application/json'}), timeout=60) as r:
             return json.loads(r.read())
     models = get('/models')['data']
-    v20 = config and config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3')
+    v20 = config and config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3', 'swebench-handoff/2.4')
     aliases = ('openai/gpt-6-sol', 'openai/gpt-6-luna') if v20 else ('openai/gpt-4.1-mini', 'openai/gpt-4.1')
     catalog = {'models': [m for m in models if m['id'] in aliases],
                'endpoints': {m: get('/models/' + m + '/endpoints') for m in aliases}}
@@ -603,7 +611,7 @@ def check_public_catalog(ca, config=None):
             inputs, cached, outputs = openrouter_chat.MODEL_PRICES[canonical if canonical in openrouter_chat.MODEL_PRICES else alias]
             price = endpoint["pricing"]
             require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
-            if config and config.get('version') == V23_VERSION:
+            if config and config.get('version') in GUARDED_VERSIONS:
                 require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= reservation_input_rate(config, canonical, alias), "catalog cache-write price exceeds reserved input rate")
             require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
     else:
@@ -646,6 +654,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
     config, task, plan = binding.config, binding.task, binding.plan
     system, response_policy, output_format = response_settings(config)
     wire_options = action_wire_options(config)
+    malformed_options = {'malformed_response_policy': MALFORMED_RESPONSE_POLICY} if config.get('version') == V24_VERSION else {}
     ctx = runtime_preflight(binding)
     public_catalog = check_public_catalog(ctx['ca'], config)
     index = claim_launch(binding)  # Atomic authorization claim before any model.
@@ -687,7 +696,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
                     observer=lambda payload,status,redacted:audit.write_artifact(f'{prefix}wire-response-{number:03d}.json',
                         {'body_base64':base64.b64encode(payload).decode(),'http_status':status,'credential_redaction_applied':redacted,'headers_recorded':False})
                 return http_transport(body,key,base_url=BASE_URL,provider='OpenRouter',ca_file=ca,response_observer=observer)
-        model_cls = V20OpenRouterChatModel if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3') else OpenRouterChatModel
+        model_cls = V20OpenRouterChatModel if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3', 'swebench-handoff/2.4') else OpenRouterChatModel
         adapter = model_cls(identity, authorized=True, tokenizer=native, mode=mode, response_model_ids=allowed,
                  agent_response_format=output_format if mode == 'agent' else None,
                  transport=transport)
@@ -721,7 +730,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
         image = image_metadata['image_id']
         require(json.loads(docker('image', 'inspect', image).stdout)[0]['Id'] == image, 'prepared image unavailable')
         index.write_artifact('task-image.json', image_metadata)
-        no_handoff_text = config.get('empty_handoff_user_text', '') if config.get('version') == V23_VERSION else ''
+        no_handoff_text = config.get('empty_handoff_user_text', '') if config.get('version') in GUARDED_VERSIONS else ''
         max_attempts = predecessor_attempt_limit(config)
         attempt = 0
         while True:
@@ -733,7 +742,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
                 checkpoint = ValidationCheckpoint()
                 execution = run_agent(model('predecessor',audit=predecessor if observable_audit_enabled(config) else None), session, Recorder(predecessor), task['problem_statement'], system, no_handoff_text,
                                       config['branch_seed'], Budgets(**config['predecessor_budgets']), role='predecessor',
-                                      checkpoint_predicate=checkpoint, time_limit_seconds=config['time_limit_seconds'], response_policy=response_policy, **wire_options)
+                                      checkpoint_predicate=checkpoint, time_limit_seconds=config['time_limit_seconds'], response_policy=response_policy, **wire_options, **malformed_options)
                 predecessor_info = execution_result(execution)
                 predecessor.write_artifact('execution.json', predecessor_info)
                 premature = classify_premature_finish(config, predecessor_info)
@@ -785,7 +794,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
                 require(session.inventory() == inventory, 'branch restoration mismatch')
                 execution = run_agent(model('successor', stage=condition,audit=branch if observable_audit_enabled(config) else None), session, Recorder(branch), task['problem_statement'], successor_system,
                                       texts[condition] or no_handoff_text, config['branch_seed'], Budgets(**config['successor_budgets']),
-                                      time_limit_seconds=config['time_limit_seconds'], response_policy=response_policy, **wire_options)
+                                      time_limit_seconds=config['time_limit_seconds'], response_policy=response_policy, **wire_options, **malformed_options)
                 branch.write_artifact('calls.json', execution.calls)
                 branch.write_artifact('execution.json', execution)
                 measure(branch,session,'successor')

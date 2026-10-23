@@ -34,6 +34,19 @@ def report_status(report, instance):
     return 'error'
 
 
+def evaluator_dataset(private, instance_id):
+    """Task-specific pinned evaluator row; refuse unless every row is the frozen task."""
+    private = Path(private)
+    require(isinstance(instance_id, str) and re.fullmatch(r'[A-Za-z0-9_.-]+', instance_id) is not None, 'unsafe instance id')
+    dataset = private / f'{instance_id}-selected-task-evaluator.jsonl'
+    if not dataset.is_file():
+        dataset = private / 'selected-task-evaluator.jsonl'
+    require(dataset.is_file() and not dataset.is_symlink(), 'pinned evaluator task row not prepared')
+    rows = [json.loads(line) for line in dataset.read_text().splitlines() if line.strip()]
+    require(len(rows) == 1 and rows[0].get('instance_id') == instance_id, 'evaluator task row instance id mismatch')
+    return dataset
+
+
 def evaluate(private, config, task, condition, prediction=None, *, gold=False, no_patch=False, run_namespace=None):
     private = Path(private).resolve()
     patch = Path(prediction).read_text() if prediction else ('gold' if gold else 'unpatched')
@@ -43,8 +56,7 @@ def evaluate(private, config, task, condition, prediction=None, *, gold=False, n
     # A pinned official task-repo row is a documented local dataset input. Its
     # unchanged eval script/keys and digest-pinned image avoid rebuilding the
     # same image on every grade. The source/HF equality check is an admission gate.
-    dataset = private / 'selected-task-evaluator.jsonl'
-    require(dataset.is_file(), 'pinned evaluator task row not prepared')
+    dataset = evaluator_dataset(private, task['instance_id'])
     command = [str(private / 'venv/bin/swebench'), 'eval', str(dataset), '-i', task['instance_id'],
                '--run-id', run_id, '-j', '1']
     command += ['--gold'] if gold else ['-p', str(Path(prediction).resolve())]

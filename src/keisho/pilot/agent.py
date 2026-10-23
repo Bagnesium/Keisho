@@ -117,8 +117,9 @@ def is_path_escape(action, reason=""):
 def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_text: str, system_prompt: str,
               handoff_text: str, seed: int, budgets: Budgets, role="successor", checkpoint_tools: int | None = None,
               checkpoint_predicate=None, time_limit_seconds: float | None = None, response_policy=STRICT,
-              action_wire_version=None) -> AgentExecution:
+              action_wire_version=None, malformed_response_policy=None) -> AgentExecution:
     require(response_policy in (STRICT, AUXILIARY), 'unsupported response policy')
+    require(malformed_response_policy in (None, 'invalid-action-strike/1.0'), 'unsupported malformed response policy')
     require(action_wire_version in (None, ACTION_WIRE_VERSION), 'unsupported action wire version')
     if response_policy == AUXILIARY or action_wire_version is not None:
         require(callable(getattr(session, 'validate_action', None)), 'amended policy requires independent action validator')
@@ -174,11 +175,34 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
             if action_wire_version is not None:
                 recorder.raw.write_artifact(f'{role}_call_{number:03d}-action-wire.json',
                     rejected_response(str(exc), text=response.text, stage='response' if parsing_started else 'generation'))
+            strike = malformed_response_policy is not None and parsing_started
             recorder.raw.write_artifact(f'{role}_call_{number:03d}-protocol-failure.json', {
                 'exception_type': type(exc).__name__, 'reason': str(exc),
-                'tool_executed': False, 'automatic_retry': False})
-            reason = "model_failure"
-            break
+                'tool_executed': False, 'automatic_retry': False,
+                **({'malformed_response_policy': malformed_response_policy, 'counted_as_invalid_action': True,
+                    'consecutive_failures_after': consecutive_failures + 1} if strike else {})})
+            if not strike:
+                reason = "model_failure"
+                break
+            # v2.4: an unparseable or schema-invalid response is an invalid action under the 3-strikes rule.
+            # Nothing is executed; the model receives the same rejection feedback as the invalid-action path.
+            if tools >= budgets.tool_calls:
+                audit_admission(number, None, 'not_executed', 'tool call budget exhausted')
+                break
+            messages.append(Message("assistant", response.text))
+            tools += 1
+            tool_id, result_id = f"{role}_tool_{tools:03d}", f"{role}_result_{tools:03d}"
+            recorder.emit(tool_id, EventKind.TOOL_CALL, role, {"action": None, "malformed_response": True}, (call.response_event_id,))
+            audit_admission(number, None, 'rejected', str(exc))
+            result = {"error": str(exc), "invalid_action": str(exc)}
+            recorder.emit(result_id, EventKind.TOOL_RESULT, role, result, (tool_id,))
+            known.add(result_id)
+            messages.append(Message("user", canonical_json({"event_id": result_id, "tool_result": result})))
+            consecutive_failures += 1
+            if consecutive_failures >= 3:
+                reason = "repeated_tool_failure"
+                break
+            continue
         messages.append(Message("assistant", response.text))
         if 'framing' in parsed:
             recorder.raw.write_artifact(f'{role}_call_{number:03d}-stripped-framing.json', parsed['framing'])
