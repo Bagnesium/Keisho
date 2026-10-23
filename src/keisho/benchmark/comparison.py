@@ -470,7 +470,7 @@ def runtime_preflight(binding, *, dry=False):
             'image_metadata': image_metadata, 'credential_presence': credentials}
 
 
-def check_public_catalog(ca):
+def check_public_catalog(ca, config=None):
     """Unauthenticated public metadata only; no model/credential validation call."""
     from urllib.request import Request
     from keisho.agents.providers.openai_chat import verified_opener
@@ -478,13 +478,31 @@ def check_public_catalog(ca):
         with verified_opener(ca).open(Request(BASE_URL + path, headers={'Accept': 'application/json'}), timeout=60) as r:
             return json.loads(r.read())
     models = get('/models')['data']
-    aliases = ('openai/gpt-4.1-mini', 'openai/gpt-4.1')
+    v20 = config and config.get('version') == 'swebench-handoff/2.0'
+    aliases = ('openai/gpt-6-sol', 'openai/gpt-6-luna') if v20 else ('openai/gpt-4.1-mini', 'openai/gpt-4.1')
     catalog = {'models': [m for m in models if m['id'] in aliases],
                'endpoints': {m: get('/models/' + m + '/endpoints') for m in aliases}}
-    validate_catalog(catalog)
-    for alias in aliases:
-        e = next(e for e in catalog['endpoints'][alias]['data']['endpoints'] if e['tag'] == 'openai')
-        require('structured_outputs' in e['supported_parameters'], 'current endpoint lacks schema support')
+    if v20:
+        for alias in aliases:
+            canonical = openrouter_chat.MODEL_ALIASES.get(alias, alias)
+            model_entry = next((row for row in catalog["models"] if row["id"] == alias), None)
+            require(model_entry is not None, "catalog model missing")
+            endpoints = catalog["endpoints"][alias]["data"]["endpoints"]
+            selected = [row for row in endpoints if row["tag"] == "openai" and row["provider_name"] == "OpenAI"]
+            require(len(selected) == 1, "exact OpenAI endpoint missing or ambiguous")
+            endpoint = selected[0]
+            require({"max_tokens", "seed", "response_format"} <= set(endpoint["supported_parameters"]), "required parameters unsupported")
+            require("structured_outputs" in endpoint["supported_parameters"], "frozen endpoint lacks schema support")
+            require(endpoint["context_length"] >= 128000 and endpoint["max_completion_tokens"] >= 2048, "catalog request limits below frozen budgets")
+            inputs, cached, outputs = openrouter_chat.MODEL_PRICES[canonical if canonical in openrouter_chat.MODEL_PRICES else alias]
+            price = endpoint["pricing"]
+            require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
+            require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
+    else:
+        validate_catalog(catalog)
+        for alias in aliases:
+            e = next(e for e in catalog['endpoints'][alias]['data']['endpoints'] if e['tag'] == 'openai')
+            require('structured_outputs' in e['supported_parameters'], 'current endpoint lacks schema support')
     return catalog
 
 
@@ -521,7 +539,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
     system, response_policy, output_format = response_settings(config)
     wire_options = action_wire_options(config)
     ctx = runtime_preflight(binding)
-    public_catalog = check_public_catalog(ctx['ca'])
+    public_catalog = check_public_catalog(ctx['ca'], config)
     index = claim_launch(binding)  # Atomic authorization claim before any model.
     provider, ca, native = ctx['provider'], ctx['ca'], ctx['native']
     prediction_dir = PRIVATE / 'predictions' / binding.run_dir.name

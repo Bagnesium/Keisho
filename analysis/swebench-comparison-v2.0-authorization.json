@@ -1,0 +1,14 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "swebench-v2.0-20261023-once-001",
+  "recorded_at_utc": "2026-10-23T02:09:00.000000+00:00",
+  "config_sha256": "829974249ab8a502e04315512c7b2bb07f12ae087a485c4f6a4ac108f325f2a7",
+  "plan_sha256": "763d0a022424b72148e48ea8dd55057ced6b45c1466651bec03b04715805dd40",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": true,
+  "automatic_retries": 0,
+  "models_or_provider_fallbacks": false,
+  "user_authorization": "I approve exactly one paid run of the frozen v2.0 five-way comparison (commit c9f4ad3), cap $10, sympy__sympy-20590, gpt-6-sol and gpt-6-luna, reasoning effort none. Disclose in the paper's methods that six earlier pilot runs (v1.4 to v1.9, about $0.88 total) stopped early before any successor ran. Do not change any prompt, task, or setting. If the predecessor fails to edit, stop the run and report instead of retrying. After the run, report the actual cost and the results table.",
+  "note": "Fresh explicit user authorization for one bounded five-way SWE-bench v2.0 comparison block on sympy__sympy-20590 with gpt-6-sol and gpt-6-luna, reasoning effort none. Dollar cap $10.00. Automatic retries: 0. Fallbacks disabled. Predecessor total tokens: 276,000, successor total tokens: 248,400, request input tokens: 64,000."
+}

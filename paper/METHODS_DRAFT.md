@@ -175,6 +175,30 @@ without creating the live guard or invoking a provider. Completed failures remai
 guarded. Configuration 1.2 and its pending authorization template are not executable
 with paid permission merely because credentials exist.
 
+## Prior pilot disclosure and protocol evolution
+
+Six earlier exploratory pilot runs on SWE-bench Verified (specifications v1.4 through v1.9,
+totaling approximately $0.88 in actual provider spend / $2.38 in conservative accounting)
+stopped early during the predecessor phase before any successor condition ran:
+1. **v1.4** (`runs/swebench-v1.4-five-way-once-001`, $0.0164 actual spend): halted at Call 6
+   (`budget_exhausted`) due to conversational context flooding from unbounded file listing.
+2. **v1.5** (`runs/swebench-v1.5-five-way-once-001`, $0.1129 actual spend): halted at Call 13
+   (`budget_exhausted` at 180k tokens) while inspecting xarray formatting logic.
+3. **v1.6** (`runs/swebench-v1.6-five-way-once-001`, $0.1269 actual spend): halted at Call 10
+   (`budget_exhausted`) exceeding the 32k request input ceiling.
+4. **v1.7** (`runs/swebench-v1.7-five-way-once-001`, $0.0342 actual spend): halted at Call 8
+   (`invalid_run`) due to fatal `read_file` error on misspelled `atomic.py`.
+5. **v1.8** (`runs/swebench-v1.8-five-way-once-001`, $0.2694 actual spend): halted at Call 22
+   (`budget_exhausted` at 400k tokens) tracing inheritance chains without editing.
+6. **v1.9** (`runs/swebench-v1.9-five-way-once-001`, $0.3249 actual spend): halted at Call 29
+   (`checkpoint_not_reached`). With `benchmark-agent/5.0` workflow pacing, the predecessor
+   diagnosed the bug in `sympy/core/symbol.py` but finished without making a non-test source edit.
+
+All thirty successor conditions across these six pilot runs remained unstarted. Following
+these disclosures, specification v2.0 transitions to OpenAI GPT-6 models (`openai/gpt-6-sol`
+for predecessor and successors, `openai/gpt-6-luna` for note generators, with reasoning effort
+explicitly set to `"none"`) under a $10.00 cap.
+
 ## Engineering validation and planned analysis
 
 Fresh public-command subprocesses on host Python and the evaluator venv reproduce and
