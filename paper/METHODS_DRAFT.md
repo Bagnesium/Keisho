@@ -177,27 +177,32 @@ with paid permission merely because credentials exist.
 
 ## Prior pilot disclosure and protocol evolution
 
-Six earlier exploratory pilot runs on SWE-bench Verified (specifications v1.4 through v1.9,
-totaling approximately $0.88 in actual provider spend / $2.38 in conservative accounting)
-stopped early during the predecessor phase before any successor condition ran:
-1. **v1.4** (`runs/swebench-v1.4-five-way-once-001`, $0.0164 actual spend): halted at Call 6
+Seven earlier exploratory pilot runs on SWE-bench Verified (specifications v1.4 through v2.0,
+totaling approximately $0.8893 in actual provider spend / $2.3853 in conservative ledger accounting;
+$0.8848 actual / $2.3808 accounted across v1.4–v1.9) stopped early during the predecessor phase
+before any successor condition ran:
+1. **v1.4** (`runs/swebench-v1.4-five-way-once-001`, $0.0164 actual spend / $0.0257 accounted spend): halted at Call 6
    (`budget_exhausted`) due to conversational context flooding from unbounded file listing.
-2. **v1.5** (`runs/swebench-v1.5-five-way-once-001`, $0.1129 actual spend): halted at Call 13
+2. **v1.5** (`runs/swebench-v1.5-five-way-once-001`, $0.1129 actual spend / $0.3341 accounted spend): halted at Call 13
    (`budget_exhausted` at 180k tokens) while inspecting xarray formatting logic.
-3. **v1.6** (`runs/swebench-v1.6-five-way-once-001`, $0.1269 actual spend): halted at Call 10
-   (`budget_exhausted`) exceeding the 32k request input ceiling.
-4. **v1.7** (`runs/swebench-v1.7-five-way-once-001`, $0.0342 actual spend): halted at Call 8
+3. **v1.6** (`runs/swebench-v1.6-five-way-once-001`, $0.1269 actual spend / $0.4103 accounted spend): halted at Call 14
+   (`stopped_on_error` / `budget_exhausted`) exceeding the 32k request input ceiling.
+4. **v1.7** (`runs/swebench-v1.7-five-way-once-001`, $0.0342 actual spend / $0.0933 accounted spend): halted at Call 8
    (`invalid_run`) due to fatal `read_file` error on misspelled `atomic.py`.
-5. **v1.8** (`runs/swebench-v1.8-five-way-once-001`, $0.2694 actual spend): halted at Call 22
+5. **v1.8** (`runs/swebench-v1.8-five-way-once-001`, $0.2694 actual spend / $0.7777 accounted spend): halted at Call 22
    (`budget_exhausted` at 400k tokens) tracing inheritance chains without editing.
-6. **v1.9** (`runs/swebench-v1.9-five-way-once-001`, $0.3249 actual spend): halted at Call 29
+6. **v1.9** (`runs/swebench-v1.9-five-way-once-001`, $0.3249 actual spend / $0.7397 accounted spend): halted at Call 29
    (`checkpoint_not_reached`). With `benchmark-agent/5.0` workflow pacing, the predecessor
    diagnosed the bug in `sympy/core/symbol.py` but finished without making a non-test source edit.
+7. **v2.0** (`runs/swebench-v2.0-five-way-once-001`, $0.0045 actual spend / $0.0045 accounted spend): halted at Call 1
+   (`model_failure`). `openai/gpt-6-sol-20260922` prepended conversational preamble prose before its JSON action,
+   failing strict JSON-only decoding with zero retries.
 
-All thirty successor conditions across these six pilot runs remained unstarted. Following
-these disclosures, specification v2.0 transitions to OpenAI GPT-6 models (`openai/gpt-6-sol`
-for predecessor and successors, `openai/gpt-6-luna` for note generators, with reasoning effort
-explicitly set to `"none"`) under a $10.00 cap.
+All thirty-five successor conditions across these seven pilot runs remained unstarted. Following
+these disclosures, specification v2.1 introduces a robust single top-level JSON reader with Zero-Skip
+brace enforcement and conservative wrapper checks, applied identically across predecessor and all five
+successor conditions, while preserving byte-identical prompt text, task (`sympy__sympy-20590`), models
+(`openai/gpt-6-sol` and `openai/gpt-6-luna` with reasoning effort `"none"`), and the $10.00 cap.
 
 ## Engineering validation and planned analysis
 
