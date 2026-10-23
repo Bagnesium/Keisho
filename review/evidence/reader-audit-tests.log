@@ -1,0 +1,20 @@
+test_structured_note_generation_uses_guarded_reader (tests.test_reader_audit_v21.CallerCoverage.test_structured_note_generation_uses_guarded_reader)
+Documents a gap: make_handoffs parses STRUCTURED_NOTES_2K with plain json.loads(response.text) ... expected failure
+test_array_wrapper_after_prose (tests.test_reader_audit_v21.EdgeCases.test_array_wrapper_after_prose) ... ok
+test_duplicate_keys_nested_and_fenced (tests.test_reader_audit_v21.EdgeCases.test_duplicate_keys_nested_and_fenced) ... ok
+test_fence_then_json_outside (tests.test_reader_audit_v21.EdgeCases.test_fence_then_json_outside) ... ok
+test_malformed_outer_inside_fence_with_prose (tests.test_reader_audit_v21.EdgeCases.test_malformed_outer_inside_fence_with_prose) ... ok
+test_multiple_objects_with_prose_between (tests.test_reader_audit_v21.EdgeCases.test_multiple_objects_with_prose_between) ... ok
+test_nested_salvage_inside_fence (tests.test_reader_audit_v21.EdgeCases.test_nested_salvage_inside_fence) ... ok
+test_nested_salvage_valid_outer_not_unwrapped (tests.test_reader_audit_v21.EdgeCases.test_nested_salvage_valid_outer_not_unwrapped) ... ok
+test_nonfinite_nested_and_fenced (tests.test_reader_audit_v21.EdgeCases.test_nonfinite_nested_and_fenced) ... ok
+test_prose_with_quote_before_json_rejected (tests.test_reader_audit_v21.EdgeCases.test_prose_with_quote_before_json_rejected) ... ok
+test_strict_policy_accepts_prose_framing_and_keeps_strict_checks (tests.test_reader_audit_v21.EdgeCases.test_strict_policy_accepts_prose_framing_and_keeps_strict_checks) ... ok
+test_real_v20_call1_executes_shell_and_logs_framing (tests.test_reader_audit_v21.RealReplay.test_real_v20_call1_executes_shell_and_logs_framing) ... skipped 'real v2.0 call-1 response is gitignored/absent in this checkout'
+test_prose_only_executes_nothing_and_records_failure (tests.test_reader_audit_v21.Reconstructed.test_prose_only_executes_nothing_and_records_failure) ... ok
+test_synthetic_prose_then_json_executes_shell_and_logs_framing (tests.test_reader_audit_v21.Reconstructed.test_synthetic_prose_then_json_executes_shell_and_logs_framing) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.063s
+
+OK (skipped=1, expected failures=1)

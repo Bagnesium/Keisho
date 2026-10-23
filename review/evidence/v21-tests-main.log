@@ -1,0 +1,102 @@
+test_dry_run_passes_and_reflects_budget (tests.test_benchmark_v21.Version21Tests.test_dry_run_passes_and_reflects_budget) ... ERROR
+test_model_configuration_pricing_and_reasoning_effort (tests.test_benchmark_v21.Version21Tests.test_model_configuration_pricing_and_reasoning_effort) ... ERROR
+test_offline_proving_suite_saved_v20_and_edge_cases (tests.test_benchmark_v21.Version21Tests.test_offline_proving_suite_saved_v20_and_edge_cases) ... FAIL
+test_only_registered_prospective_changes (tests.test_benchmark_v21.Version21Tests.test_only_registered_prospective_changes) ... ok
+test_pending_binding_never_calls_preflight_or_claims_guard (tests.test_benchmark_v21.Version21Tests.test_pending_binding_never_calls_preflight_or_claims_guard) ... ERROR
+test_prompts_byte_identical_to_system_v5_and_workflow_block_present (tests.test_benchmark_v21.Version21Tests.test_prompts_byte_identical_to_system_v5_and_workflow_block_present) ... ok
+test_real_component_manifest_verifies_before_admission (tests.test_benchmark_v21.Version21Tests.test_real_component_manifest_verifies_before_admission) ... ERROR
+test_run_agent_logs_stripped_framing_and_preserves_raw_response (tests.test_benchmark_v21.Version21Tests.test_run_agent_logs_stripped_framing_and_preserves_raw_response) ... ERROR
+
+======================================================================
+ERROR: test_dry_run_passes_and_reflects_budget (tests.test_benchmark_v21.Version21Tests.test_dry_run_passes_and_reflects_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tests/test_benchmark_v21.py", line 129, in test_dry_run_passes_and_reflects_budget
+    out = c.dry_run(**args)
+  File "src/keisho/benchmark/comparison.py", line 512, in dry_run
+    binding = resolve_binding(config_path, plan_path, run_dir, authorization_path,allow_pending=True)
+  File "src/keisho/benchmark/comparison.py", line 297, in resolve_binding
+    config, task, plan = load_frozen_plan(config_path, plan_path)
+                         ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "src/keisho/benchmark/comparison.py", line 240, in load_frozen_plan
+    require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "src/keisho/core.py", line 48, in require
+    raise ValidationError(message)
+keisho.core.ValidationError: prospective plan changed
+
+======================================================================
+ERROR: test_model_configuration_pricing_and_reasoning_effort (tests.test_benchmark_v21.Version21Tests.test_model_configuration_pricing_and_reasoning_effort)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tests/test_benchmark_v21.py", line 148, in test_model_configuration_pricing_and_reasoning_effort
+    tok = NativeTokenizer()
+  File "src/keisho/pilot/tokenizer.py", line 19, in __init__
+    require(asset.is_file(), "tokenizer asset missing; run explicit prepare-tokenizer command")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "src/keisho/core.py", line 48, in require
+    raise ValidationError(message)
+keisho.core.ValidationError: tokenizer asset missing; run explicit prepare-tokenizer command
+
+======================================================================
+ERROR: test_pending_binding_never_calls_preflight_or_claims_guard (tests.test_benchmark_v21.Version21Tests.test_pending_binding_never_calls_preflight_or_claims_guard)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tests/test_benchmark_v21.py", line 114, in test_pending_binding_never_calls_preflight_or_claims_guard
+    binding = c.resolve_binding(**args, allow_pending=True)
+  File "src/keisho/benchmark/comparison.py", line 297, in resolve_binding
+    config, task, plan = load_frozen_plan(config_path, plan_path)
+                         ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "src/keisho/benchmark/comparison.py", line 240, in load_frozen_plan
+    require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "src/keisho/core.py", line 48, in require
+    raise ValidationError(message)
+keisho.core.ValidationError: prospective plan changed
+
+======================================================================
+ERROR: test_real_component_manifest_verifies_before_admission (tests.test_benchmark_v21.Version21Tests.test_real_component_manifest_verifies_before_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tests/test_benchmark_v21.py", line 87, in test_real_component_manifest_verifies_before_admission
+    manifest = validate_freeze(self.config, c.ROOT)
+  File "src/keisho/benchmark/experiment_freeze.py", line 26, in validate_freeze
+    require(component.is_file() and not any(parent.is_symlink() for parent in (component, *component.parents)),
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            'unsafe or missing frozen component: ' + relative)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "src/keisho/core.py", line 48, in require
+    raise ValidationError(message)
+keisho.core.ValidationError: unsafe or missing frozen component: .cache/certificates/openrouter-ca-v1.2.0.pem
+
+======================================================================
+ERROR: test_run_agent_logs_stripped_framing_and_preserves_raw_response (tests.test_benchmark_v21.Version21Tests.test_run_agent_logs_stripped_framing_and_preserves_raw_response)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tests/test_benchmark_v21.py", line 277, in test_run_agent_logs_stripped_framing_and_preserves_raw_response
+    saved_text = json.loads(saved_file.read_text())['text']
+                            ~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/pathlib/_local.py", line 548, in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_abc.py", line 632, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_local.py", line 539, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'runs/swebench-v2.0-five-way-once-001/predecessor/predecessor_call_001-response.json'
+
+======================================================================
+FAIL: test_offline_proving_suite_saved_v20_and_edge_cases (tests.test_benchmark_v21.Version21Tests.test_offline_proving_suite_saved_v20_and_edge_cases)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tests/test_benchmark_v21.py", line 166, in test_offline_proving_suite_saved_v20_and_edge_cases
+    self.assertTrue(saved_file.is_file(), 'saved v2.0 response missing')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : saved v2.0 response missing
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.008s
+
+FAILED (failures=1, errors=5)
