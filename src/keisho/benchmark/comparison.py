@@ -60,6 +60,8 @@ V19_PLAN_SHA = '3575f9bc53998a5f0638ec96ce9fe8a78268ec99a09d493c9f76cc6d38a3adfd
 V20_SPEC_SHA = '829974249ab8a502e04315512c7b2bb07f12ae087a485c4f6a4ac108f325f2a7'
 V20_PLAN_SHA = '763d0a022424b72148e48ea8dd55057ced6b45c1466651bec03b04715805dd40'
 V20_PROVIDER_SHA = '4cb5191d5859035445e7d69daf7dd6b20f45aaac030d44eaa42fe8bd8b32ccd5'
+V21_SPEC_SHA = '0700ede4aed6d884cce2fdb50bdbedcc3bac427a5a195cc3bfdcc16bb437eb5d'
+V21_PLAN_SHA = 'f4fc73c008785a909f12fcb74a16fa0810214a91b22f3894c55442de5b21ef2b'
 
 from keisho.agents.providers import openai_chat, openrouter_chat
 
@@ -231,14 +233,14 @@ def load_frozen_plan(config_path=None, plan_path=None):
                      READINESS_SPEC_SHA: READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                      V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
                      V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA,
-                     V20_SPEC_SHA: V20_PLAN_SHA}
+                     V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA}
         require(digest(config) in supported, 'configuration differs from frozen supported specification')
         expected_plan = supported[digest(config)]
         require(digest(plan) == expected_plan, 'plan differs from matched frozen plan')
         require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
         sel_file = (PRESELECT / f"{task_instance}-plan.json") if task_instance and (PRESELECT / f"{task_instance}-plan.json").exists() else (PRESELECT / 'plan.json')
         selection = read_input(sel_file)
-        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA) else SELECTION_PLAN_SHA
+        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA) else SELECTION_PLAN_SHA
         require(digest(selection) == expected_sel_sha, 'frozen selection/order changed')
         require(selection['task_sha256'] == digest(task) and task['instance_id'] == config['selected_instance'], 'selected task changed')
         require(selection['branch_order'] == random.Random(config['branch_seed']).sample(config['conditions'], len(config['conditions'])), 'branch order changed')
@@ -247,7 +249,7 @@ def load_frozen_plan(config_path=None, plan_path=None):
     require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
     require(plan['plausibly_fits'] and config['selection']['count'] == 1, 'one comparison must fit cap')
     require(config['automatic_retries'] == 0, 'no automatic paid retries')
-    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA):
+    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA):
         from .experiment_freeze import validate_freeze
         validate_freeze(config, ROOT)
     return config, task, plan
@@ -296,12 +298,12 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
     response_settings(config)
     authorization = read_input(authorization_path)
     require(authorization['cap_usd'] == config['cap_usd'] == '10.00', 'authorization cap changed')
-    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA):
+    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA):
         expected_plan = {NEXT_SPEC_SHA:NEXT_PLAN_SHA, WIRE_SPEC_SHA:WIRE_PLAN_SHA,
                          READINESS_SPEC_SHA:READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                          V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
                          V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA,
-                         V20_SPEC_SHA: V20_PLAN_SHA}[digest(config)]
+                         V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA}[digest(config)]
         require(authorization.get('version')=='swebench-authorization/2.0' and
             authorization.get('config_sha256')==digest(config) and authorization.get('plan_sha256')==expected_plan and
             authorization.get('attempts')==1 and isinstance(authorization.get('authorization_id'),str) and authorization['authorization_id'].strip(),
@@ -414,9 +416,9 @@ def execution_result(execution):
 def runtime_preflight(binding, *, dry=False):
     config, task, plan = binding.config, binding.task, binding.plan
     setup = validate_setup(config)  # Before creating a paid-run guard or any model.
-    catalog_path = (PRESELECT / 'provider-catalog-v2.0.json') if config.get('version') == 'swebench-handoff/2.0' else (PRESELECT / 'provider-catalog.json')
+    catalog_path = (PRESELECT / 'provider-catalog-v2.0.json') if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1') else (PRESELECT / 'provider-catalog.json')
     catalog = read_input(catalog_path)
-    if config.get('version') == 'swebench-handoff/2.0':
+    if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1'):
         for alias in ('openai/gpt-6-sol', 'openai/gpt-6-luna'):
             canonical = openrouter_chat.MODEL_ALIASES.get(alias, alias)
             model_entry = next((row for row in catalog["models"] if row["id"] == alias), None)
@@ -442,7 +444,7 @@ def runtime_preflight(binding, *, dry=False):
     credentials = load_project_env(ROOT, environ=dict(__import__('os').environ) if dry else None)['present']
     require(credentials['OPENROUTER_API_KEY'], 'configured provider credential missing')
     provider = read_input(ROOT / 'configs' / config['provider_config'])
-    expected_prov_sha = V20_PROVIDER_SHA if digest(config) == V20_SPEC_SHA else PROVIDER_SHA
+    expected_prov_sha = V20_PROVIDER_SHA if digest(config) in (V20_SPEC_SHA, V21_SPEC_SHA) else PROVIDER_SHA
     require(digest(provider) == expected_prov_sha, 'frozen provider mapping/routing changed')
     ca = (ROOT / 'configs' / provider['tls']['ca_file']).resolve()
     require(ca.is_file() and hashlib.sha256(ca.read_bytes()).hexdigest() == provider['tls']['ca_sha256'], 'pinned verified CA missing/changed')
@@ -478,7 +480,7 @@ def check_public_catalog(ca, config=None):
         with verified_opener(ca).open(Request(BASE_URL + path, headers={'Accept': 'application/json'}), timeout=60) as r:
             return json.loads(r.read())
     models = get('/models')['data']
-    v20 = config and config.get('version') == 'swebench-handoff/2.0'
+    v20 = config and config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1')
     aliases = ('openai/gpt-6-sol', 'openai/gpt-6-luna') if v20 else ('openai/gpt-4.1-mini', 'openai/gpt-4.1')
     catalog = {'models': [m for m in models if m['id'] in aliases],
                'endpoints': {m: get('/models/' + m + '/endpoints') for m in aliases}}
@@ -579,7 +581,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
                     observer=lambda payload,status,redacted:audit.write_artifact(f'{prefix}wire-response-{number:03d}.json',
                         {'body_base64':base64.b64encode(payload).decode(),'http_status':status,'credential_redaction_applied':redacted,'headers_recorded':False})
                 return http_transport(body,key,base_url=BASE_URL,provider='OpenRouter',ca_file=ca,response_observer=observer)
-        model_cls = V20OpenRouterChatModel if config.get('version') == 'swebench-handoff/2.0' else OpenRouterChatModel
+        model_cls = V20OpenRouterChatModel if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1') else OpenRouterChatModel
         adapter = model_cls(identity, authorized=True, tokenizer=native, mode=mode, response_model_ids=allowed,
                  agent_response_format=output_format if mode == 'agent' else None,
                  transport=transport)

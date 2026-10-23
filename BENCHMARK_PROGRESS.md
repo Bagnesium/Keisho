@@ -1,4 +1,4 @@
-# Keisho benchmark progress — v2.0 live run 001 recorded 2026-10-23
+# Keisho benchmark progress — v2.1 freeze defined 2026-10-23
 
 **Seven predecessor failures recorded and disclosed; all thirty-five successor conditions unstarted:**
 1. **v1.4 attempt 001 (`runs/swebench-v1.4-five-way-once-001`, $0.0164 spend)**:
@@ -32,6 +32,14 @@
    prior to emitting its JSON action, violating JSON-object wire mode and failing top-level JSON parsing
    (`JSONDecodeError: Expecting value: line 1 column 1`). No tool actions or code edits were executed. Predecessor stopped
    immediately without retrying; all five successors unstarted.
+
+**v2.1 specification defined and frozen (`configs/swebench-comparison-v2.1.json`, commit pending):**
+- Reader admission: Robust single top-level JSON reader enforcing the Zero-Skip Brace Rule and conservative wrapper checks (`{}[]"` forbidden outside admitted object/fence).
+- Logging: Preserves raw model output in `response.text` and conversation history; logs stripped framing metadata to `{role}_call_{number:03d}-stripped-framing.json`.
+- Invariant models, prompts, task (`sympy__sympy-20590`), reasoning effort (`none`), and budgets ($10.00 cap, $9.5337 envelope, $0.1559 headroom, 3.104% margin).
+- All five conditions and predecessor share identical reader behavior.
+- Comparison unstarted; no comparison results exist.
+
 
 # Keisho benchmark progress — v1.9 live run 001 recorded; prospective v2.0 defined 2026-10-22
 

@@ -1,5 +1,6 @@
 """Prospective auxiliary annotations; structural validity never establishes truth."""
 import json
+import re
 
 from keisho.core import canonical_json, require
 
@@ -48,6 +49,87 @@ def parse_unique_json(text):
     return json.loads(text, object_pairs_hook=_unique_object, parse_constant=invalid_constant)
 
 
+def _invalid_constant(value):
+    require(False, 'non-JSON numeric constant: ' + value)
+
+
+_JSON_DECODER = json.JSONDecoder(
+    object_pairs_hook=_unique_object,
+    parse_constant=_invalid_constant,
+)
+FORBIDDEN_OUTSIDE = set('{}[]"')
+
+
+def extract_action_json(text: str) -> tuple[dict, dict]:
+    """Extract exactly one top-level action/claims JSON object without nested salvage.
+
+    Preserves duplicate-key rejection and parse_constant rejection of NaN/Infinity/-Infinity.
+    Strictly enforces the Zero-Skip Brace Rule and conservative wrapper checks.
+    """
+    require(isinstance(text, str), 'response text must be a string')
+
+    fence_count = text.count('```')
+    if fence_count > 0:
+        require(fence_count == 2, f'ambiguous response: expected exactly one code block (2 fences), found {fence_count}')
+        start_fence = text.find('```')
+        end_fence = text.find('```', start_fence + 3)
+        outside_before = text[:start_fence]
+        outside_after = text[end_fence + 3:]
+
+        forbidden_before = set(outside_before) & FORBIDDEN_OUTSIDE
+        require(not forbidden_before, f'forbidden wrapper characters before code fence: {forbidden_before}')
+        forbidden_after = set(outside_after) & FORBIDDEN_OUTSIDE
+        require(not forbidden_after, f'forbidden wrapper characters after code fence: {forbidden_after}')
+
+        inner = text[start_fence + 3 : end_fence]
+        tag_match = re.match(r'^[a-zA-Z0-9_-]*\r?\n', inner)
+        tag_len = tag_match.end() if tag_match else 0
+        content = inner[tag_len:].strip()
+
+        require(content.startswith('{'), 'no JSON object found inside code fence')
+        try:
+            data, end = _JSON_DECODER.raw_decode(content, 0)
+        except (json.JSONDecodeError, ValueError) as exc:
+            require(False, f'malformed JSON inside code fence: {exc}')
+
+        require(content[end:].strip() == '', 'extra content inside code fence after JSON object')
+        stripped_leading = text[:start_fence + 3 + tag_len]
+        stripped_trailing = text[end_fence:]
+        framing = {
+            'stripped_leading': stripped_leading,
+            'stripped_trailing': stripped_trailing,
+            'is_fenced': True,
+            'has_framing': bool(stripped_leading.strip() or stripped_trailing.strip()),
+        }
+        return data, framing
+
+    first_brace = text.find('{')
+    require(first_brace != -1, 'no JSON object found in response (prose only)')
+
+    outside_before = text[:first_brace]
+    forbidden_before = set(outside_before) & FORBIDDEN_OUTSIDE
+    require(not forbidden_before, f'forbidden wrapper characters before JSON object: {forbidden_before}')
+
+    # ZERO-SKIP BRACE RULE: Decode strictly from first_brace.
+    # Never advance past first_brace if decoding fails; fail fast to prevent nested-object salvage.
+    try:
+        data, end = _JSON_DECODER.raw_decode(text, first_brace)
+    except (json.JSONDecodeError, ValueError) as exc:
+        require(False, f'malformed outer JSON: {exc}')
+
+    outside_after = text[end:]
+    forbidden_after = set(outside_after) & FORBIDDEN_OUTSIDE
+    require(not forbidden_after, f'forbidden wrapper characters or trailing content after JSON object: {forbidden_after}')
+
+    framing = {
+        'stripped_leading': outside_before,
+        'stripped_trailing': outside_after,
+        'is_fenced': False,
+        'has_framing': bool(outside_before.strip() or outside_after.strip()),
+    }
+    return data, framing
+
+
 def validate_recordable_json(data):
     """Reject decoded values that cannot be losslessly stored in UTF-8 JSON."""
     try:
@@ -60,8 +142,14 @@ def validate_recordable_json(data):
         require(False, 'decoded value is not JSON')
 
 
-def parse_auxiliary(text, known_evidence_ids):
-    data = parse_unique_json(text)
+def parse_auxiliary(text_or_data, known_evidence_ids):
+    if isinstance(text_or_data, str):
+        data, framing = extract_action_json(text_or_data)
+        validate_recordable_json(data)
+    elif isinstance(text_or_data, tuple) and len(text_or_data) == 2:
+        data, framing = text_or_data
+    else:
+        data, framing = text_or_data, {'has_framing': False, 'stripped_leading': '', 'stripped_trailing': '', 'is_fenced': False}
     require(isinstance(data, dict) and set(data) == {'action', 'claims'}, 'response must contain action and claims only')
     require(isinstance(data['action'], dict) and isinstance(data['claims'], list), 'invalid action/claims types')
     require(len(data['claims']) <= 8, 'too many claims')
@@ -92,7 +180,7 @@ def parse_auxiliary(text, known_evidence_ids):
               'diagnostics': rejected, 'coverage': {'supplied': len(data['claims']), 'validated': len(accepted), 'rejected': len(rejected)},
               'annotation_information': 'unknown' if not accepted else 'schema-validated interpretation only',
               'semantic_truth_verified': False}
-    return {'action': data['action'], 'claims': accepted, 'annotation_report': report}
+    return {'action': data['action'], 'claims': accepted, 'annotation_report': report, 'framing': framing}
 
 
 def agent_response_format(version='2.0'):

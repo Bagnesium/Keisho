@@ -1,0 +1,89 @@
+{
+  "version": "swebench-cost-envelope/2.1",
+  "prepared_date": "2026-10-23",
+  "offline_only": true,
+  "provider_requests": 0,
+  "spending_authorized": false,
+  "experiment_config": "configs/swebench-comparison-v2.1.json",
+  "experiment_config_keisho_digest": "0700ede4aed6d884cce2fdb50bdbedcc3bac427a5a195cc3bfdcc16bb437eb5d",
+  "matched_launch_plan": "analysis/swebench-comparison-v2.1-plan.json",
+  "matched_launch_plan_keisho_digest": "f4fc73c008785a909f12fcb74a16fa0810214a91b22f3894c55442de5b21ef2b",
+  "runtime_manifest": "analysis/swebench-experiment-v2.1-manifest.json",
+  "runtime_manifest_keisho_digest": "8bdb2fa94a742aaae59b81e0860f76cbfadfe6a75d357c5feee05a18c4a64d08",
+  "pricing_evidence": {
+    "source": "OpenRouter live catalog check",
+    "checked_at_utc": "2026-10-22T17:10:00+00:00",
+    "authenticated": false,
+    "public_source": "https://openrouter.ai/api/v1/models"
+  },
+  "rates_usd_per_million": {
+    "openai/gpt-6-luna-20260922": {
+      "input": "0.10",
+      "cached_input": "0.01",
+      "output": "0.50"
+    },
+    "openai/gpt-6-sol-20260922": {
+      "input": "2.00",
+      "cached_input": "0.20",
+      "output": "10.00"
+    }
+  },
+  "cache_discounts_assumed": false,
+  "conservative_multiplier": "1.05",
+  "reasoning_token_policy": {
+    "billed_as": "completion_tokens (output)",
+    "effort_setting": "none",
+    "included_in_cost_envelope": true
+  },
+  "conservative_maximum": {
+    "formula": "O=min(total_tokens,model_calls*output_cap); cost=1.05*((total_tokens-O)*input_rate+O*output_rate)/1000000",
+    "predecessor": {
+      "calls": 48,
+      "total_tokens": 276000,
+      "input_tokens_at_maximum": 177696,
+      "output_tokens_at_maximum": 98304,
+      "cost_usd": "1.40535360"
+    },
+    "summary_generation": {
+      "calls": 1,
+      "input_tokens": 64000,
+      "output_tokens": 1600,
+      "cost_usd": "0.00756000"
+    },
+    "structured_generation": {
+      "calls": 1,
+      "input_tokens": 64000,
+      "output_tokens": 1600,
+      "cost_usd": "0.00756000"
+    },
+    "keisho_compilation": {
+      "calls": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": "0"
+    },
+    "each_successor": {
+      "calls": 64,
+      "total_tokens": 248400,
+      "input_tokens_at_maximum": 117328,
+      "output_tokens_at_maximum": 131072,
+      "cost_usd": "1.62264480"
+    },
+    "successor_count": 5,
+    "total_calls": 370,
+    "total_tool_calls": 276,
+    "total_cost_usd": "9.53369760",
+    "largest_request_reservation_usd": "0.15590400",
+    "envelope_plus_reservation_usd": "9.68960160",
+    "reservation_is_extra_charge": false
+  },
+  "proposed_total_cap_usd": "10.00",
+  "margin_under_cap_usd": "0.31039840",
+  "margin_percent": "3.104%",
+  "predecessor_budget_analysis": {
+    "total_tokens": 276000,
+    "model_calls_ceiling": 48,
+    "request_input_tokens_ceiling": 64000,
+    "binding_constraint_note": "Proportionally reduced by 31% from 400,000 to fit under  cap with 3.1% margin. Models switched to gpt-6-sol for predecessor and successors, gpt-6-luna for note generators, reasoning effort set to none."
+  }
+}

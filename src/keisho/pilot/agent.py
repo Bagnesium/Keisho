@@ -9,7 +9,7 @@ from keisho.logging.raw import Event, EventKind, FrozenTrajectory, RawRun
 from keisho.metrics.definitions import CallPurpose, CallRecord
 from .sandbox import IsolationUnavailable
 from .tools import InvalidAction, ToolSession
-from .response_policy import STRICT, AUXILIARY, parse_auxiliary, parse_unique_json, validate_recordable_json
+from .response_policy import STRICT, AUXILIARY, extract_action_json, parse_auxiliary, parse_unique_json, validate_recordable_json
 from .action_wire import VERSION as ACTION_WIRE_VERSION, canonicalize_action, rejected_response
 
 
@@ -83,13 +83,10 @@ def logged_generate(model: AgentModel, request: ModelRequest, recorder: Recorder
 def parse_output(text: str, known_evidence_ids: set[str], policy=STRICT, action_wire_version=None) -> dict:
     require(policy in (STRICT, AUXILIARY), 'unsupported response policy')
     require(action_wire_version in (None, ACTION_WIRE_VERSION), 'unsupported action wire version')
-    if action_wire_version is not None:
-        data = parse_unique_json(text)
-        validate_recordable_json(data)
+    data, framing = extract_action_json(text)
+    validate_recordable_json(data)
     if policy == AUXILIARY:
-        return parse_auxiliary(text, known_evidence_ids)
-    if action_wire_version is None:
-        data = json.loads(text)
+        return parse_auxiliary((data, framing), known_evidence_ids)
     require(isinstance(data, dict) and set(data) == {"action", "claims"}, "response must contain action and claims only")
     require(isinstance(data["action"], dict) and isinstance(data["claims"], list), "invalid action/claims types")
     require(len(data["claims"]) <= 8, "too many claims")
@@ -100,6 +97,7 @@ def parse_output(text: str, known_evidence_ids: set[str], policy=STRICT, action_
         require(claim["basis"] in ("tool", "predecessor", "independent"), "invalid claim basis")
         require(isinstance(claim["evidence_ids"], list) and all(isinstance(key, str) for key in claim["evidence_ids"]), "invalid claim evidence")
         require(set(claim["evidence_ids"]) <= known_evidence_ids, "claim cites unavailable tool evidence")
+    data["framing"] = framing
     return data
 
 
@@ -182,6 +180,8 @@ def run_agent(model: AgentModel, session: ToolSession, recorder: Recorder, task_
             reason = "model_failure"
             break
         messages.append(Message("assistant", response.text))
+        if 'framing' in parsed:
+            recorder.raw.write_artifact(f'{role}_call_{number:03d}-stripped-framing.json', parsed['framing'])
         if response_policy == AUXILIARY:
             report = parsed['annotation_report']
             recorder.raw.write_artifact(f'{role}_call_{number:03d}-annotations.json', report)
