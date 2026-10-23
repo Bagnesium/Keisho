@@ -23,6 +23,14 @@ WORKFLOW_BLOCK_VERBATIM = (
 )
 
 
+
+def _v21_superseded():
+    """True on branches (v2.4+) where a v2.1-pinned component has moved on; v2.1 must then refuse (fail closed)."""
+    import hashlib, json as _json
+    m = _json.loads((c.ROOT / 'analysis/swebench-experiment-v2.1-manifest.json').read_text())
+    return any((c.ROOT / f).is_file() and hashlib.sha256((c.ROOT / f).read_bytes()).hexdigest() != h
+               for f, h in m['files'].items() if f in ('src/keisho/pilot/agent.py', 'src/keisho/benchmark/evaluator.py'))
+
 class Version21Tests(unittest.TestCase):
     def setUp(self):
         self.config = c.read_input(c.ROOT / 'configs/swebench-comparison-v2.1.json')
@@ -84,6 +92,10 @@ class Version21Tests(unittest.TestCase):
                                  c.SYSTEM_V4 + takeover)
 
     def test_real_component_manifest_verifies_before_admission(self):
+        if _v21_superseded():
+            with self.assertRaisesRegex(ValidationError, 'frozen experiment component changed'):
+                validate_freeze(self.config, c.ROOT)
+            return
         manifest = validate_freeze(self.config, c.ROOT)
         self.assertGreaterEqual(len(manifest['files']), 84)
         self.assertIn('src/keisho/pilot/agent.py', manifest['files'])
@@ -111,6 +123,12 @@ class Version21Tests(unittest.TestCase):
                         plan_path=c.ROOT / 'analysis/swebench-comparison-v2.1-plan.json',
                         authorization_path=c.ROOT / 'analysis/swebench-comparison-v2.1-authorization-template.json',
                         run_dir=Path(t).resolve() / 'not-started-v21')
+            if _v21_superseded():
+                with patch.object(c, 'runtime_preflight', side_effect=AssertionError('preflight must not run')):
+                    with self.assertRaises(ValidationError):
+                        c.execute(approve_live=True, **args)
+                self.assertFalse(args['run_dir'].exists())
+                return
             binding = c.resolve_binding(**args, allow_pending=True)
             self.assertFalse(binding.authorization['provider_inference_authorized'])
             self.assertFalse(binding.authorization_guard.exists())
