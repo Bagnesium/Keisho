@@ -1,0 +1,11 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "bagi-v22-sympy-20590-20261023-02",
+  "config_sha256": "e4afa4d3b87aa478f4ffd3c01789a3d98c5d86c1345c6b6eb25370484742ed8a",
+  "plan_sha256": "35979af0c8ba6bff3ef87240503f6d7a4e738dbd795cd1b3367b95a807a60346",
+  "final_source_freeze_sha256": "d87b3d131bed0b75c69001a2ccd02e9c1030cf09022606256c51d319328b2aa6",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": true,
+  "note": "Single v2.2 five-way pilot on sympy__sympy-20590 (final source freeze r2); one attempt; cap USD 10.00. Supersedes retired -01. Prepared 2026-10-23 pending Bagi confirmation; do not reuse."
+}

@@ -1,0 +1,11 @@
+{
+  "attempts": 1,
+  "authorization_id": "bagi-20261023-v24-01",
+  "cap_usd": "10.00",
+  "config_sha256": "e9fe9eaa098cba683d52a121bf6c23d1995ae9aefb09fce6ce894bbbfae0c7b9",
+  "final_source_freeze_sha256": "3babe47ed75f33c859fc02d354533c868aec6edb537575c53c38f19bc88b5151",
+  "note": "Bagi approved one v2.4 pilot in chat 2026-10-23 15:17 UTC+5 (cap USD 10.00). One launch; predecessor attempts per frozen config rule; no relaunch.",
+  "plan_sha256": "6f68728f10457269cb86410316286d48235ce30276c52ed9934e6a997f266e56",
+  "provider_inference_authorized": true,
+  "version": "swebench-authorization/2.0"
+}

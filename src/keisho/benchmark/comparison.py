@@ -75,8 +75,12 @@ V24_SPEC_SHA = 'e9fe9eaa098cba683d52a121bf6c23d1995ae9aefb09fce6ce894bbbfae0c7b9
 V24_PLAN_SHA = '6f68728f10457269cb86410316286d48235ce30276c52ed9934e6a997f266e56'
 V24_FINAL_SOURCE_FREEZE = 'analysis/swebench-v2.4-final-source-freeze.json'
 V24_VERSION = 'swebench-handoff/2.4'
+V25_SPEC_SHA = '16207ebfc421f23706f7ecb4aba18293985003fe98ea2d8e8e099eacd45b301e'
+V25_PLAN_SHA = 'c3ae9b49b546326c9ac1ea283afc855b04085baebdefcea6c4617735d5f41ee2'
+V25_FINAL_SOURCE_FREEZE = 'analysis/swebench-v2.5-final-source-freeze.json'
+V25_VERSION = 'swebench-handoff/2.5'
 MALFORMED_RESPONSE_POLICY = 'invalid-action-strike/1.0'
-GUARDED_VERSIONS = (V23_VERSION, V24_VERSION)
+GUARDED_VERSIONS = (V23_VERSION, V24_VERSION, V25_VERSION)
 
 from keisho.agents.providers import openai_chat, openrouter_chat
 
@@ -248,14 +252,14 @@ def load_frozen_plan(config_path=None, plan_path=None):
                      READINESS_SPEC_SHA: READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                      V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
                      V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA,
-                     V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA, V24_SPEC_SHA: V24_PLAN_SHA}
+                     V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA, V24_SPEC_SHA: V24_PLAN_SHA, V25_SPEC_SHA: V25_PLAN_SHA}
         require(digest(config) in supported, 'configuration differs from frozen supported specification')
         expected_plan = supported[digest(config)]
         require(digest(plan) == expected_plan, 'plan differs from matched frozen plan')
         require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
         sel_file = (PRESELECT / f"{task_instance}-plan.json") if task_instance and (PRESELECT / f"{task_instance}-plan.json").exists() else (PRESELECT / 'plan.json')
         selection = read_input(sel_file)
-        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA) else SELECTION_PLAN_SHA
+        expected_sel_sha = V17_SELECTION_PLAN_SHA if digest(config) in (V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA, V25_SPEC_SHA) else SELECTION_PLAN_SHA
         require(digest(selection) == expected_sel_sha, 'frozen selection/order changed')
         require(selection['task_sha256'] == digest(task) and task['instance_id'] == config['selected_instance'], 'selected task changed')
         require(selection['branch_order'] == random.Random(config['branch_seed']).sample(config['conditions'], len(config['conditions'])), 'branch order changed')
@@ -264,7 +268,7 @@ def load_frozen_plan(config_path=None, plan_path=None):
     require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
     require(plan['plausibly_fits'] and config['selection']['count'] == 1, 'one comparison must fit cap')
     require(config['automatic_retries'] == 0, 'no automatic paid retries')
-    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA):
+    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA, V25_SPEC_SHA):
         from .experiment_freeze import validate_freeze
         validate_freeze(config, ROOT)
     return config, task, plan
@@ -313,12 +317,12 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
     response_settings(config)
     authorization = read_input(authorization_path)
     require(authorization['cap_usd'] == config['cap_usd'] == '10.00', 'authorization cap changed')
-    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA):
+    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA, V25_SPEC_SHA):
         expected_plan = {NEXT_SPEC_SHA:NEXT_PLAN_SHA, WIRE_SPEC_SHA:WIRE_PLAN_SHA,
                          READINESS_SPEC_SHA:READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                          V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
                          V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA,
-                         V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA, V24_SPEC_SHA: V24_PLAN_SHA}[digest(config)]
+                         V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA, V24_SPEC_SHA: V24_PLAN_SHA, V25_SPEC_SHA: V25_PLAN_SHA}[digest(config)]
         require(authorization.get('version')=='swebench-authorization/2.0' and
             authorization.get('config_sha256')==digest(config) and authorization.get('plan_sha256')==expected_plan and
             authorization.get('attempts')==1 and isinstance(authorization.get('authorization_id'),str) and authorization['authorization_id'].strip(),
@@ -332,6 +336,8 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
             validate_final_source_freeze(authorization, V23_FINAL_SOURCE_FREEZE)
         if digest(config) == V24_SPEC_SHA:
             validate_final_source_freeze(authorization, V24_FINAL_SOURCE_FREEZE)
+        if digest(config) == V25_SPEC_SHA:
+            validate_final_source_freeze(authorization, V25_FINAL_SOURCE_FREEZE)
         guard = RUNROOT.parent / ('authorized-' + digest({'authorization_id':authorization['authorization_id']})[:24])
         return LaunchBinding(Path(config_path).resolve(),Path(plan_path).resolve(),Path(authorization_path).resolve(),
             safe_destination(run_dir),guard,config,task,plan,authorization)
@@ -421,7 +427,7 @@ def make_handoffs(task, predecessor, inventory, base_inventory, note_models, con
             require(response.text.strip(), 'empty ordinary summary')
             texts['SUMMARY_2K'] = response.text.strip()
         else:
-            if config.get('version') in ('swebench-handoff/2.2', V23_VERSION, V24_VERSION):
+            if config.get('version') in ('swebench-handoff/2.2', V23_VERSION, V24_VERSION, V25_VERSION):
                 from .notes_reader import read_structured_notes
                 fields = json.loads(PROMPTS.read_text())['structured_fields']
                 try:
@@ -485,9 +491,9 @@ def execution_result(execution):
 def runtime_preflight(binding, *, dry=False):
     config, task, plan = binding.config, binding.task, binding.plan
     setup = validate_setup(config)  # Before creating a paid-run guard or any model.
-    catalog_path = (PRESELECT / 'provider-catalog-v2.0.json') if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3', 'swebench-handoff/2.4') else (PRESELECT / 'provider-catalog.json')
+    catalog_path = (PRESELECT / 'provider-catalog-v2.0.json') if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3', 'swebench-handoff/2.4', 'swebench-handoff/2.5') else (PRESELECT / 'provider-catalog.json')
     catalog = read_input(catalog_path)
-    if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3', 'swebench-handoff/2.4'):
+    if config.get('version') in ('swebench-handoff/2.0', 'swebench-handoff/2.1', 'swebench-handoff/2.2', 'swebench-handoff/2.3', 'swebench-handoff/2.4', 'swebench-handoff/2.5'):
         for alias in ('openai/gpt-6-sol', 'openai/gpt-6-luna'):
             canonical = openrouter_chat.MODEL_ALIASES.get(alias, alias)
             model_entry = next((row for row in catalog["models"] if row["id"] == alias), None)
@@ -515,7 +521,7 @@ def runtime_preflight(binding, *, dry=False):
     credentials = load_project_env(ROOT, environ=dict(__import__('os').environ) if dry else None)['present']
     require(credentials['OPENROUTER_API_KEY'], 'configured provider credential missing')
     provider = read_input(ROOT / 'configs' / config['provider_config'])
-    expected_prov_sha = V20_PROVIDER_SHA if digest(config) in (V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA) else PROVIDER_SHA
+    expected_prov_sha = V20_PROVIDER_SHA if digest(config) in (V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA, V25_SPEC_SHA) else PROVIDER_SHA
     require(digest(provider) == expected_prov_sha, 'frozen provider mapping/routing changed')
     ca = (ROOT / 'configs' / provider['tls']['ca_file']).resolve()
     require(ca.is_file() and hashlib.sha256(ca.read_bytes()).hexdigest() == provider['tls']['ca_sha256'], 'pinned verified CA missing/changed')
@@ -654,7 +660,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
     config, task, plan = binding.config, binding.task, binding.plan
     system, response_policy, output_format = response_settings(config)
     wire_options = action_wire_options(config)
-    malformed_options = {'malformed_response_policy': MALFORMED_RESPONSE_POLICY} if config.get('version') == V24_VERSION else {}
+    malformed_options = {'malformed_response_policy': MALFORMED_RESPONSE_POLICY} if config.get('version') in (V24_VERSION, V25_VERSION) else {}
     ctx = runtime_preflight(binding)
     public_catalog = check_public_catalog(ctx['ca'], config)
     index = claim_launch(binding)  # Atomic authorization claim before any model.

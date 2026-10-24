@@ -6,7 +6,7 @@ from jsonschema import Draft202012Validator
 
 from keisho.core import canonical_json, require
 from keisho.pilot.action_wire import VERSION as ACTION_WIRE_VERSION, canonicalize_action
-from keisho.pilot.response_policy import agent_response_format, parse_auxiliary, validate_recordable_json
+from keisho.pilot.response_policy import agent_response_format, extract_action_json, parse_auxiliary, validate_recordable_json
 
 VERSION = 'response-measurements/1.0'
 ACTION_WIRE_MEASUREMENT_VERSION = 'response-measurements/2.0'
@@ -35,26 +35,20 @@ def assess_text(text, known, validate_action, action_contract_version='2.0', act
         row['json_syntax_valid'] = False
         error('json_syntax', 'model message has no string content')
         return row
-    duplicates = []
-    def pairs(items):
-        data = {}
-        for key, value in items:
-            if key in data: duplicates.append(key)
-            data[key] = value
-        return data
-    def constant(value):
-        raise ValueError('non-JSON numeric constant: ' + value)
     try:
-        data = json.loads(text, object_pairs_hook=pairs, parse_constant=constant)
+        data, framing = extract_action_json(text)
     except (ValueError, TypeError) as exc:
-        row['json_syntax_valid'] = False
-        error('json_syntax', str(exc))
+        msg = str(exc)
+        if 'ambiguous duplicate JSON key:' in msg:
+            row['json_syntax_valid'] = True
+            row['response_structure_valid'] = False
+            error('response_structure', msg)
+        else:
+            row['json_syntax_valid'] = False
+            error('json_syntax', msg)
         return row
     row['json_syntax_valid'] = True
-    if duplicates:
-        row['response_structure_valid'] = False
-        error('response_structure', 'ambiguous duplicate JSON keys: ' + ', '.join(duplicates))
-        return row  # Never interpret a selected duplicate as the model's action.
+    row['framing'] = framing
     if action_wire_version is not None:
         try:
             validate_recordable_json(data)
@@ -207,10 +201,11 @@ def measure_run(raw, validate_action, *, role='predecessor', action_contract_ver
         result = payloads.get(f'{role}_result_{number:03d}')
         completed = tool is not None and result is not None and not any(k in result for k in ('invalid_action', 'infrastructure_failure'))
         row['tool_execution_completed'] = completed
-        row['tool_execution_successful'] = completed and not result.get('cursor_stale',False) and (action.get('tool') != 'shell' or result.get('exit_code') == 0)
+        is_action_dict = isinstance(action, dict)
+        row['tool_execution_successful'] = completed and not result.get('cursor_stale', False) and is_action_dict and (action.get('tool') != 'shell' or result.get('exit_code') == 0)
         row['response_rejected'] |= any(row[field] is False for field in (
             'json_syntax_valid', 'response_structure_valid', 'action_schema_valid', 'safety_valid'))
-        row['action_rejected'] = isinstance(action, dict) and (row['response_rejected'] or bool(result and 'invalid_action' in result))
+        row['action_rejected'] = is_action_dict and (row['response_rejected'] or bool(result and 'invalid_action' in result))
         if row['action_rejected']: row['response_rejected'] = True
         rows.append(row)
     report = summarize(rows, len(wire_requests), action_wire_version)

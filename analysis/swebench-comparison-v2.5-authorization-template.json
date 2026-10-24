@@ -1,0 +1,11 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "PROSPECTIVE-V25-TEMPLATE-NOT-APPROVED",
+  "config_sha256": "16207ebfc421f23706f7ecb4aba18293985003fe98ea2d8e8e099eacd45b301e",
+  "plan_sha256": "c3ae9b49b546326c9ac1ea283afc855b04085baebdefcea6c4617735d5f41ee2",
+  "final_source_freeze_sha256": "36aeacdfccfcbc00169440e2773d3076204c069386531fba3b16e99104973b9c",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": false,
+  "note": "PROPOSAL TEMPLATE ONLY; no inference authorized. Bagi has not approved this proposal."
+}

@@ -1,0 +1,14 @@
+{
+  "version": "swebench-final-source-freeze/1.0",
+  "freeze_status": "PROSPECTIVE PROPOSAL",
+  "revision": 1,
+  "config_sha256": "16207ebfc421f23706f7ecb4aba18293985003fe98ea2d8e8e099eacd45b301e",
+  "plan_sha256": "c3ae9b49b546326c9ac1ea283afc855b04085baebdefcea6c4617735d5f41ee2",
+  "files": {
+    "scripts/benchmark_compare.py": "86e3920ab5dca82a2177b2e85f4a3018f09e230e25758ed60b6d3458310101b4",
+    "src/keisho/benchmark/comparison.py": "dbfb041d547be1678304242208f853ebfc0c0822b11f382809faddf7310be801",
+    "src/keisho/benchmark/experiment_freeze.py": "704cdcb4b4a0959cb150745012dd78b42700d4eeb9e6a64069c1e9883d1c130a",
+    "src/keisho/benchmark/notes_reader.py": "0de635927c595b7a6a21a31020c402becb35bebaadad6f56ffbc6f6e9aa53d44",
+    "src/keisho/benchmark/response_measurements.py": "416b931ce046ab9f959343b15fef5fb9ee79951c96f3f66e5b72f1e2a0c2e738"
+  }
+}
