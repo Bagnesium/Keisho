@@ -49,12 +49,15 @@ AttributeError: 'NoneType' object has no attribute 'get'
 - The predecessor's Call 7 command was `python -m pytest ...`. `completed_validation_command` recognized `python -m pytest` as a validation command head. The command executed in the container and completed with integer exit code 1.
 - **Finding**: Checkpoint reached with exit code 1 **strictly follows the registered rule**. Checkpoint is an empirical boundary marking when predecessor work ends and successor takeover begins; it is **not** a passing grade. Exit code 1 is recorded in `checkpoint.json` and passed to handoff adapters (e.g. `source-change-with-failing-validation`). It is not an implementation defect.
 
-### Missing Test Runner Diagnosis
+### Test Runner Resolution: Repository-Local `bin/test` Recognition
 - Inspection of the official SWE-bench evaluation script (`sympy__sympy-20590-selected-task-evaluator.jsonl`) reveals the command used by official grading:
   `PYTHONWARNINGS='ignore::UserWarning,ignore::SyntaxWarning' bin/test -C --verbose sympy/core/tests/test_basic.py`
 - In SWE-bench's SymPy testbed, `pytest` is **not installed** in conda environment `testbed` or the base image. SymPy uses its own test runner script: `/testbed/bin/test`.
-- In `src/keisho/benchmark/protocol.py`, `completed_validation_command` currently recognizes `pytest`, `tox`, `nox`, `python -m ...`, etc., but **does not recognize** `bin/test` or `python bin/test`.
-- **Proposed Rule Extension for v2.5**: Extend `completed_validation_command` to recognize `bin/test` and `python bin/test` so that agents that discover and run SymPy's native runner qualify for checkpoint.
+- In `src/keisho/benchmark/protocol.py`, `completed_validation_command` is extended to recognize repository-local `bin/test` forms:
+  - `bin/test ...`, `./bin/test ...`, and `/testbed/bin/test ...`
+  - `python bin/test ...`, `python ./bin/test ...`, and `python /testbed/bin/test ...`
+  - Explicitly rejects POSIX system test utilities such as `/usr/bin/test`, `/bin/test`, or shell builtin `test`.
+  - Reaffirms that checkpoint is an empirical boundary marking when predecessor work ends and successor takeover begins, triggered on completed validation results regardless of pass/fail (exit 0 vs exit 1).
 
 ---
 
@@ -82,9 +85,22 @@ AttributeError: 'NoneType' object has no attribute 'get'
      - No action proposal is invented.
      - `action_rejected` evaluates to `False` (no identifiable action was proposed), while `response_rejected` evaluates to `True` based on syntax/structure validity.
 
-3. **Audit Measurement Error Policy Proposal**:
-   - Post-execution response measurement is observational telemetry. It should not be a single point of failure that aborts completed trajectories.
-   - We propose wrapping `measure()` in `comparison.py` to write `response-measurements-failure.json` upon any unhandled measurement exception, record the error in `result.json`, and continue the benchmark run rather than halting.
+3. **Audit Measurement Error Isolation Policy (`src/keisho/benchmark/comparison.py`)**:
+   - Post-execution response measurement is observational telemetry.
+   - `measure()` in `comparison.py` wraps `measure_run()` calculation in a `try...except Exception as exc:` block.
+   - Upon calculation failure:
+     - `raw.write_artifact('response-measurements-failure.json', failure_record)` is persisted with error details and status `audit_calculation_failed`.
+     - The top-level `result.json` records `'audit_status': 'audit_failed'` and `'audit_failures': [...]`.
+     - Missing metrics are not labeled successful or fabricated.
+     - The benchmark run continues without halting.
+   - Failures writing artifacts (e.g. disk/permissions) remain outside the calculation handler and remain fatal.
+
+4. **Repository Native Runner Recognition (`src/keisho/benchmark/protocol.py`)**:
+   - `completed_validation_command()` recognizes repository-local `bin/test` and `python bin/test` command heads while rejecting system commands like `/usr/bin/test`.
+   - Preserves explicit `exit_code` recording in checkpoint metadata.
+
+5. **Test Version String Update (`tests/test_notes_reader_v22.py`)**:
+   - Updated `test_v22_uses_guarded_reader_and_logs_without_retry` assertion to accept `V25_VERSION`.
 
 ---
 
@@ -108,11 +124,11 @@ AttributeError: 'NoneType' object has no attribute 'get'
 
 ## 5. Prospective Freeze Digests & Cost Envelope
 
-- **Configuration Digest (`configs/swebench-comparison-v2.5.json`)**: `16207ebfc421f23706f7ecb4aba18293985003fe98ea2d8e8e099eacd45b301e`
-- **Plan Digest (`analysis/swebench-comparison-v2.5-plan.json`)**: `c3ae9b49b546326c9ac1ea283afc855b04085baebdefcea6c4617735d5f41ee2`
-- **Manifest Digest (`analysis/swebench-experiment-v2.5-manifest.json`)**: `cbca195d4d0a73bda9021f9583b2f08980ea2bfc04600855bd19b755a5f75802`
-- **Final Source Freeze (`analysis/swebench-v2.5-final-source-freeze.json`)**: `36aeacdfccfcbc00169440e2773d3076204c069386531fba3b16e99104973b9c`
-- **Authorization Template (`analysis/swebench-comparison-v2.5-authorization-template.json`)**: `6cbfa2cb879297e2986b19d1587239cf00e88a156750fb7f2b93e136984bd224`
+- **Configuration Digest (`configs/swebench-comparison-v2.5.json`)**: `8facce961117b57c480a0bbf54138f460e59f2219fe1e82d89b2cab639e6a452`
+- **Plan Digest (`analysis/swebench-comparison-v2.5-plan.json`)**: `2246575ecd820564c6607a2dfc9e3faf56420be0940a5a505fc1394008966a28`
+- **Manifest Digest (`analysis/swebench-experiment-v2.5-manifest.json`)**: `bf4d261f64c995dc3fbe208c32be78ea42cd6785c63d4fc02582cccf4019b1da`
+- **Final Source Freeze (`analysis/swebench-v2.5-final-source-freeze.json`)**: `b7db8ad583a779d664cad1aeab6eba7a05c0c79f764210eeff01562ccac13a5b`
+- **Authorization Template (`analysis/swebench-comparison-v2.5-authorization-template.json`)**: `428e1085052c78a8de6e7a4192d876d7d4a482f43b1ae73941a3786e8f08deb4`
 
 ### Cost Envelope (Unchanged from v2.4)
 - Predecessor maximum: $1.498644

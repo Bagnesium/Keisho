@@ -80,7 +80,7 @@
   "patch_export_policy": "source-and-artifacts/2.0",
   "tool_output_policy": "bounded-output/1.0",
   "experiment_manifest": "analysis/swebench-experiment-v2.5-manifest.json",
-  "experiment_manifest_sha256": "cbca195d4d0a73bda9021f9583b2f08980ea2bfc04600855bd19b755a5f75802",
+  "experiment_manifest_sha256": "bf4d261f64c995dc3fbe208c32be78ea42cd6785c63d4fc02582cccf4019b1da",
   "notes_reader_version": "structured-notes-reader/1.0",
   "empty_handoff_user_text": "No handoff context is provided for this run. The repository is available at /testbed; begin work on the issue above using the tools.",
   "early_finish_guard": "premature-finish-guard/1.0",

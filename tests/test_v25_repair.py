@@ -10,8 +10,9 @@ from decimal import Decimal
 import json
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from keisho.agents.base import ModelRequest, ModelResponse, TokenCount, Usage
 from keisho.benchmark import comparison as c
@@ -20,7 +21,7 @@ from keisho.benchmark.response_measurements import assess_text, measure_run
 from keisho.core import canonical_json
 from keisho.logging.raw import RawRun
 from keisho.pilot.action_wire import VERSION as ACTION_WIRE_VERSION
-from keisho.pilot.agent import Budgets, Recorder, run_agent
+from keisho.pilot.agent import AgentExecution, Budgets, Recorder, run_agent
 from keisho.pilot.response_policy import AUXILIARY, STRICT, extract_action_json
 
 RUN_002 = c.ROOT / 'runs/swebench-v2.4-five-way-once-002'
@@ -232,16 +233,185 @@ class ProspectiveValidationRuleTests(unittest.TestCase):
         self.assertEqual(gate.checkpoint['exit_code'], 1)
         self.assertEqual(gate.checkpoint['rule'], 'after_first_validation_result')
 
-    def test_bin_test_recognition_proposals(self):
-        """Test recognition of SymPy native test runner bin/test."""
-        for cmd in ('bin/test -C sympy/core/tests/test_symbol.py',
-                    './bin/test -C sympy/core/tests/test_symbol.py',
-                    'python bin/test -C sympy/core/tests/test_symbol.py'):
+    def test_native_runner_recognition_positive_and_negative(self):
+        """Repository-local bin/test forms are recognized as validation commands,
+        while system commands (/usr/bin/test, /bin/test, test) are rejected.
+        """
+        positives = (
+            'bin/test sympy/core/tests/test_symbol.py',
+            './bin/test -C sympy/core/tests/test_symbol.py',
+            '/testbed/bin/test -C --verbose sympy/core/tests/test_basic.py',
+            'PYTHONWARNINGS="ignore" bin/test -C sympy/core/tests/test_basic.py',
+            'python bin/test sympy/core/tests/test_symbol.py',
+            'python3 ./bin/test sympy/core/tests/test_symbol.py',
+            'python /testbed/bin/test sympy/core/tests/test_symbol.py',
+        )
+        for cmd in positives:
             with self.subTest(cmd=cmd):
-                # Currently false in v2.4, proposed for prospective v2.5
-                res = completed_validation_command(cmd)
-                # Test documents the current status and ensures we track it
-                self.assertIn(res, (True, False))
+                self.assertTrue(completed_validation_command(cmd), f"Expected True for {cmd}")
+
+        negatives = (
+            '/usr/bin/test -d dir',
+            '/bin/test -f foo',
+            'test -f file.txt',
+            'cat bin/test',
+            'echo "bin/test"',
+            'python -c "import bin.test"',
+            'git diff',
+        )
+        for cmd in negatives:
+            with self.subTest(cmd=cmd):
+                self.assertFalse(completed_validation_command(cmd), f"Expected False for {cmd}")
+
+    def test_bin_test_checkpoint_completed_not_passed(self):
+        """A completed bin/test command result with exit 1 triggers checkpoint.
+        ValidationCheckpoint marks completed execution, not passed tests.
+        """
+        gate = ValidationCheckpoint()
+        gate({'tool': 'write_file', 'path': 'sympy/core/_print_helpers.py'},
+             {'changed_paths': ['sympy/core/_print_helpers.py'], 'exit_code': 0})
+        self.assertTrue(gate.source_edit_seen)
+        self.assertIsNone(gate.checkpoint)
+
+        reached = gate({'tool': 'shell', 'command': 'bin/test sympy/core/tests/test_symbol.py'},
+                       {'changed_paths': [], 'exit_code': 1})
+        self.assertTrue(reached)
+        self.assertEqual(gate.checkpoint['exit_code'], 1)
+        self.assertEqual(gate.checkpoint['rule'], 'after_first_validation_result')
+        self.assertEqual(gate.checkpoint['command'], 'bin/test sympy/core/tests/test_symbol.py')
+
+
+class AuditErrorPolicyTests(unittest.TestCase):
+    def setUp(self):
+        self.cfg = json.loads((c.ROOT / 'configs/swebench-comparison-v2.4.json').read_text())
+
+    def _setup_mock_run(self, t, execute_reasons):
+        t = Path(t).resolve()
+        (t / 'guards').mkdir()
+        (t / 'private').mkdir()
+        ds = t / 'private' / 'x-selected-task-evaluator.jsonl'
+        ds.write_text('{}')
+        import hashlib
+        plan = t / 'plan.json'
+        plan.write_text(json.dumps({'branch_order': self.cfg['conditions']}))
+        binding = c.LaunchBinding(
+            config_path=t / 'cfg.json', plan_path=plan, authorization_path=t / 'auth.json',
+            run_dir=t / 'run-001', authorization_guard=t / 'guards' / 'authorized-test',
+            config=self.cfg, task={'instance_id': 'x', 'base_commit': 'abc', 'problem_statement': 'issue'},
+            plan={'branch_order': self.cfg['conditions'], 'total_envelope_usd': '1'},
+            authorization={'cap_usd': '10.00', 'authorization_id': 'test'}
+        )
+        meta = {'instance_id': 'x', 'environment_verified': True, 'image_id': 'img',
+                'evaluator_dataset_sha256': hashlib.sha256(b'{}').hexdigest()}
+        prov = {'models': {r: {'accepted_response_model_ids': ['m']} for r in ('predecessor', 'successor', 'generation')}}
+        ctx = {'provider': prov, 'ca': None, 'native': None, 'image_metadata': meta, 'credential_presence': {}, 'setup': {}}
+
+        seq = list(execute_reasons)
+        def fake_run_agent(*a, **k):
+            cp = k.get('checkpoint_predicate')
+            if cp is not None:
+                cp.checkpoint = {
+                    'rule': 'after_first_validation_result', 'completed_action': 1,
+                    'first_source_edit_action': 1, 'command': 'bin/test',
+                    'exit_code': 0, 'uses_hidden_grades': False
+                }
+            reason, tools, n = seq.pop(0) if seq else ('budget_exhausted', 0, 0)
+            return AgentExecution(reason=reason, model_calls=n, tool_calls=tools, calls=(), elapsed_seconds=0.1)
+
+        class FakeSession:
+            def initialize_base(self, commit): return {}
+            def patch(self, commit): return ''
+            def close(self): pass
+            def validate_action(self, action): return True
+            def inventory(self): return {}
+            def freeze(self): return 'img-sha', {}
+            def __getattr__(self, name): return MagicMock()
+
+        return binding, plan, ctx, meta, fake_run_agent, FakeSession
+
+    def test_audit_computation_error_continuation_and_persisted_evidence_and_top_level_disclosure(self):
+        """When measure_run raises a computation error, execute() persists failure artifact,
+        marks audit failure in top-level result.json, does not label missing metrics successful,
+        and continues without crashing.
+        """
+        with tempfile.TemporaryDirectory() as t:
+            binding, plan, ctx, meta, fake_run_agent, FakeSession = self._setup_mock_run(
+                t, [('checkpoint', 1, 1)] + [('completed', 0, 1)] * 5
+            )
+            with patch.object(c, 'resolve_binding', return_value=binding), \
+                 patch.object(c, 'runtime_preflight', return_value=ctx), \
+                 patch.object(c, 'check_public_catalog', return_value={}), \
+                 patch.object(c, 'PRIVATE', Path(t) / 'private'), \
+                 patch.object(c, 'docker', return_value=SimpleNamespace(stdout=json.dumps([{'Id': 'img'}]))), \
+                 patch.object(c, 'run_agent', side_effect=fake_run_agent), \
+                 patch.object(c, 'V20OpenRouterChatModel', MagicMock()), \
+                 patch.object(c, 'BudgetedModel', MagicMock()), \
+                 patch.object(c, 'make_handoffs', return_value={cond: 'handoff' for cond in self.cfg['conditions']}), \
+                 patch.object(c, 'evaluate', return_value={'status': 'completed'}), \
+                 patch('keisho.benchmark.bounded_output.BoundedRepositorySession', return_value=FakeSession()), \
+                 patch.object(c, 'RepositorySession', return_value=FakeSession(), create=True), \
+                 patch('keisho.benchmark.response_measurements.measure_run', side_effect=TypeError('calculation divergence')):
+                c.execute(approve_live=True, config_path=binding.config_path, plan_path=plan,
+                          run_dir=binding.run_dir, authorization_path=binding.authorization_path)
+
+            run = binding.run_dir
+            # Run completed despite audit calculation error
+            result = json.loads((run / 'result.json').read_text())
+            self.assertEqual(result['status'], 'complete')
+            self.assertEqual(result['audit_status'], 'audit_failed')
+            self.assertIsInstance(result['audit_failures'], list)
+            self.assertGreaterEqual(len(result['audit_failures']), 1)
+            pred_failure = result['audit_failures'][0]
+            self.assertEqual(pred_failure['status'], 'audit_calculation_failed')
+            self.assertEqual(pred_failure['error'], 'TypeError')
+            self.assertEqual(pred_failure['reason'], 'calculation divergence')
+            self.assertEqual(pred_failure['role'], 'predecessor')
+
+            # Evidence persisted in predecessor artifact
+            fail_art = json.loads((run / 'predecessor' / 'response-measurements-failure.json').read_text())
+            self.assertEqual(fail_art['error'], 'TypeError')
+            self.assertEqual(fail_art['status'], 'audit_calculation_failed')
+
+            # Missing metrics are NOT labeled successful or fabricated
+            self.assertFalse((run / 'predecessor' / 'response-measurements.json').exists())
+
+    def test_artifact_write_failure_remains_fatal(self):
+        """When write_artifact raises during audit reporting (storage/security failure),
+        the error is NOT swallowed and halts the run via failure.json.
+        """
+        with tempfile.TemporaryDirectory() as t:
+            binding, plan, ctx, meta, fake_run_agent, FakeSession = self._setup_mock_run(
+                t, [('checkpoint', 1, 1)]
+            )
+            orig_write_artifact = RawRun.write_artifact
+            def fail_on_measurements_write(raw_self, name, value):
+                if 'response-measurements' in name:
+                    raise OSError('disk full or storage permission denied')
+                return orig_write_artifact(raw_self, name, value)
+
+            with patch.object(c, 'resolve_binding', return_value=binding), \
+                 patch.object(c, 'runtime_preflight', return_value=ctx), \
+                 patch.object(c, 'check_public_catalog', return_value={}), \
+                 patch.object(c, 'PRIVATE', Path(t) / 'private'), \
+                 patch.object(c, 'docker', return_value=SimpleNamespace(stdout=json.dumps([{'Id': 'img'}]))), \
+                 patch.object(c, 'run_agent', side_effect=fake_run_agent), \
+                 patch.object(c, 'V20OpenRouterChatModel', MagicMock()), \
+                 patch.object(c, 'BudgetedModel', MagicMock()), \
+                 patch.object(RawRun, 'write_artifact', side_effect=fail_on_measurements_write, autospec=True), \
+                 patch('keisho.benchmark.bounded_output.BoundedRepositorySession', return_value=FakeSession()), \
+                 patch.object(c, 'RepositorySession', return_value=FakeSession(), create=True), \
+                 patch('keisho.benchmark.response_measurements.measure_run', return_value={'ok': True}):
+                c.execute(approve_live=True, config_path=binding.config_path, plan_path=plan,
+                          run_dir=binding.run_dir, authorization_path=binding.authorization_path)
+
+            run = binding.run_dir
+            # Storage failure was NOT swallowed; run halted with failure.json
+            self.assertTrue((run / 'failure.json').exists())
+            failure = json.loads((run / 'failure.json').read_text())
+            self.assertEqual(failure['exception'], 'OSError')
+            self.assertIn('disk full or storage permission denied', failure['reason'])
+            result = json.loads((run / 'result.json').read_text())
+            self.assertEqual(result['status'], 'stopped_on_error')
 
 
 class NetworkDisabledIntegrationTests(unittest.TestCase):

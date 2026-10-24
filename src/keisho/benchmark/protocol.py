@@ -11,6 +11,29 @@ BUILD = re.compile(r'\b(?:build|lint|compileall|check|verify|validate)\b', re.I)
 PROMPTS = Path(__file__).parent / 'vendor/prompts.json'
 
 
+def is_repo_bin_test(tok):
+    """Check if token refers to a repository-local bin/test runner (e.g. SymPy).
+
+    Accepts:
+      - 'bin/test'
+      - './bin/test'
+      - '/testbed/bin/test' (standard SWE-bench repo worktree root)
+
+    Rejects:
+      - 'test' (shell builtin or generic command)
+      - '/usr/bin/test', '/bin/test' (POSIX system test utilities)
+    """
+    try:
+        p = Path(tok)
+    except Exception:
+        return False
+    if not p.is_absolute() and p.parts == ('bin', 'test'):
+        return True
+    if p.as_posix() in ('/testbed/bin/test', './bin/test', 'bin/test'):
+        return True
+    return False
+
+
 def completed_validation_command(command):
     """Author signals, narrowed to executed command heads (not echo/read output).
 
@@ -41,10 +64,14 @@ def completed_validation_command(command):
         rest = ' '.join(tokens[1:])
         if head in ('pytest', 'tox', 'nox', 'ruff', 'mypy', 'pylint', 'flake8'):
             return True
-        if head in ('python', 'python3') and (rest.startswith('-m ') and rest.split()[1] in
-                   ('pytest', 'unittest', 'compileall', 'build') or
-                   tokens[1:2] and re.search(r'(repro|reproduce|check|verify|validate|test).*\.py$', tokens[1]) or
-                   tokens[1:3] in (['setup.py', 'build'], ['setup.py', 'check'])):
+        if is_repo_bin_test(tokens[0]):
+            return True
+        if head in ('python', 'python3') and (
+            (len(tokens) > 1 and is_repo_bin_test(tokens[1])) or
+            (rest.startswith('-m ') and rest.split()[1] in ('pytest', 'unittest', 'compileall', 'build')) or
+            (tokens[1:2] and re.search(r'(repro|reproduce|check|verify|validate|test).*\.py$', tokens[1])) or
+            (tokens[1:3] in (['setup.py', 'build'], ['setup.py', 'check']))
+        ):
             return True
         if head in ('make', 'npm', 'pnpm', 'yarn', 'cargo', 'go', 'gradle', 'mvn') and any(t in ('test', 'build', 'lint', 'check') for t in tokens[1:]):
             return True
@@ -70,6 +97,10 @@ class ValidationCheckpoint:
             self.first_edit = self.first_edit or self.completed
         command = action.get('command', '')
         recognized = completed_validation_command(command)
+        # Checkpoint is an empirical boundary marking when predecessor work ends
+        # and successor takeover begins. A completed validation command execution
+        # (with integer exit code, e.g. 0, 1, or other) qualifies as completed validation;
+        # exit code is recorded in the checkpoint record without requiring tests to pass.
         if preceding_source_edit and action.get('tool') == 'shell' and recognized and type(result.get('exit_code')) is int:
             self.checkpoint = {'rule': 'after_first_validation_result', 'completed_action': self.completed,
                                'first_source_edit_action': self.first_edit, 'command': command,

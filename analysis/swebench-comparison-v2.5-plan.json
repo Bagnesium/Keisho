@@ -3,7 +3,7 @@
   "provider_requests": 0,
   "credential_validation_requests": 0,
   "new_spending_authorized": false,
-  "config_sha256": "16207ebfc421f23706f7ecb4aba18293985003fe98ea2d8e8e099eacd45b301e",
+  "config_sha256": "8facce961117b57c480a0bbf54138f460e59f2219fe1e82d89b2cab639e6a452",
   "task_sha256": "edc429b5c441e91fe9e661cf7c4ca721892cb60e89cb375c09dfcbb7b935b378",
   "catalog_sha256": "c2401039b8759242b9d59dcd388eedc906ce1856d136197aa6bcc6f202fa574b",
   "response_policy": "auxiliary-claims/2.0",
@@ -57,11 +57,11 @@
   "action_wire_version": "flat-or-args/1.0",
   "wire_action_contract_sha256": "b17d5737b9f67e70f8b21ea6e7d27a800b726acee86d4fe1b88f7e975e678d95",
   "internal_action_contract_sha256": "48af7498236adb94a9e291c17269239ef998c1eda977dfd13e7dc1c14da73388",
-  "intervention": "Specification v2.3 replaces the empty trailing user message with a constant non-empty turn, adds a premature-finish guard for the predecessor, a pre-registered bound of 3 predecessor attempts, and a cache-write-priced envelope. Specification v2.4 counts malformed or schema-invalid action responses as invalid-action strikes and grades with the task-specific evaluator row. Specification v2.5 aligns response audit measurement with the runtime framing reader and handles absent actions safely.",
+  "intervention": "Specification v2.3 replaces the empty trailing user message with a constant non-empty turn, adds a premature-finish guard for the predecessor, a pre-registered bound of 3 predecessor attempts, and a cache-write-priced envelope. Specification v2.4 counts malformed or schema-invalid action responses as invalid-action strikes and grades with the task-specific evaluator row. Specification v2.5 aligns response audit measurement with the runtime framing reader, handles absent actions safely, isolates audit computation errors, and recognizes native repository bin/test runners.",
   "annotation_guidance_version": "annotation-guidance/1.0",
   "annotation_guidance_sha256": "4355a256a11dc729a2c6d35e95b770ae041777a1c96d19217003222406f25d1e",
   "patch_export_policy": "source-and-artifacts/2.0",
   "tool_output_policy": "bounded-output/1.0",
-  "experiment_manifest_sha256": "cbca195d4d0a73bda9021f9583b2f08980ea2bfc04600855bd19b755a5f75802",
+  "experiment_manifest_sha256": "bf4d261f64c995dc3fbe208c32be78ea42cd6785c63d4fc02582cccf4019b1da",
   "freeze_status": "PROSPECTIVE PROPOSAL; no spending authorized"
 }

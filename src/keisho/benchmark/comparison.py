@@ -75,8 +75,8 @@ V24_SPEC_SHA = 'e9fe9eaa098cba683d52a121bf6c23d1995ae9aefb09fce6ce894bbbfae0c7b9
 V24_PLAN_SHA = '6f68728f10457269cb86410316286d48235ce30276c52ed9934e6a997f266e56'
 V24_FINAL_SOURCE_FREEZE = 'analysis/swebench-v2.4-final-source-freeze.json'
 V24_VERSION = 'swebench-handoff/2.4'
-V25_SPEC_SHA = '16207ebfc421f23706f7ecb4aba18293985003fe98ea2d8e8e099eacd45b301e'
-V25_PLAN_SHA = 'c3ae9b49b546326c9ac1ea283afc855b04085baebdefcea6c4617735d5f41ee2'
+V25_SPEC_SHA = '8facce961117b57c480a0bbf54138f460e59f2219fe1e82d89b2cab639e6a452'
+V25_PLAN_SHA = '2246575ecd820564c6607a2dfc9e3faf56420be0940a5a505fc1394008966a28'
 V25_FINAL_SOURCE_FREEZE = 'analysis/swebench-v2.5-final-source-freeze.json'
 V25_VERSION = 'swebench-handoff/2.5'
 MALFORMED_RESPONSE_POLICY = 'invalid-action-strike/1.0'
@@ -718,11 +718,25 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
         if config.get('patch_export_policy'):
             options['patch_export_policy'] = config['patch_export_policy']
         return RepositorySession(image,audit=raw,timeout=config['tool_timeout_seconds'],output_bytes=config['tool_output_bytes'],**options)
+    audit_failures = []
     def measure(raw,session,role):
         if observable_audit_enabled(config):
             from .response_measurements import measure_run
-            raw.write_artifact('response-measurements.json',measure_run(raw,session.validate_action,role=role,
-                action_contract_version=config['action_contract_version'], **wire_options))
+            report = None
+            try:
+                report = measure_run(raw,session.validate_action,role=role,
+                    action_contract_version=config['action_contract_version'], **wire_options)
+            except Exception as exc:
+                failure_record = {
+                    'status': 'audit_calculation_failed',
+                    'role': role,
+                    'error': type(exc).__name__,
+                    'reason': str(exc)
+                }
+                raw.write_artifact('response-measurements-failure.json', failure_record)
+                audit_failures.append(failure_record)
+                return
+            raw.write_artifact('response-measurements.json', report)
     results = {c: {'status': 'unstarted', 'official_status': None} for c in config['conditions']}
     overall = 'interrupted'
     predecessor_info = None
@@ -830,6 +844,8 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
         index.write_artifact('result.json', {'label': config['label'], 'status': overall, 'predecessor': predecessor_info,
                'checkpoint_classification': checkpoint_grade, 'conditions': results,
                'note_generation_cost_usd': str(sum(Decimal(r.get('noncached_accounted_usd', '0')) for r in ledger.records if r['stage'].startswith('note_generation'))),
-               'model_assisted_semantic_review': None, 'human_review': False})
+               'model_assisted_semantic_review': None, 'human_review': False,
+               'audit_status': 'audit_failed' if audit_failures else 'ok',
+               'audit_failures': audit_failures if audit_failures else None})
         index.freeze()
     return index.path

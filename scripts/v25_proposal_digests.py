@@ -31,7 +31,8 @@ m['binding_module_note'] = ('Binding modules are pinned in analysis/swebench-v2.
 m['prospective_changes'] = [
     'response-measurements: assess_text uses extract_action_json to align audit measurement with runtime reader framing rules without parser divergence',
     'response-measurements: measure_run guards action against absent/non-dict shapes, preventing AttributeError and explicitly evaluating tool_execution_successful=False without inventing actions',
-    'checkpoint-rule: confirms that checkpoint on validation result with exit 1 strictly follows registered rule; proposes bin/test recognition in completed_validation_command'
+    'audit-error-policy: execute() records audit measurement computation errors to response-measurements-failure.json and result.json and continues without halting, while artifact write failures remain fatal',
+    'checkpoint-rule: protocol.py completed_validation_command recognizes repository-local bin/test forms (e.g. SymPy) while rejecting system utilities like /usr/bin/test'
 ]
 dump('analysis/swebench-experiment-v2.5-manifest.json', m)
 
@@ -44,7 +45,7 @@ dump('configs/swebench-comparison-v2.5.json', cfg)
 plan = load('analysis/swebench-comparison-v2.4-plan.json')
 plan.update({'version': 'swebench-plan/2.5', 'config_sha256': digest(cfg), 'experiment_manifest_sha256': digest(m),
              'freeze_status': 'PROSPECTIVE PROPOSAL; no spending authorized', 'new_spending_authorized': False,
-             'intervention': plan['intervention'] + ' Specification v2.5 aligns response audit measurement with the runtime framing reader and handles absent actions safely.'})
+             'intervention': plan['intervention'] + ' Specification v2.5 aligns response audit measurement with the runtime framing reader, handles absent actions safely, isolates audit computation errors, and recognizes native repository bin/test runners.'})
 dump('analysis/swebench-comparison-v2.5-plan.json', plan)
 
 src = (ROOT / 'src/keisho/benchmark/comparison.py').read_text()
