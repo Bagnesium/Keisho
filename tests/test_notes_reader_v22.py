@@ -82,7 +82,8 @@ class Wiring(unittest.TestCase):
         self.assertTrue("config.get('version') == 'swebench-handoff/2.2'" in src
                         or "config.get('version') in ('swebench-handoff/2.2', V23_VERSION)" in src
                         or "config.get('version') in ('swebench-handoff/2.2', V23_VERSION, V24_VERSION)" in src
-                        or "config.get('version') in ('swebench-handoff/2.2', V23_VERSION, V24_VERSION, V25_VERSION)" in src)
+                        or "config.get('version') in ('swebench-handoff/2.2', V23_VERSION, V24_VERSION, V25_VERSION)" in src
+                        or "config.get('version') in ('swebench-handoff/2.2', V23_VERSION, V24_VERSION, V25_VERSION, V26_VERSION)" in src)
         self.assertIn('read_structured_notes(response.text, fields)', src)
         self.assertIn("'-stripped-framing.json'", src)
         self.assertIn("'automatic_retry': False", src)
