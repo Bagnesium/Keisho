@@ -29,7 +29,7 @@ the target failure and recorded all 1,445 collected-test outcomes.
 - [Reproducibility notes and limits](research/REPRODUCIBILITY.md)
 - [Chronological experiment record](BENCHMARK_PROGRESS.md)
 
-The raw v2.7 run archive and private evaluator inputs are not included in this
+The raw pilot run archive and private evaluator inputs are not included in this
 clone. There is no public data archive or DOI, so the reported run cannot be
 independently replayed from this repository alone.
 

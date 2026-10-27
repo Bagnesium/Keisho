@@ -1,6 +1,6 @@
 # Typed Evidence Handoffs in a Coding-Agent Takeover: A Single-Task SWE-bench Verified Pilot
 
-**Keisho Research Working Group (Lead: bagnesium)**
+**Bagdat Beimzhan**
 
 Exploratory empirical pilot | 27 October 2026
 
@@ -68,7 +68,7 @@ The official evaluator classified the predecessor's empty patch as `unresolved` 
 
 ### 4.2 Successor outcomes
 
-**Table 1.** Official grade and successor-run resource observations for each condition in the completed v2.7 comparison.
+**Table 1.** Official grade and successor-run resource observations for each condition in the completed exploratory comparison.
 
 | Condition | Official grade | Model calls | Tool calls | Input tokens | Output tokens | Elapsed time (s) |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
@@ -116,7 +116,7 @@ Fourth, `STRUCTURED_NOTES_2K` was a local adaptation of the published structured
 
 Fifth, the Keisho bundle retained unknown evidence scopes. Although the broader system supports file-scope checks, this run does not show that a complete file-hash revalidation mechanism improved successor behavior. A successful SWE-bench grade also establishes only that the exported patch passed the benchmark's grading tests; it does not establish behavior on every lazy storage backend or in deployment.
 
-Finally, the completed run followed four earlier v2.7 attempts that exposed protocol and instrumentation failures. The successful run was exploratory and followed protocol repairs. The earlier attempts are disclosed in Appendix A and are not pooled with the five successor outcomes.
+Finally, the completed run followed four earlier attempts that exposed protocol and instrumentation failures. The successful run was exploratory and followed protocol repairs. The earlier attempts are disclosed in Appendix A and are not pooled with the five successor outcomes.
 
 ## 7. Conclusion
 
@@ -126,7 +126,7 @@ A follow-up should vary the handoff representation while controlling the substan
 
 ## Data and Code Availability
 
-The completed run records are retained under `runs/swebench-v2.7-five-way-once-005`. The checkpoint verification log and structured result are under `analysis/checkpoint_verification_log.txt` and `analysis/checkpoint_verification_result.json`. These artifacts do not have a public archive or DOI in this manuscript version.
+The completed run records remain in a local archive identified in Appendix B. The checkpoint verification log and structured result are under `analysis/checkpoint_verification_log.txt` and `analysis/checkpoint_verification_result.json`. The run archive is not publicly available, and no public archive or DOI is provided in this manuscript version.
 
 ## References
 
@@ -142,9 +142,9 @@ The completed run records are retained under `runs/swebench-v2.7-five-way-once-0
 
 ## Appendix A. Protocol Development Attempts
 
-Four v2.7 attempts preceded the completed comparison. They were protocol-development runs, not additional observations for the five-condition results. Their charges are reported separately and are not pooled with Table 1.
+Four protocol-development attempts preceded the completed comparison. They are not additional observations for the five-condition results. Their charges are reported separately and are not pooled with Table 1.
 
-**Table A1.** Provider charges and reservations across the five v2.7 protocol attempts. Amounts are rounded to six decimal places.
+**Table A1.** Provider charges and reservations across the five recorded attempts. Amounts are rounded to six decimal places.
 
 | Attempt | Provider requests | Outcome | Billed (USD) | Accounted (USD) | Unreconciled (USD) |
 | --- | ---: | --- | ---: | ---: | ---: |
@@ -158,7 +158,7 @@ Attempt 001 failed to reach the stopping rule after the reproduction script caug
 
 Attempt 003 reached an empty, officially unresolved checkpoint. The provider rejected the first successor request because the route did not accept the requested seed parameter. The ledger retains USD 0.379008 as unreconciled. Attempt 004 reached the same checkpoint, but each successor response exceeded the local input-token reservation bound before any tool action. In that run, one request was reported as 5,990 tokens by the OpenAI tokenizer while the provider reported 9,540 input tokens. Attempt 005 increased the reservation multiplier and completed all five branches.
 
-Across the five v2.7 runs, raw ledger values sum to USD 2.051310325 in actual charges and USD 2.508869925 in conservative accounted spend. The USD 0.379008 reservation from Attempt 003 remains unreconciled. Totals are calculated from unrounded ledger values; row displays are rounded to six decimals. A separate earlier v2.6 pilot on `sympy__sympy-20590` used a checkpoint whose fix was already applied. It measured solution preservation and is not combined with this unresolved-checkpoint comparison.
+Across the five recorded attempts, raw ledger values sum to USD 2.051310325 in actual charges and USD 2.508869925 in conservative accounted spend. The USD 0.379008 reservation from Attempt 003 remains unreconciled. Totals are calculated from unrounded ledger values; row displays are rounded to six decimals. A separate earlier v2.6 pilot on `sympy__sympy-20590` used a checkpoint whose fix was already applied. It measured solution preservation and is not combined with this unresolved-checkpoint comparison.
 
 ## Appendix B. Run Specification
 

@@ -36,7 +36,7 @@ The references are not yet a substitute for a final citation-style pass against 
 
 ## Remaining checks for the author
 
-1. The byline preserves “Keisho Research Working Group (Lead: bagnesium)” from the v2.7 draft. Confirm that this is the intended public byline and provide any formal affiliation, corresponding-author details, and contribution statement before submission.
+1. The byline now reads “Bagdat Beimzhan.” Add a formal affiliation, corresponding-author details, or a contribution statement if required by the target venue.
 2. Decide whether the run artifacts and code will receive a public, stable archive. The manuscript currently says that no public archive or DOI is provided.
 3. Confirm the experimental labels, model identifiers, and billing figures against the provider invoices and immutable run records before public release. The manuscript records the available run IDs and hashes, but this edit does not independently re-run the experiment.
 4. Choose a target venue before final submission formatting. The current document uses a neutral single-column academic layout and makes no claim of acceptance or venue affiliation.

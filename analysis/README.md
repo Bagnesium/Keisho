@@ -6,7 +6,7 @@ notebook, and most files are protocol history rather than inferential results.
 
 ## Current empirical study
 
-The completed v2.7 comparison is reported in
+The completed comparison is reported in
 [`paper/MANUSCRIPT_FINAL_PILOT.md`](../paper/MANUSCRIPT_FINAL_PILOT.md), with
 editorial and verification issues in
 [`paper/EDITORIAL_AUDIT_20261027.md`](../paper/EDITORIAL_AUDIT_20261027.md).
@@ -32,13 +32,13 @@ result are the tracked files `checkpoint_verification_command.sh`,
   development and failed attempts. Do not treat a higher version number alone
   as evidence that an experiment ran.
 - `research-closeout-2026-10-27.md` is a superseded historical status report;
-  its executive summary predates the v2.7 comparison. Use the current paper for
+  its executive summary predates the completed comparison. Use the current paper for
   the result.
 - `../BENCHMARK_PROGRESS.md` is the chronological execution log. Its older
   interpretations are historical; the current paper states the supported
   conclusion.
 - `../research/REPRODUCIBILITY.md` documents the earlier v1.2 engineering
-  integration and its local setup. It is not the v2.7 run archive.
+  integration and its local setup. It is not the current pilot run archive.
 
 No pooled or confirmatory statistical analysis is reported. Synthetic
 development fixtures and offline rehearsals are software evidence, not
