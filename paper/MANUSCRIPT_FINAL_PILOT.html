@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Epistemic Handoffs in Multi-Agent Software Engineering: Empirical Evaluation of Mid-Task Frontier Takeover on SWE-bench Verified</title>
+<style>
+  @page {
+    size: letter;
+    margin: 20mm 18mm 20mm 18mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.55;
+    color: #111;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 18pt;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    color: #0b1c2d;
+    text-align: center;
+  }
+  .metadata {
+    text-align: center;
+    font-size: 9pt;
+    color: #444;
+    margin-bottom: 24px;
+    line-height: 1.45;
+  }
+  hr {
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 20px 0;
+  }
+  h2 {
+    font-size: 13pt;
+    font-weight: 700;
+    margin-top: 22px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e1e4e8;
+    padding-bottom: 4px;
+    color: #0b1c2d;
+  }
+  h3 {
+    font-size: 11pt;
+    font-weight: 600;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    color: #1b2d42;
+  }
+  h4 {
+    font-size: 10pt;
+    font-weight: 600;
+    margin-top: 12px;
+    margin-bottom: 4px;
+  }
+  p {
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: justify;
+  }
+  ul, ol {
+    margin-top: 0;
+    margin-bottom: 12px;
+    padding-left: 24px;
+  }
+  li {
+    margin-bottom: 5px;
+  }
+  blockquote {
+    margin: 12px 0;
+    padding: 8px 16px;
+    background-color: #f6f8fa;
+    border-left: 4px solid #0366d6;
+    color: #333;
+    font-size: 9pt;
+  }
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 8.5pt;
+    background-color: #f0f3f6;
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: #24292e;
+  }
+  pre {
+    background-color: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 4px;
+    padding: 10px 14px;
+    overflow-x: auto;
+    font-size: 8pt;
+    line-height: 1.4;
+    margin: 12px 0;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    border: 0;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    font-size: 8.5pt;
+  }
+  th, td {
+    border: 1px solid #d0d7de;
+    padding: 6px 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+    color: #24292e;
+  }
+  tr:nth-child(even) {
+    background-color: #fcfdfe;
+  }
+  a {
+    color: #0969da;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  .abstract {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+  }
+  .abstract h2 {
+    font-size: 11pt;
+    border-bottom: none;
+    margin-top: 0;
+    margin-bottom: 6px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  @media print {
+    body {
+      max-width: 100%;
+      padding: 0;
+      font-size: 9.5pt;
+    }
+    h2, h3 {
+      page-break-after: avoid;
+    }
+    table, pre {
+      page-break-inside: avoid;
+    }
+  }
+</style>
+</head>
+<body>
+<h1>Epistemic Handoffs in Multi-Agent Software Engineering: Empirical Evaluation of Mid-Task Frontier Takeover on SWE-bench Verified</h1>
+<div class="metadata">
+<strong>Authors</strong>: Keisho Research Working Group (Lead: bagnesium) [Review: attribution unconfirmed — confirm actual authorship before any external sharing]<br>
+<strong>Status</strong>: COMPLETED PILOT MANUSCRIPT (EMPIRICAL FIVE-WAY FRONTIER TAKEOVER COMPARISON)<br>
+<strong>Date</strong>: October 27, 2026<br>
+<strong>Evaluation Target</strong>: SWE-bench Verified (<code>pydata__xarray-6721</code>)
+</div>
+<hr>
+<div class="abstract">
+<h2>Abstract</h2>
+<p>We report a completed empirical five-way comparison evaluating agent context handoff representations during a mid-task takeover between two distinct frontier model families on a complex software repair task from SWE-bench Verified (<code>pydata__xarray-6721</code>). The study evaluates five context transfer conditions across an identical checkpoint: <code>REPOSITORY_ONLY</code> (no handoff context; testbed exploration from scratch), <code>FULL_HISTORY</code> (uncompressed turn-by-turn conversation), <code>SUMMARY_2K</code> (2,048-token LLM narrative summary), <code>STRUCTURED_NOTES_2K</code> (7-field schema notes + deterministic facts), and <code>KEISHO_2K</code> (compiler-generated typed items with file-revalidation scoping).</p>
+<p>Unlike earlier pilot studies where the predecessor reached a solved checkpoint (measuring solution preservation), the present study implements a <em>pre-execution source-edit interception protocol</em>: the predecessor (<code>openai/gpt-6-sol</code>) explores the repository and formulates a repair strategy, but is paused strictly prior to executing its first attempted source code modification. This leaves the container working tree unpatched. At runtime, the SWE-bench evaluation harness classified the empty checkpoint patch via its native empty-patch shortcut (recorded as <code>status: unresolved</code>, <code>empty_patch: true</code>). To close the empirical verification gap, dedicated container testing executed the official <code>FAIL_TO_PASS</code> and <code>PASS_TO_PASS</code> pytest suites directly on the unpatched codebase inside Docker, confirming that the target defect failed with <code>UnexpectedDataAccess: Tried accessing data</code> at <code>xarray/core/common.py:2026</code> while all 1,405 baseline regression tests passed.</p>
+<p>Following checkpoint verification, context was transferred to an asymmetric frontier successor (<code>anthropic/claude-opus-5.5</code>) across all five branches. All five successor conditions successfully resolved the task (5/5 <code>resolved</code> by official Docker SWE-bench evaluation). Because all five conditions resolved the issue, this experiment does not demonstrate differential task accuracy. However, substantial operational differences were observed across representations:</p>
+<ol>
+  <li><strong>Token Efficiency</strong>: <code>FULL_HISTORY</code> consumed 138,443 successor input tokens across 4 calls. In contrast, <code>SUMMARY_2K</code> consumed 44,126 input tokens (68.1% reduction vs. <code>FULL_HISTORY</code>), <code>STRUCTURED_NOTES_2K</code> consumed 45,429 input tokens (67.2% reduction), <code>KEISHO_2K</code> consumed 47,170 input tokens (65.9% reduction), and <code>REPOSITORY_ONLY</code> consumed 54,526 input tokens (60.6% reduction).</li>
+  <li><strong>Turn Efficiency</strong>: <code>KEISHO_2K</code> and <code>FULL_HISTORY</code> required the joint-fewest model calls (4 model calls, 3 tool calls), moving directly from the handoff to source modification. <code>SUMMARY_2K</code> and <code>STRUCTURED_NOTES_2K</code> each required 5 model calls (4 tool calls), taking an additional exploratory verification step before editing. <code>REPOSITORY_ONLY</code> required 7 model calls (6 tool calls), spending 3 calls re-investigating the repository from scratch.</li>
+  <li><strong>Execution Latency</strong>: Wall-clock duration was 32.7 seconds for <code>FULL_HISTORY</code> and 34.5 seconds for <code>KEISHO_2K</code>, compared to 53.8 seconds for <code>REPOSITORY_ONLY</code>, 86.5 seconds for <code>STRUCTURED_NOTES_2K</code>, and 86.8 seconds for <code>SUMMARY_2K</code>. Wall-clock time reflects composite provider response latency and turn count, rather than pure context processing speed.</li>
+</ol>
+<p>Actual provider billing for the completed comparison run was <strong>$1.534741</strong> (conservative accounted spend: <strong>$1.590336</strong>; unreconciled reservations: <strong>$0.00</strong>). Billed spend across all five iterative experimental attempts was <strong>$2.051311</strong>, plus one unreconciled reservation of <strong>$0.379008</strong> from an upstream routing parameter rejection. As an $N=1$ single-task study, these results do not establish general performance superiority, but provide an empirical demonstration of how structured epistemic handoffs perform during mid-task frontier agent transfer.</p>
+</div>
+<hr>
+<h2>1. Introduction and Research Motivation</h2>
+<p>Autonomous software engineering agents increasingly require multi-agent collaboration, delegation, and context handoff. When tasks exceed a single model&#x27;s context window, or when specialized models are paired—for instance, using an analytical model for codebase triage and a code-specialized frontier model for implementation—intermediate state must be transferred accurately.</p>
+<p>Prior work has highlighted <em>Handoff Debt</em> (KC &amp; Budathoki, 2026), where informal or unstructured summaries omit crucial negative evidence, obscure provenance, and induce hallucinations or redundant exploration in successor agents. In an earlier single-task pilot on <code>sympy__sympy-20590</code>, all five successor conditions preserved task resolution. However, because the predecessor&#x27;s cumulative patch had already resolved the task prior to handoff, that initial study evaluated <em>solution preservation</em> rather than the <em>continuation of unfinished work</em>.</p>
+<p>To investigate context handoffs during active, unfinished problem-solving, this study establishes an empirical protocol evaluating a genuine mid-task takeover between two distinct frontier model families on a complex repair instance:</p>
+<ol>
+  <li><strong>Multi-File Benchmark Target</strong>: Moving from a single-file SymPy issue to <code>pydata__xarray-6721</code>, a multi-file defect in <code>xarray/core/common.py</code> and <code>xarray/core/variable.py</code> from SWE-bench Verified.</li>
+  <li><strong>Frontier Model Asymmetry</strong>: Pairing OpenAI&#x27;s <code>gpt-6-sol</code> as predecessor investigator with Anthropic&#x27;s <code>claude-opus-5.5</code> as successor repair engineer, mediated by <code>gpt-6-luna</code> for narrative and schema-based note generation.</li>
+  <li><strong>Pre-Execution Interception Stopping Rule</strong>: Enforcing an automated interception barrier on the predecessor&#x27;s first attempted non-test source edit, halting the agent prior to tool execution and leaving the working tree completely unpatched.</li>
+  <li><strong>Empirical Checkpoint Verification</strong>: Confirming through direct container execution that the unpatched baseline reproduces the target defect while preserving the wider test suite before initiating successor branches.</li>
+</ol>
+<hr>
+<h2>2. Experimental Design and Interception Protocol</h2>
+<p>The experimental architecture evaluates five context transfer conditions across an identical checkpoint. All runs were conducted in isolated Linux containers under explicit cost bounds.</p>
+<h3>2.1 Benchmark Target: <code>pydata__xarray-6721</code></h3>
+<ul>
+  <li><strong>Instance ID</strong>: <code>pydata__xarray-6721</code> (SWE-bench Verified)</li>
+  <li><strong>Repository</strong>: <code>pydata/xarray</code></li>
+  <li><strong>Base Commit</strong>: <code>cc183652bf6e1273e985e1c4b3cba79c896c1193</code></li>
+  <li><strong>Defect Description</strong>: Accessing <code>Dataset.chunks</code> or <code>Dataset.chunksizes</code> on lazily indexed or inaccessible storage backends unintentionally forces array materialization into memory. The underlying flaw resides in <code>get_chunksizes()</code> in <code>xarray/core/common.py</code> querying <code>hasattr(v.data, &quot;chunks&quot;)</code> rather than checking <code>v.chunks is not None</code>, alongside a corresponding access in <code>Variable.chunksizes</code> (<code>xarray/core/variable.py</code>).</li>
+  <li><strong>Official Test Suite</strong>: </li>
+  <li><code>FAIL_TO_PASS</code>: <code>xarray/tests/test_dataset.py::TestDataset::test_chunks_does_not_load_data</code> (1 test).</li>
+  <li><code>PASS_TO_PASS</code>: 1,405 regression tests in <code>xarray/tests/test_dataset.py</code>.</li>
+</ul>
+<h3>2.2 Frontier Multi-Model Pipeline</h3>
+<p>The experiment uses three distinct models across task phases:</p>
+<ul>
+  <li><strong>Predecessor Investigator</strong>: <code>openai/gpt-6-sol</code> (via OpenRouter, reasoning effort <code>none</code>). Configured rates: prompt $2.00/M, completion $10.00/M, cache-write reservation $2.50/M.</li>
+  <li><strong>Handoff Note Generators</strong>: <code>openai/gpt-6-luna</code> (via OpenRouter, reasoning effort <code>none</code>). Configured rates: prompt $0.10/M, completion $0.50/M, cache-write reservation $0.125/M.</li>
+  <li><strong>Successor Repair Engineers (5 conditions)</strong>: <code>anthropic/claude-opus-5.5</code> (via OpenRouter, reasoning effort <code>low</code> required by provider catalog). Configured rates: prompt $4.00/M, completion $20.00/M, cache-write reservation $5.00/M.</li>
+</ul>
+<h3>2.3 Pre-Execution Interception Stopping Rule</h3>
+<p>Heuristic stopping rules based on string-matching error logs are prone to failure because language models often trap expected errors inside <code>try...except</code> blocks or shell scripts that exit with code 0. To provide a robust stopping boundary, the system intercepts the predecessor&#x27;s actions:</p>
+<ol>
+  <li>The predecessor agent is initialized with the problem statement and full read/command access to the testbed repository.</li>
+  <li>The agent inspects files, runs shell searches, and executes reproductions.</li>
+  <li>When the predecessor issues an action targeting a non-test source-code modification (e.g., editing <code>xarray/core/common.py</code>), the execution harness intercepts the action <em>before</em> the modification is written to disk.</li>
+  <li>The tool returns an interception notice (<code>status: paused_before_execution</code>).</li>
+  <li>The predecessor session halts cleanly with <code>reason: checkpoint</code>.</li>
+  <li>The container working tree is verified clean (<code>git diff</code> is empty).</li>
+  <li>The unpatched checkpoint state is submitted to grading to confirm it is unresolved before any successor branch commences.</li>
+</ol>
+<h3>2.4 Five Successor Context Conditions</h3>
+<p>All five successor branches execute from the clean checkpoint state, receiving identical tool sets (<code>benchmark-agent/5.0</code> with <code>json_object/3.0</code> action wire), identical task descriptions, and identical container environments:</p>
+<ol>
+  <li><strong><code>REPOSITORY_ONLY</code></strong>: Receives no predecessor context (prompt contains only: <em>&quot;No handoff context is provided for this run. The repository is available at /testbed; begin work on the issue above using the tools.&quot;</em>).</li>
+  <li><strong><code>FULL_HISTORY</code></strong>: Receives the raw, uncompressed sequence of all predecessor conversation turns, tool calls, and outputs (16,166 tokens; 55,749 characters).</li>
+  <li><strong><code>SUMMARY_2K</code></strong>: Receives a 2,048-token capped free-form narrative summary produced by GPT-6 Luna (326 tokens; 1,437 characters).</li>
+  <li><strong><code>STRUCTURED_NOTES_2K</code></strong>: Receives a 7-field structured schema (problem understanding, work completed, evidence observed, observed failures, remaining uncertainties, rollback notes, recommended next actions) plus deterministic repository continuation facts produced by GPT-6 Luna (435 tokens; 2,137 characters).</li>
+  <li><strong><code>KEISHO_2K</code></strong>: Receives compiler-verified, typed epistemic items (observed facts, hypothesized claims, unknown boundaries, provenance pointers) scoped to the repository state (2,035 tokens; 8,103 characters).</li>
+</ol>
+<hr>
+<h2>3. Engineering Discoveries and Iterative Development</h2>
+<p>Conducting mid-task handoffs across heterogeneous frontier model families required addressing several real-world distributed agent challenges across five successive attempts:</p>
+<h3>3.1 Disclosure of All Experimental Attempts</h3>
+<p>Five attempts were conducted under the authorized spending cap:</p>
+<ul>
+  <li><strong>Attempt 1</strong>: Tested a post-reproduction error detection heuristic. The predecessor successfully reproduced the defect using a Python snippet, but caught the exception inside a <code>try...except</code> block. Because the shell exited with return code 0 and non-matching text, the detector missed the checkpoint, and the predecessor proceeded past the desired stopping point. Spend: $0.069326.</li>
+  <li><strong>Attempt 2</strong>: Refined the stdout regex detector. The model adapted its output format, again bypassing heuristic detection before attempting an edit. Spend: $0.065966.</li>
+  <li><strong>Attempt 3</strong>: Replaced heuristic log parsing with the pre-execution source-edit interception protocol. The predecessor halted cleanly at the first source edit. However, the first successor call to Claude Opus 5.5 failed immediately with an HTTP 404 from OpenRouter (<code>Filter by Parameters</code>) because the request passed an explicit <code>seed: 20261007</code> with <code>require_parameters: True</code>, which Anthropic&#x27;s provider endpoint does not support. The spend guard held a $0.379008 reservation for the rejected request. Spend: $0.036516 billed (plus $0.379008 unreconciled reservation).</li>
+  <li><strong>Attempt 4</strong>: Omitted the <code>seed</code> parameter for Anthropic models. The predecessor halted cleanly, but the first successor call was halted by local client-side token reservation guards: Claude Opus 5.5&#x27;s native tokenizer returned 9,540 input tokens on a request that OpenAI&#x27;s <code>o200k_base</code> tokenizer measured at 5,990 tokens. Because the returned usage exceeded the pre-declared reservation upper bound, the local harness failed closed. Spend: $0.344762.</li>
+  <li><strong>Attempt 5 (Completed Run)</strong>: Scaled the Anthropic token reservation multiplier to 2.0x (<code>int(math.ceil(base * 2.0))</code>) and implemented explicit empty-patch handling for checkpoint evaluation. All 33 model calls completed end-to-end across the predecessor, note generators, and all five successor branches. Spend: $1.534741 billed.</li>
+</ul>
+<h3>3.2 Tokenizer Density Divergence Across Providers</h3>
+<p>OpenAI models use the <code>o200k_base</code> Byte-Pair Encoding (BPE) vocabulary (~200,000 tokens), whereas Anthropic&#x27;s Claude family uses a distinct vocabulary (~65,000 tokens). On technical Python source code and SWE-bench prompts, Claude&#x27;s tokenizer exhibited an empirical expansion ratio of <strong>1.575x to 1.633x</strong> relative to <code>o200k_base</code>. Multi-agent architectures that calculate token reservations using a single tokenizer will systematically under-reserve for denser tokenizers, causing client-side validation failures unless provider-specific scaling factors are enforced.</p>
+<h3>3.3 Pre-Execution Interception Boundary</h3>
+<p>The pre-execution edit interception mechanism eliminated heuristic uncertainty. By hooking the tool dispatcher before disk writes execute, the harness precisely separated the diagnostic/triage phase from the modification phase without depending on fragile log patterns.</p>
+<h3>3.4 Successor Seed Non-Determinism</h3>
+<p>Because Anthropic&#x27;s API via OpenRouter does not accept the <code>seed</code> parameter, successor branches operated without server-side seed pinning. While temperature was set to 0.0 across all calls, upstream provider routing and distributed sampling mean that outputs remain subject to stochastic variance.</p>
+<hr>
+<h2>4. Empirical Evaluation Results</h2>
+<p>The completed benchmark comparison was executed in Attempt 5 under authorization ceiling $20.00.</p>
+<h3>4.1 Predecessor Trajectory and Checkpoint State</h3>
+<p>Predecessor <code>gpt-6-sol</code> executed 6 model calls (25.0s elapsed):</p>
+<ul>
+  <li><strong>Calls 1–2</strong>: Examined <code>xarray/core/dataset.py</code> and <code>xarray/core/common.py</code> using <code>grep</code> and <code>sed</code> (noting <code>rg</code> was not installed), tracing <code>Dataset.chunks</code> to <code>get_chunksizes()</code>.</li>
+  <li><strong>Calls 3–4</strong>: Inspected <code>xarray/core/variable.py</code> to check the behavior of <code>Variable.chunks</code> vs <code>Variable.data</code> and <code>chunksizes</code>.</li>
+  <li><strong>Call 5</strong>: Executed a local reproduction script using a custom <code>LazilyIndexedArray</code> whose <code>__getitem__</code> raised <code>RuntimeError(&quot;loaded&quot;)</code>. Accessing <code>ds.chunks</code> triggered <code>RuntimeError: loaded</code>, confirming that accessing chunk metadata coerced array loading.</li>
+  <li><strong>Call 6</strong>: Formulated a shell script to patch <code>xarray/core/common.py</code>. The action was intercepted before execution, returning <code>status: paused_before_execution</code>. Predecessor terminated with <code>reason: checkpoint</code>.</li>
+</ul>
+<h3>4.2 Checkpoint Verification</h3>
+<ol>
+  <li><strong>Runtime Evaluator Classification</strong>: During benchmark execution, the harness submitted the predecessor&#x27;s empty patch to SWE-bench evaluation (<code>swebench eval</code>). The SWE-bench evaluation harness recognized the empty patch natively, recording <code>empty_patch_instances: 1</code>, <code>empty_patch_ids: [&quot;pydata__xarray-6721&quot;]</code>, and <code>status: unresolved</code>. The harness did not spin up a Docker container for test execution at that stage.</li>
+  <li><strong>Empirical Container Test Execution</strong>: To verify that the unpatched state genuinely failed the task&#x27;s tests (rather than relying solely on the empty-patch labeling shortcut), a post-run verification command executed the official evaluation script directly inside the task&#x27;s Docker image (<code>swebench/sweb.eval.x86_64.pydata_1776_xarray-6721@sha256:58c7f4ada7f3cbcfcde50e0b55157701100cf694faa87978c672e368c0531898</code>).</li>
+</ol>
+<ul>
+  <li>The official test patch was applied to <code>xarray/tests/test_dataset.py</code>, adding <code>test_chunks_does_not_load_data</code>.</li>
+  <li>Pytest executed across all 1,406 collected items in <code>xarray/tests/test_dataset.py</code>.</li>
+  <li><strong>Target Defect Outcome (<code>FAIL_TO_PASS</code>)</strong>: <code>test_chunks_does_not_load_data</code> FAILED with:</li>
+</ul>
+<p>     ```</p>
+<p>     xarray.tests.UnexpectedDataAccess: Tried accessing data</p>
+<p>     /testbed/xarray/core/common.py:2026: in get_chunksizes: if hasattr(v.data, &quot;chunks&quot;):</p>
+<p>     ```</p>
+<ul>
+  <li><strong>Baseline Regression Outcome (<code>PASS_TO_PASS</code>)</strong>: All 1,405 baseline tests passed (1,405 passed, 33 skipped, 1 xfailed, 5 xpassed in 29.18s).</li>
+  <li><strong>Conclusion</strong>: The unpatched codebase cleanly reproduced the genuine task failure with zero environment, dependency, or configuration errors, empirically confirming that the checkpoint was genuinely unresolved prior to successor takeover.</li>
+</ul>
+<h3>4.3 Five-Way Successor Takeover Results</h3>
+<p>All five successor branches were executed from the identical unpatched checkpoint and evaluated using the official SWE-bench evaluation harness in Docker:</p>
+<table>
+  <tr>
+    <th>Condition</th>
+    <th>Official Docker Status</th>
+    <th>Model Calls</th>
+    <th>Tool Calls</th>
+    <th>Successor Input Tokens</th>
+    <th>Successor Output Tokens</th>
+    <th>Wall-Clock Time (s)</th>
+    <th>Successor Modification Strategy</th>
+  </tr>
+  <tr>
+    <td><strong><code>FULL_HISTORY</code></strong></td>
+    <td><strong><code>resolved</code></strong></td>
+    <td>4</td>
+    <td>3</td>
+    <td>138,443</td>
+    <td>1,585</td>
+    <td>32.7s</td>
+    <td>Replaced <code>hasattr(v.data, &#x27;chunks&#x27;)</code> with <code>v.chunks is not None</code> in <code>common.py</code> and <code>variable.py</code></td>
+  </tr>
+  <tr>
+    <td><strong><code>SUMMARY_2K</code></strong></td>
+    <td><strong><code>resolved</code></strong></td>
+    <td>5</td>
+    <td>4</td>
+    <td>44,126</td>
+    <td>1,931</td>
+    <td>86.8s</td>
+    <td>Replaced <code>v.data</code> with <code>v._data</code> in <code>common.py</code> and <code>variable.py</code></td>
+  </tr>
+  <tr>
+    <td><strong><code>REPOSITORY_ONLY</code></strong></td>
+    <td><strong><code>resolved</code></strong></td>
+    <td>7</td>
+    <td>6</td>
+    <td>54,526</td>
+    <td>2,315</td>
+    <td>53.8s</td>
+    <td>Replaced <code>v.data</code> with <code>v._data</code> in <code>common.py</code></td>
+  </tr>
+  <tr>
+    <td><strong><code>STRUCTURED_NOTES_2K</code></strong></td>
+    <td><strong><code>resolved</code></strong></td>
+    <td>5</td>
+    <td>4</td>
+    <td>45,429</td>
+    <td>1,650</td>
+    <td>86.5s</td>
+    <td>Replaced <code>v.data</code> with <code>v._data</code> in <code>common.py</code> and <code>variable.py</code></td>
+  </tr>
+  <tr>
+    <td><strong><code>KEISHO_2K</code></strong></td>
+    <td><strong><code>resolved</code></strong></td>
+    <td>4</td>
+    <td>3</td>
+    <td>47,170</td>
+    <td>1,493</td>
+    <td>34.5s</td>
+    <td>Replaced <code>v.data</code> with <code>v._data</code> in <code>common.py</code> and <code>variable.py</code></td>
+  </tr>
+</table>
+<h3>4.4 Handoff Payload Content and Information Disclosure</h3>
+<p>A critical qualitative factor is how each handoff representation handled the predecessor&#x27;s intercepted patch proposal:</p>
+<ul>
+  <li><strong><code>FULL_HISTORY</code></strong>: Transmitted the raw text of the predecessor&#x27;s Call 6 tool invocation, including the exact proposed diff and the subsequent system notice: <code>[PAUSED: source code edit intercepted prior to execution]</code>.</li>
+  <li><strong><code>SUMMARY_2K</code></strong>: Explicitly summarized the proposed patch: <em>&quot;Proposed fix: change get_chunksizes() to use v.chunks and iterate zip(v.dims, v.chunks)... The predecessor attempted to apply those edits... but the edit was intercepted and paused before execution. No source files were changed.&quot;</em></li>
+  <li><strong><code>STRUCTURED_NOTES_2K</code></strong>: Explicitly documented the proposed fix in <code>work_completed</code> while recording <code>repository_change_state: &quot;no source changes observed&quot;</code> in the deterministic facts.</li>
+  <li><strong><code>KEISHO_2K</code></strong>: Emitted verified tool outputs and typed hypotheses. The unexecuted edit tool call was excluded from tool observations because it never executed. The need to guard lazy arrays was preserved as an unverified hypothesis (<code>S12 [HYPOTHESIZED]</code>), while acceptance criteria and workspace changes were explicitly flagged as unknown.</li>
+  <li><strong><code>REPOSITORY_ONLY</code></strong>: Contained zero context. Successor Opus 5.5 re-discovered the root cause independently by searching <code>xarray/core/common.py</code>.</li>
+</ul>
+<hr>
+<h2>5. Quantitative and Qualitative Analysis</h2>
+<h3>5.1 Context Token Consumption</h3>
+<p>Carrying uncompressed conversation turns in <code>FULL_HISTORY</code> resulted in extreme token accumulation, consuming <strong>138,443 input tokens</strong> across 4 calls:</p>
+<ul>
+  <li><code>FULL_HISTORY</code>: 138,443 input tokens (100.0% baseline)</li>
+  <li><code>REPOSITORY_ONLY</code>: 54,526 input tokens (60.6% reduction)</li>
+  <li><code>KEISHO_2K</code>: 47,170 input tokens (65.9% reduction)</li>
+  <li><code>STRUCTURED_NOTES_2K</code>: 45,429 input tokens (67.2% reduction)</li>
+  <li><code>SUMMARY_2K</code>: 44,126 input tokens (68.1% reduction)</li>
+</ul>
+<p>The initial handoff token sizes were:</p>
+<ul>
+  <li><code>FULL_HISTORY</code>: 16,166 tokens</li>
+  <li><code>KEISHO_2K</code>: 2,035 tokens</li>
+  <li><code>STRUCTURED_NOTES_2K</code>: 435 tokens</li>
+  <li><code>SUMMARY_2K</code>: 326 tokens</li>
+  <li><code>REPOSITORY_ONLY</code>: 0 tokens</li>
+</ul>
+<p>Although <code>SUMMARY_2K</code> and <code>STRUCTURED_NOTES_2K</code> had smaller initial handoff payloads than <code>KEISHO_2K</code>, their cumulative input tokens over the run approached <code>KEISHO_2K</code> (within 3–6%) because both required an additional full conversation turn.</p>
+<h3>5.2 Turn Efficiency and Model Calls</h3>
+<ul>
+  <li><strong>Joint-Fewest Calls</strong>: Both <code>FULL_HISTORY</code> and <code>KEISHO_2K</code> completed the repair in <strong>4 model calls</strong> (3 tool calls). In both conditions, the successor examined the target files on Call 1, applied the patch on Call 2, executed validation tests on Call 3, and concluded on Call 4.</li>
+  <li><strong>Verification Turn in Summaries</strong>: Both <code>SUMMARY_2K</code> and <code>STRUCTURED_NOTES_2K</code> required <strong>5 model calls</strong> (4 tool calls). In both branches, Claude Opus 5.5 took an extra turn inspecting the codebase before applying edits, reflecting uncertainty regarding the unverified narrative claims.</li>
+  <li><strong>Re-Exploration Overhead</strong>: <code>REPOSITORY_ONLY</code> required <strong>7 model calls</strong> and <strong>6 tool calls</strong>, spending Calls 1–3 executing directory searches (<code>find</code>, <code>grep</code>) to locate the relevant methods.</li>
+</ul>
+<h3>5.3 Execution Time and Latency Observables</h3>
+<p>Observed wall-clock durations were:</p>
+<ul>
+  <li><code>FULL_HISTORY</code>: 32.7s</li>
+  <li><code>KEISHO_2K</code>: 34.5s</li>
+  <li><code>REPOSITORY_ONLY</code>: 53.8s</li>
+  <li><code>STRUCTURED_NOTES_2K</code>: 86.5s</li>
+  <li><code>SUMMARY_2K</code>: 86.8s</li>
+</ul>
+<p>While <code>FULL_HISTORY</code> and <code>KEISHO_2K</code> finished in ~33–35 seconds, <code>SUMMARY_2K</code> and <code>STRUCTURED_NOTES_2K</code> required ~86–87 seconds. However, wall-clock latency should not be interpreted as a direct measurement of prompt processing time alone; it reflects a composite of network transmission, queue wait time at the provider API, and the number of round-trip model calls.</p>
+<h3>5.4 Financial Ledger and Multi-Attempt Accounting</h3>
+<p>Across all development and execution attempts, expenditures were tracked using a fail-closed spend guard enforcing a conservative non-cached price ceiling and a 5% provider fee multiplier.</p>
+<h4>Comprehensive Spending Summary Across All Attempts</h4>
+<table>
+  <tr>
+    <th>Attempt</th>
+    <th>Model Calls</th>
+    <th>Status</th>
+    <th>Billed Spend (USD)</th>
+    <th>Non-Cached Accounted (USD)</th>
+    <th>Held / Unreconciled (USD)</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><strong>001</strong></td>
+    <td>8</td>
+    <td>Aborted</td>
+    <td>$0.069326</td>
+    <td>$0.148785</td>
+    <td>$0.000000</td>
+    <td>Heuristic detector missed checkpoint</td>
+  </tr>
+  <tr>
+    <td><strong>002</strong></td>
+    <td>13</td>
+    <td>Aborted</td>
+    <td>$0.065966</td>
+    <td>$0.249584</td>
+    <td>$0.000000</td>
+    <td>Predecessor format bypassed regex</td>
+  </tr>
+  <tr>
+    <td><strong>003</strong></td>
+    <td>10</td>
+    <td>Aborted</td>
+    <td>$0.036516</td>
+    <td>$0.105225</td>
+    <td>$0.379008</td>
+    <td>Anthropic rejected <code>seed</code> with 404</td>
+  </tr>
+  <tr>
+    <td><strong>004</strong></td>
+    <td>14</td>
+    <td>Aborted</td>
+    <td>$0.344762</td>
+    <td>$0.414938</td>
+    <td>$0.000000</td>
+    <td>Tokenizer bound exceeded on Call 1</td>
+  </tr>
+  <tr>
+    <td><strong>005</strong></td>
+    <td>33</td>
+    <td>Completed</td>
+    <td>$1.534741</td>
+    <td>$1.590336</td>
+    <td>$0.000000</td>
+    <td>Successful five-way benchmark run</td>
+  </tr>
+  <tr>
+    <td><strong>Total</strong></td>
+    <td><strong>78</strong></td>
+    <td>—</td>
+    <td><strong>$2.051311</strong></td>
+    <td><strong>$2.508868</strong></td>
+    <td><strong>$0.379008</strong></td>
+    <td>Combined totals across 5 attempts</td>
+  </tr>
+</table>
+<h4>Breakdown of Completed Attempt (005)</h4>
+<ul>
+  <li><strong>Predecessor (<code>openai/gpt-6-sol</code>)</strong>: 6 calls, 38,497 input tokens, 985 output tokens; Billed: <strong>$0.031248</strong></li>
+  <li><strong>Note Generation (<code>openai/gpt-6-luna</code>)</strong>: 2 calls, 39,265 input tokens, 657 output tokens; Billed: <strong>$0.005236</strong></li>
+  <li>Summary Notes: 1 call, 19,546 in, 330 out ($0.002608)</li>
+  <li>Structured Notes: 1 call, 19,719 in, 327 out ($0.002628)</li>
+  <li><strong>Keisho Compiler</strong>: Local deterministic compilation; Billed: <strong>$0.000000</strong></li>
+  <li><strong>Successor Branches (<code>anthropic/claude-opus-5.5</code>)</strong>: 25 calls, 329,694 input tokens, 8,974 output tokens; Billed: <strong>$1.498256</strong></li>
+  <li><code>FULL_HISTORY</code>: 4 calls, 138,443 in, 1,585 out ($0.585472)</li>
+  <li><code>SUMMARY_2K</code>: 5 calls, 44,126 in, 1,931 out ($0.215124)</li>
+  <li><code>REPOSITORY_ONLY</code>: 7 calls, 54,526 in, 2,315 out ($0.264404)</li>
+  <li><code>KEISHO_2K</code>: 4 calls, 47,170 in, 1,493 out ($0.218540)</li>
+  <li><code>STRUCTURED_NOTES_2K</code>: 5 calls, 45,429 in, 1,650 out ($0.214716)</li>
+  <li><strong>Grand Total (Attempt 005)</strong>: 33 calls, 407,456 input tokens, 10,616 output tokens; Billed: <strong>$1.534741</strong> (Accounted ceiling: $1.590336; Remaining headroom under $20.00 cap: $18.41).</li>
+</ul>
+<hr>
+<h2>6. Threats to Validity and Study Limitations</h2>
+<ol>
+  <li><strong>Single-Task Scope ($N=1$)</strong>: This study evaluates one specific SWE-bench Verified instance (<code>pydata__xarray-6721</code>). While it demonstrates feasibility and provides detailed empirical measurements of token volume, call counts, and failure reproduction, it does not support general claims of statistical superiority across broader benchmarks.</li>
+  <li><strong>Pre-Interception Fix Formulation</strong>: When the predecessor was intercepted at Call 6, it had already formulated a candidate patch in its tool call arguments. Although the patch was never executed, this proposed solution was visible in the raw turns of <code>FULL_HISTORY</code> and described in <code>SUMMARY_2K</code> and <code>STRUCTURED_NOTES_2K</code>. Consequently, those successors were evaluating and applying a pre-formulated fix rather than diagnosing the issue from scratch.</li>
+  <li><strong>Frontier Successor Capability</strong>: Claude Opus 5.5 was able to resolve the task even with zero context (<code>REPOSITORY_ONLY</code>), demonstrating that highly capable frontier models can independently re-solve this defect within 7 calls. Handoff representations primarily affected token efficiency and turn count rather than binary solvability.</li>
+  <li><strong>Absence of Successor Seed Pinning</strong>: Due to Anthropic&#x27;s provider rejection of the <code>seed</code> parameter via OpenRouter, successor runs operated without server-side seed locking. Despite <code>temperature: 0.0</code>, output variability across runs cannot be completely ruled out.</li>
+</ol>
+<hr>
+<h2>7. Conclusion</h2>
+<p>This study successfully executed a controlled five-way empirical comparison of context handoff representations during a mid-task takeover between asymmetric frontier models on SWE-bench Verified. By intercepting the predecessor prior to source-code execution and validating the unpatched state through both native harness grading and dedicated Docker test suite execution, the protocol established an empirically verified unresolved baseline.</p>
+<p>All five successor conditions achieved task resolution (5/5 <code>resolved</code>). Across this single repair task, compiler-structured epistemic handoffs (<code>KEISHO_2K</code>) matched the turn efficiency (4 model calls) of uncompressed conversational history while reducing input token consumption by 65.9% (47,170 vs. 138,443 tokens). Free-form narrative summaries achieved similar token reductions (44,126 tokens) but required an additional exploratory model call and tool execution turn. These results illustrate the practical trade-offs between context compression, information fidelity, and execution overhead in multi-agent software engineering systems.</p>
+<hr>
+<h2>Reproducibility Appendix: Pinned Artifacts, Specifications, and Logs</h2>
+<h3>Appendix A: Experiment Identifiers and Pinned Specifications</h3>
+<ul>
+  <li><strong>Governing Specification</strong>: <code>swebench-handoff/2.7</code></li>
+  <li><strong>Pinned Specification Configuration</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/configs/swebench-comparison-v2.7.json\"><code>configs/swebench-comparison-v2.7.json</code></a> (SHA-256: <code>09f93905cfc9b0e12d5e23630d70bba713ebdc13ea0183bdafa7c24479cb25e2</code>)</li>
+  <li><strong>Execution Plan</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/analysis/swebench-comparison-v2.7-plan.json\"><code>analysis/swebench-comparison-v2.7-plan.json</code></a> (SHA-256: <code>cc84d41d182e0578635e9851ec03c80e0c034220b3341c25fd79c657519bf7bc</code>)</li>
+  <li><strong>Source Code Freeze</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/analysis/swebench-v2.7-final-source-freeze.json\"><code>analysis/swebench-v2.7-final-source-freeze.json</code></a> (SHA-256: <code>088b71d497db3b8ec862086e115da7311749fe48a95f00e95ee7b43f0cfc134d</code>)</li>
+  <li><strong>Completed Run Directory</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/runs/swebench-v2.7-five-way-once-005/\"><code>runs/swebench-v2.7-five-way-once-005/</code></a></li>
+  <li><strong>Financial Authorization ID</strong>: <code>bagi-20261027-v27-05</code> ($20.00 authorized ceiling)</li>
+</ul>
+<h3>Appendix B: Execution Records and Raw Trajectories</h3>
+<ul>
+  <li><strong>Run Manifest</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/runs/swebench-v2.7-five-way-once-005/experiment-manifest.json\"><code>runs/swebench-v2.7-five-way-once-005/experiment-manifest.json</code></a></li>
+  <li><strong>Primary Result</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/runs/swebench-v2.7-five-way-once-005/result.json\"><code>runs/swebench-v2.7-five-way-once-005/result.json</code></a></li>
+  <li><strong>Comprehensive Spending Ledger</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/runs/swebench-v2.7-five-way-once-005/spending.json\"><code>runs/swebench-v2.7-five-way-once-005/spending.json</code></a></li>
+  <li><strong>Predecessor Grade Artifact</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/runs/swebench-v2.7-five-way-once-005/checkpoint-grade-private.json\"><code>runs/swebench-v2.7-five-way-once-005/checkpoint-grade-private.json</code></a></li>
+  <li><strong>Task Docker Image Record</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/runs/swebench-v2.7-five-way-once-005/task-image.json\"><code>runs/swebench-v2.7-five-way-once-005/task-image.json</code></a></li>
+</ul>
+<h3>Appendix C: Checkpoint Docker Verification Artifacts</h3>
+<ul>
+  <li><strong>Verification Execution Script</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/analysis/checkpoint_verification_command.sh\"><code>analysis/checkpoint_verification_command.sh</code></a></li>
+  <li><strong>Full Verification Pytest Log</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/analysis/checkpoint_verification_log.txt\"><code>analysis/checkpoint_verification_log.txt</code></a></li>
+  <li><strong>Structured Verification Result</strong>: <a href=\"file:///Users/bagnesium/documents/github/keisho/analysis/checkpoint_verification_result.json\"><code>analysis/checkpoint_verification_result.json</code></a></li>
+  <li><strong>Docker Image Digest</strong>: <code>swebench/sweb.eval.x86_64.pydata_1776_xarray-6721@sha256:58c7f4ada7f3cbcfcde50e0b55157701100cf694faa87978c672e368c0531898</code></li>
+  <li><strong>Baseline Git Commit</strong>: <code>cc183652bf6e1273e985e1c4b3cba79c896c1193</code></li>
+</ul>
+</body>
+</html>

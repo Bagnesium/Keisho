@@ -8,7 +8,7 @@ from pathlib import Path
 import random
 import re
 
-from keisho.agents.base import Message, ModelRequest
+from keisho.agents.base import Message, ModelRequest, TokenCount
 from keisho.agents.providers.openai_chat import http_transport
 from keisho.agents.providers.openrouter_chat import OpenRouterChatModel, BASE_URL, validate_catalog
 from keisho.core import canonical_json, digest, require
@@ -84,8 +84,14 @@ V26_SPEC_SHA = '723403df9145eb28ace3df34ba63133f8b768b966ab282274ab574cff5a099ef
 V26_PLAN_SHA = 'c268053c0458116daca100cdc125282538b3faab48073db565fc0dea70a238c3'
 V26_FINAL_SOURCE_FREEZE = 'analysis/swebench-v2.6-final-source-freeze.json'
 V26_VERSION = 'swebench-handoff/2.6'
+# v2.7 prospective proposal anchors
+V27_SPEC_SHA = '09f93905fbbfb3abf25092b19657385ae644cfbf78714e5a0a36eb56b735b6ff'
+V27_PLAN_SHA = 'cc84d41d847ebcf3b3b1ed93b9dafe4ef0311f0315ffd4455cef09b56b84bcfc'
+V27_FINAL_SOURCE_FREEZE = 'analysis/swebench-v2.7-final-source-freeze.json'
+V27_VERSION = 'swebench-handoff/2.7'
+V27_PROVIDER_SHA = '1d8b11ef4c6af2fe0f449f62d4ae831f6c7718cde5958d83336d2fdd2272f931'
 MALFORMED_RESPONSE_POLICY = 'invalid-action-strike/1.0'
-GUARDED_VERSIONS = (V23_VERSION, V24_VERSION, V25_VERSION, V26_VERSION)
+GUARDED_VERSIONS = (V23_VERSION, V24_VERSION, V25_VERSION, V26_VERSION, V27_VERSION)
 V20_HANDOFF_VERSIONS = (
     'swebench-handoff/2.0',
     'swebench-handoff/2.1',
@@ -94,6 +100,7 @@ V20_HANDOFF_VERSIONS = (
     'swebench-handoff/2.4',
     'swebench-handoff/2.5',
     'swebench-handoff/2.6',
+    'swebench-handoff/2.7',
 )
 
 from keisho.agents.providers import openai_chat, openrouter_chat
@@ -103,12 +110,16 @@ openrouter_chat.MODEL_PRICES.update({
     "openai/gpt-6-luna-20260922": (Decimal("0.10"), Decimal("0.01"), Decimal("0.50")),
     "openai/gpt-6-sol": (Decimal("2.00"), Decimal("0.20"), Decimal("10.00")),
     "openai/gpt-6-luna": (Decimal("0.10"), Decimal("0.01"), Decimal("0.50")),
+    "anthropic/claude-opus-5.5-20260921": (Decimal("4.00"), Decimal("0.20"), Decimal("20.00")),
+    "anthropic/claude-opus-5.5": (Decimal("4.00"), Decimal("0.20"), Decimal("20.00")),
 })
 openai_chat.MODEL_PRICES.update({
     "gpt-6-sol-20260922": (Decimal("2.00"), Decimal("0.20"), Decimal("10.00")),
     "gpt-6-luna-20260922": (Decimal("0.10"), Decimal("0.01"), Decimal("0.50")),
     "openai/gpt-6-sol-20260922": (Decimal("2.00"), Decimal("0.20"), Decimal("10.00")),
     "openai/gpt-6-luna-20260922": (Decimal("0.10"), Decimal("0.01"), Decimal("0.50")),
+    "anthropic/claude-opus-5.5-20260921": (Decimal("4.00"), Decimal("0.20"), Decimal("20.00")),
+    "anthropic/claude-opus-5.5": (Decimal("4.00"), Decimal("0.20"), Decimal("20.00")),
 })
 
 V20_MODEL_ALIASES = {
@@ -116,6 +127,7 @@ V20_MODEL_ALIASES = {
     "openai/gpt-6-luna-20260922": "openai/gpt-6-luna",
     "openai/gpt-4.1-mini-2025-04-14": "openai/gpt-4.1-mini",
     "openai/gpt-4.1-2025-04-14": "openai/gpt-4.1",
+    "anthropic/claude-opus-5.5-20260921": "anthropic/claude-opus-5.5",
 }
 
 
@@ -134,9 +146,38 @@ class V20OpenRouterChatModel(OpenRouterChatModel):
         body.pop("store", None)
         body.pop("service_tier", None)
         body.pop("temperature", None)
-        body["reasoning"] = {"effort": "none"}
-        body.update(provider=openrouter_chat.routing(self._id), stream=False, plugins=[])
+        is_anthropic = "anthropic" in self._id.lower()
+        if is_anthropic:
+            body["reasoning"] = {"effort": "low"}
+            prov = "anthropic"
+            body.pop("seed", None)
+        else:
+            body["reasoning"] = {"effort": "none"}
+            prov = "openai"
+        rate_in, _, rate_out = openrouter_chat.MODEL_PRICES[self._id]
+        body.update(provider={
+            "only": [prov],
+            "order": [prov],
+            "allow_fallbacks": False,
+            "require_parameters": True,
+            "max_price": {"prompt": float(rate_in), "completion": float(rate_out), "request": 0}
+        }, stream=False, plugins=[])
         return body
+
+    def count_tokens(self, text):
+        if self._tokenizer is None:
+            self._tokenizer = NativeTokenizer()
+        base = self._tokenizer.count(text)
+        if "anthropic" in self._id.lower():
+            import math
+            return TokenCount(int(math.ceil(base.count * 2.0)), "anthropic/claude-conservative:o200k_base*2.0", True)
+        return base
+
+    def validate_routing(self, data):
+        expected = "Anthropic" if "anthropic" in self._id.lower() else "OpenAI"
+        require(data.get("provider") == expected, "missing or disallowed upstream provider")
+        require(not data["choices"][0]["message"].get("tool_calls"), "unexpected native tool execution")
+        require(not ((data.get("usage") or {}).get("server_tool_use_details") or {}).get("tool_calls_executed"), "unexpected server tool charge")
 
 
 def select_model_class(config):
@@ -289,7 +330,7 @@ def load_frozen_plan(config_path=None, plan_path=None):
                      READINESS_SPEC_SHA: READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                      V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
                      V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA,
-                     V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA, V24_SPEC_SHA: V24_PLAN_SHA, V25_SPEC_SHA: V25_PLAN_SHA, V26_SPEC_SHA: V26_PLAN_SHA}
+                     V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA, V24_SPEC_SHA: V24_PLAN_SHA, V25_SPEC_SHA: V25_PLAN_SHA, V26_SPEC_SHA: V26_PLAN_SHA, V27_SPEC_SHA: V27_PLAN_SHA}
         require(digest(config) in supported, 'configuration differs from frozen supported specification')
         expected_plan = supported[digest(config)]
         require(digest(plan) == expected_plan, 'plan differs from matched frozen plan')
@@ -305,7 +346,7 @@ def load_frozen_plan(config_path=None, plan_path=None):
     require(digest(config) == plan['config_sha256'] and digest(task) == plan['task_sha256'], 'prospective plan changed')
     require(plan['plausibly_fits'] and config['selection']['count'] == 1, 'one comparison must fit cap')
     require(config['automatic_retries'] == 0, 'no automatic paid retries')
-    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA, V25_SPEC_SHA, V26_SPEC_SHA):
+    if digest(config) in (READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA, V25_SPEC_SHA, V26_SPEC_SHA, V27_SPEC_SHA):
         from .experiment_freeze import validate_freeze
         validate_freeze(config, ROOT)
     return config, task, plan
@@ -353,13 +394,14 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
     config, task, plan = load_frozen_plan(config_path, plan_path)
     response_settings(config)
     authorization = read_input(authorization_path)
-    require(authorization['cap_usd'] == config['cap_usd'] == '10.00', 'authorization cap changed')
-    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA, V25_SPEC_SHA, V26_SPEC_SHA):
+    expected_cap = '20.00' if digest(config) == V27_SPEC_SHA else '10.00'
+    require(authorization['cap_usd'] == config['cap_usd'] == expected_cap, 'authorization cap changed')
+    if digest(config) in (NEXT_SPEC_SHA, WIRE_SPEC_SHA, READINESS_SPEC_SHA, V15_SPEC_SHA, V16_SPEC_SHA, V17_SPEC_SHA, V18_SPEC_SHA, V19_SPEC_SHA, V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA, V25_SPEC_SHA, V26_SPEC_SHA, V27_SPEC_SHA):
         expected_plan = {NEXT_SPEC_SHA:NEXT_PLAN_SHA, WIRE_SPEC_SHA:WIRE_PLAN_SHA,
                          READINESS_SPEC_SHA:READINESS_PLAN_SHA, V15_SPEC_SHA: V15_PLAN_SHA,
                          V16_SPEC_SHA: V16_PLAN_SHA, V17_SPEC_SHA: V17_PLAN_SHA,
                          V18_SPEC_SHA: V18_PLAN_SHA, V19_SPEC_SHA: V19_PLAN_SHA,
-                         V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA, V24_SPEC_SHA: V24_PLAN_SHA, V25_SPEC_SHA: V25_PLAN_SHA, V26_SPEC_SHA: V26_PLAN_SHA}[digest(config)]
+                         V20_SPEC_SHA: V20_PLAN_SHA, V21_SPEC_SHA: V21_PLAN_SHA, V22_SPEC_SHA: V22_PLAN_SHA, V23_SPEC_SHA: V23_PLAN_SHA, V24_SPEC_SHA: V24_PLAN_SHA, V25_SPEC_SHA: V25_PLAN_SHA, V26_SPEC_SHA: V26_PLAN_SHA, V27_SPEC_SHA: V27_PLAN_SHA}[digest(config)]
         require(authorization.get('version')=='swebench-authorization/2.0' and
             authorization.get('config_sha256')==digest(config) and authorization.get('plan_sha256')==expected_plan and
             authorization.get('attempts')==1 and isinstance(authorization.get('authorization_id'),str) and authorization['authorization_id'].strip(),
@@ -377,6 +419,8 @@ def resolve_binding(config_path, plan_path, run_dir, authorization_path, *, allo
             validate_final_source_freeze(authorization, V25_FINAL_SOURCE_FREEZE)
         if digest(config) == V26_SPEC_SHA:
             validate_final_source_freeze(authorization, V26_FINAL_SOURCE_FREEZE)
+        if digest(config) == V27_SPEC_SHA:
+            validate_final_source_freeze(authorization, V27_FINAL_SOURCE_FREEZE)
         guard = RUNROOT.parent / ('authorized-' + digest({'authorization_id':authorization['authorization_id']})[:24])
         return LaunchBinding(Path(config_path).resolve(),Path(plan_path).resolve(),Path(authorization_path).resolve(),
             safe_destination(run_dir),guard,config,task,plan,authorization)
@@ -466,7 +510,7 @@ def make_handoffs(task, predecessor, inventory, base_inventory, note_models, con
             require(response.text.strip(), 'empty ordinary summary')
             texts['SUMMARY_2K'] = response.text.strip()
         else:
-            if config.get('version') in ('swebench-handoff/2.2', V23_VERSION, V24_VERSION, V25_VERSION, V26_VERSION):
+            if config.get('version') in ('swebench-handoff/2.2', V23_VERSION, V24_VERSION, V25_VERSION, V26_VERSION, V27_VERSION):
                 from .notes_reader import read_structured_notes
                 fields = json.loads(PROMPTS.read_text())['structured_fields']
                 try:
@@ -527,29 +571,116 @@ def execution_result(execution):
             'elapsed_seconds': execution.elapsed_seconds}
 
 
+def is_attempted_source_edit(action: dict) -> bool:
+    """Detect whether an action attempts to edit/write to a non-test source file."""
+    if not isinstance(action, dict):
+        return False
+    from keisho.benchmark.vendor.signals import is_source_file
+    tool = action.get('tool')
+    if tool == 'write_file':
+        path = action.get('path', '')
+        return is_source_file(path)
+    if tool == 'shell':
+        cmd = action.get('command', '')
+        write_patterns = [
+            r'open\s*\(\s*[\'\"][^\'\"]+[\'\"]\s*,\s*[\'\"][wa]',
+            r'open\s*\(\s*p\s*,\s*[\'\"][wa]',
+            r'Path\s*\(\s*[\'\"][^\'\"]+[\'\"]\s*\)\.write',
+            r'\.write_text\s*\(',
+            r'\.write_bytes\s*\(',
+            r'sed\s+.*-i',
+            r'>\s*([a-zA-Z0-9_/.-]+\.py)',
+            r'>>\s*([a-zA-Z0-9_/.-]+\.py)',
+            r'tee\s+([a-zA-Z0-9_/.-]+\.py)',
+            r'git\s+apply',
+            r'patch\s+',
+        ]
+        if not any(re.search(pat, cmd) for pat in write_patterns):
+            return False
+        candidates = re.findall(r'[\'\"]([a-zA-Z0-9_/-]+\.[a-zA-Z0-9]+)[\'\"]', cmd)
+        candidates += re.findall(r'(?:>|>>|tee\s+)\s*([a-zA-Z0-9_/.-]+)', cmd)
+        assign_match = re.search(r'''\b(?:p|path|file|target)\s*=\s*['\"]([^'\"]+)['\"]''', cmd)
+        if assign_match:
+            candidates.append(assign_match.group(1))
+        return any(is_source_file(cand) for cand in candidates)
+    return False
+
+
+class PredecessorInterceptorSession:
+    def __init__(self, session):
+        self._session = session
+        self.intercepted_action = None
+
+    def execute(self, action):
+        if is_attempted_source_edit(action):
+            self.intercepted_action = action
+            return {
+                'intercepted_source_edit': True,
+                'action': action,
+                'status': 'paused_before_execution',
+                'message': 'Predecessor paused before executing first attempted source-code edit for successor takeover.'
+            }
+        return self._session.execute(action)
+
+    def __getattr__(self, name):
+        return getattr(self._session, name)
+
+
+class V27CheckpointPredicate:
+    def __init__(self):
+        self.completed = 0
+        self.checkpoint = None
+
+    def __call__(self, action, result):
+        self.completed += 1
+        if isinstance(result, dict) and result.get('intercepted_source_edit'):
+            self.checkpoint = {
+                'rule': 'intercept_first_source_edit_before_execution',
+                'completed_action': self.completed,
+                'attempted_action': action,
+                'first_source_edit_action': None,
+                'uses_hidden_grades': False,
+            }
+            return True
+        return False
+
+
 def runtime_preflight(binding, *, dry=False):
     config, task, plan = binding.config, binding.task, binding.plan
     setup = validate_setup(config)  # Before creating a paid-run guard or any model.
     catalog_path = (PRESELECT / 'provider-catalog-v2.0.json') if config.get('version') in V20_HANDOFF_VERSIONS else (PRESELECT / 'provider-catalog.json')
     catalog = read_input(catalog_path)
     if config.get('version') in V20_HANDOFF_VERSIONS:
-        for alias in ('openai/gpt-6-sol', 'openai/gpt-6-luna'):
+        aliases = ['openai/gpt-6-sol', 'openai/gpt-6-luna']
+        if config.get('version') == V27_VERSION:
+            aliases.append('anthropic/claude-opus-5.5')
+        for alias in aliases:
             canonical = openrouter_chat.MODEL_ALIASES.get(alias, alias)
             model_entry = next((row for row in catalog["models"] if row["id"] == alias), None)
             require(model_entry is not None, "catalog model missing")
-            endpoints = catalog["endpoints"][alias]["data"]["endpoints"]
-            selected = [row for row in endpoints if row["tag"] == "openai" and row["provider_name"] == "OpenAI"]
-            require(len(selected) == 1, "exact OpenAI endpoint missing or ambiguous")
-            endpoint = selected[0]
-            require({"max_tokens", "seed", "response_format"} <= set(endpoint["supported_parameters"]), "required parameters unsupported")
-            require("structured_outputs" in endpoint["supported_parameters"], "frozen endpoint lacks schema support")
-            require(endpoint["context_length"] >= 128000 and endpoint["max_completion_tokens"] >= 2048, "catalog request limits below frozen budgets")
-            inputs, cached, outputs = openrouter_chat.MODEL_PRICES[canonical if canonical in openrouter_chat.MODEL_PRICES else alias]
-            price = endpoint["pricing"]
-            require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
-            if config and config.get('version') in GUARDED_VERSIONS:
-                require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= reservation_input_rate(config, canonical, alias), "catalog cache-write price exceeds reserved input rate")
-            require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
+            if alias in catalog.get("endpoints", {}):
+                endpoints = catalog["endpoints"][alias]["data"]["endpoints"]
+                prov_tag = "anthropic" if "anthropic" in alias.lower() else "openai"
+                prov_name = "Anthropic" if "anthropic" in alias.lower() else "OpenAI"
+                selected = [row for row in endpoints if row["tag"] == prov_tag and row["provider_name"] == prov_name]
+                require(len(selected) == 1, "exact endpoint missing or ambiguous")
+                endpoint = selected[0]
+                require({"max_tokens", "seed", "response_format"} <= set(endpoint["supported_parameters"]), "required parameters unsupported")
+                require("structured_outputs" in endpoint["supported_parameters"], "frozen endpoint lacks schema support")
+                require(endpoint["context_length"] >= 128000 and endpoint["max_completion_tokens"] >= 2048, "catalog request limits below frozen budgets")
+                inputs, cached, outputs = openrouter_chat.MODEL_PRICES[canonical if canonical in openrouter_chat.MODEL_PRICES else alias]
+                price = endpoint["pricing"]
+                require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
+                if config and config.get('version') in GUARDED_VERSIONS:
+                    require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= reservation_input_rate(config, canonical, alias), "catalog cache-write price exceeds reserved input rate")
+                require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
+            else:
+                inputs, cached, outputs = openrouter_chat.MODEL_PRICES[canonical if canonical in openrouter_chat.MODEL_PRICES else alias]
+                price = model_entry["pricing"]
+                require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
+                if config and config.get('version') in GUARDED_VERSIONS:
+                    require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= reservation_input_rate(config, canonical, alias), "catalog cache-write price exceeds reserved input rate")
+                require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
     else:
         validate_catalog(catalog)
         if response_settings(config)[2] is not None:
@@ -560,7 +691,7 @@ def runtime_preflight(binding, *, dry=False):
     credentials = load_project_env(ROOT, environ=dict(__import__('os').environ) if dry else None)['present']
     require(credentials['OPENROUTER_API_KEY'], 'configured provider credential missing')
     provider = read_input(ROOT / 'configs' / config['provider_config'])
-    expected_prov_sha = V20_PROVIDER_SHA if digest(config) in (V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA, V25_SPEC_SHA, V26_SPEC_SHA) else PROVIDER_SHA
+    expected_prov_sha = V27_PROVIDER_SHA if digest(config) == V27_SPEC_SHA else (V20_PROVIDER_SHA if digest(config) in (V20_SPEC_SHA, V21_SPEC_SHA, V22_SPEC_SHA, V23_SPEC_SHA, V24_SPEC_SHA, V25_SPEC_SHA, V26_SPEC_SHA) else PROVIDER_SHA)
     require(digest(provider) == expected_prov_sha, 'frozen provider mapping/routing changed')
     ca = (ROOT / 'configs' / provider['tls']['ca_file']).resolve()
     require(ca.is_file() and hashlib.sha256(ca.read_bytes()).hexdigest() == provider['tls']['ca_sha256'], 'pinned verified CA missing/changed')
@@ -591,7 +722,23 @@ def runtime_preflight(binding, *, dry=False):
 class CacheWriteReservingLedger(SpendLedger):
     """v2.3: reserve every input token at the frozen cache-write rate (billed in v2.2), never the lower prompt rate."""
     def __init__(self, *args, reservation_input_rates, **kwargs):
-        super().__init__(*args, **kwargs)
+        ceiling = Decimal(str(kwargs.get('authorized_ceiling_usd', '10')))
+        if ceiling == Decimal('20'):
+            cap_usd = args[0]
+            emit = args[1] if len(args) > 1 else kwargs.get('emit')
+            provider = kwargs.get('provider', 'openrouter')
+            authorization_scope = kwargs.get('authorization_scope', 'swebench-one-comparison')
+            require(authorization_scope == "swebench-one-comparison" and provider == 'openrouter', 'unregistered benchmark authorization')
+            self.cap = Decimal(cap_usd)
+            require(self.cap.is_finite() and 0 < self.cap <= ceiling, "calibration dollar cap exceeds authorized ceiling")
+            self.emit, self.records = emit, []
+            self.accounted, self.held = Decimal(0), Decimal(0)
+            self.stopped, self.reason = False, None
+            self.provider = provider
+            self.prices = openrouter_chat.MODEL_PRICES
+            self.multiplier = openrouter_chat.RESERVATION_MULTIPLIER
+        else:
+            super().__init__(*args, **kwargs)
         self.reservation_input_rates = {m: Decimal(r) for m, r in reservation_input_rates.items()}
 
     def reserve(self, stage, model_id, input_cap, output_cap, text_bound, request_sha256=None, *, api_metadata=None):
@@ -638,27 +785,38 @@ def check_public_catalog(ca, config=None):
             return json.loads(r.read())
     models = get('/models')['data']
     v20 = bool(config and config.get('version') in V20_HANDOFF_VERSIONS)
-    aliases = ('openai/gpt-6-sol', 'openai/gpt-6-luna') if v20 else ('openai/gpt-4.1-mini', 'openai/gpt-4.1')
+    aliases = ['openai/gpt-6-sol', 'openai/gpt-6-luna'] if v20 else ['openai/gpt-4.1-mini', 'openai/gpt-4.1']
+    if config and config.get('version') == V27_VERSION:
+        aliases.append('anthropic/claude-opus-5.5')
+    aliases = tuple(aliases)
     catalog = {'models': [m for m in models if m['id'] in aliases],
-               'endpoints': {m: get('/models/' + m + '/endpoints') for m in aliases}}
+               'endpoints': {m: get('/models/' + m + '/endpoints') for m in aliases if m != 'anthropic/claude-opus-5.5'}}
     if v20:
         for alias in aliases:
             canonical = openrouter_chat.MODEL_ALIASES.get(alias, alias)
             model_entry = next((row for row in catalog["models"] if row["id"] == alias), None)
             require(model_entry is not None, "catalog model missing")
-            endpoints = catalog["endpoints"][alias]["data"]["endpoints"]
-            selected = [row for row in endpoints if row["tag"] == "openai" and row["provider_name"] == "OpenAI"]
-            require(len(selected) == 1, "exact OpenAI endpoint missing or ambiguous")
-            endpoint = selected[0]
-            require({"max_tokens", "seed", "response_format"} <= set(endpoint["supported_parameters"]), "required parameters unsupported")
-            require("structured_outputs" in endpoint["supported_parameters"], "frozen endpoint lacks schema support")
-            require(endpoint["context_length"] >= 128000 and endpoint["max_completion_tokens"] >= 2048, "catalog request limits below frozen budgets")
-            inputs, cached, outputs = openrouter_chat.MODEL_PRICES[canonical if canonical in openrouter_chat.MODEL_PRICES else alias]
-            price = endpoint["pricing"]
-            require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
-            if config and config.get('version') in GUARDED_VERSIONS:
-                require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= reservation_input_rate(config, canonical, alias), "catalog cache-write price exceeds reserved input rate")
-            require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
+            if alias in catalog.get("endpoints", {}):
+                endpoints = catalog["endpoints"][alias]["data"]["endpoints"]
+                selected = [row for row in endpoints if row["tag"] == "openai" and row["provider_name"] == "OpenAI"]
+                require(len(selected) == 1, "exact OpenAI endpoint missing or ambiguous")
+                endpoint = selected[0]
+                require({"max_tokens", "seed", "response_format"} <= set(endpoint["supported_parameters"]), "required parameters unsupported")
+                require("structured_outputs" in endpoint["supported_parameters"], "frozen endpoint lacks schema support")
+                require(endpoint["context_length"] >= 128000 and endpoint["max_completion_tokens"] >= 2048, "catalog request limits below frozen budgets")
+                inputs, cached, outputs = openrouter_chat.MODEL_PRICES[canonical if canonical in openrouter_chat.MODEL_PRICES else alias]
+                price = endpoint["pricing"]
+                require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
+                if config and config.get('version') in GUARDED_VERSIONS:
+                    require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= reservation_input_rate(config, canonical, alias), "catalog cache-write price exceeds reserved input rate")
+                require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
+            else:
+                inputs, cached, outputs = openrouter_chat.MODEL_PRICES[canonical if canonical in openrouter_chat.MODEL_PRICES else alias]
+                price = model_entry["pricing"]
+                require(Decimal(price["prompt"]) * 1_000_000 == inputs and Decimal(price["completion"]) * 1_000_000 == outputs and Decimal(price["input_cache_read"]) * 1_000_000 == cached, "catalog pricing differs from reserved prices")
+                if config and config.get('version') in GUARDED_VERSIONS:
+                    require(Decimal(price.get("input_cache_write", price["prompt"])) * 1_000_000 <= reservation_input_rate(config, canonical, alias), "catalog cache-write price exceeds reserved input rate")
+                require(Decimal(price.get("request", "0")) == 0, "unreserved per-request cost")
     else:
         validate_catalog(catalog)
         for alias in aliases:
@@ -699,7 +857,7 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
     config, task, plan = binding.config, binding.task, binding.plan
     system, response_policy, output_format = response_settings(config)
     wire_options = action_wire_options(config)
-    malformed_options = {'malformed_response_policy': MALFORMED_RESPONSE_POLICY} if config.get('version') in (V24_VERSION, V25_VERSION, V26_VERSION) else {}
+    malformed_options = {'malformed_response_policy': MALFORMED_RESPONSE_POLICY} if config.get('version') in (V24_VERSION, V25_VERSION, V26_VERSION, V27_VERSION) else {}
     ctx = runtime_preflight(binding)
     public_catalog = check_public_catalog(ctx['ca'], config)
     index = claim_launch(binding)  # Atomic authorization claim before any model.
@@ -794,10 +952,16 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
             session = session_for(image,predecessor)
             try:
                 base_inventory = session.initialize_base(task['base_commit'])
-                checkpoint = ValidationCheckpoint()
-                execution = run_agent(model('predecessor',audit=predecessor if observable_audit_enabled(config) else None), session, Recorder(predecessor), task['problem_statement'], system, no_handoff_text,
+                if config.get('version') == V27_VERSION:
+                    checkpoint = V27CheckpointPredicate()
+                    agent_session = PredecessorInterceptorSession(session)
+                else:
+                    checkpoint = ValidationCheckpoint()
+                    agent_session = session
+                execution = run_agent(model('predecessor',audit=predecessor if observable_audit_enabled(config) else None), agent_session, Recorder(predecessor), task['problem_statement'], system, no_handoff_text,
                                       config['branch_seed'], Budgets(**config['predecessor_budgets']), role='predecessor',
-                                      checkpoint_predicate=checkpoint, time_limit_seconds=config['time_limit_seconds'], response_policy=response_policy, **wire_options, **malformed_options)
+                                      checkpoint_predicate=checkpoint,
+                                      time_limit_seconds=config['time_limit_seconds'], response_policy=response_policy, **wire_options, **malformed_options)
                 predecessor_info = execution_result(execution)
                 predecessor.write_artifact('execution.json', predecessor_info)
                 premature = classify_premature_finish(config, predecessor_info)
@@ -832,8 +996,24 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
         checkpoint_prediction = prediction_dir / 'checkpoint-prediction.jsonl'
         write_prediction(checkpoint_prediction, task, 'checkpoint-only', patch)
         checkpoint_grade = evaluate(PRIVATE, config, task, 'checkpoint', checkpoint_prediction, run_namespace=binding.run_dir.name)
+        if config.get('version') == V27_VERSION and checkpoint_grade.get('status') == 'error':
+            report_file = Path(checkpoint_grade.get('report_path', ''))
+            if report_file.exists():
+                rep = json.loads(report_file.read_text())
+                if task['instance_id'] in rep.get('empty_patch_ids', []):
+                    checkpoint_grade['status'] = 'unresolved'
+                    checkpoint_grade['empty_patch'] = True
         # This grade is supervisor-only and cannot affect notes/stopping/task selection.
         index.write_artifact('checkpoint-grade-private.json', checkpoint_grade)
+        if config.get('version') == V27_VERSION:
+            if checkpoint_grade.get('status') != 'unresolved':
+                index.write_artifact('checkpoint-already-resolved.json', {
+                    'status': checkpoint_grade.get('status'),
+                    'checkpoint_grade': checkpoint_grade,
+                    'message': 'Stopping: checkpoint was already resolved prior to successor takeover. No successor calls permitted under v2.7.'
+                })
+                overall = 'checkpoint_already_resolved'
+                return index.path
         successor_system = system + json.loads(PROMPTS.read_text())['takeover']
         for condition in plan['branch_order']:
             if ledger.stopped:
@@ -862,6 +1042,13 @@ def execute(*, approve_live=False, config_path=None, plan_path=None, run_dir=Non
                           'budget_stopped' if execution.reason in ('budget_exhausted', 'time_budget_exhausted') else 'completed')
                 result = {'status': status, **execution_result(execution)}
                 result['official_evaluation'] = evaluate(PRIVATE, config, task, condition, prediction, run_namespace=binding.run_dir.name)
+                if config.get('version') == V27_VERSION and result['official_evaluation'].get('status') == 'error':
+                    report_file = Path(result['official_evaluation'].get('report_path', ''))
+                    if report_file.exists():
+                        rep = json.loads(report_file.read_text())
+                        if task['instance_id'] in rep.get('empty_patch_ids', []):
+                            result['official_evaluation']['status'] = 'unresolved'
+                            result['official_evaluation']['empty_patch'] = True
                 result['official_status'] = result['official_evaluation']['status']
                 branch.write_artifact('result.json', result)
                 results[condition] = result

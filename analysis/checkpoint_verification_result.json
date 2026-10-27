@@ -1,0 +1,41 @@
+{
+  "instance_id": "pydata__xarray-6721",
+  "base_commit": "cc183652bf6e1273e985e1c4b3cba79c896c1193",
+  "docker_image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-6721@sha256:58c7f4ada7f3cbcfcde50e0b55157701100cf694faa87978c672e368c0531898",
+  "verification_time_iso": "2026-10-27T17:33:08Z",
+  "verification_type": "empirical_docker_execution",
+  "applied_model_patch": null,
+  "empty_patch": true,
+  "git_status": "clean",
+  "diff_to_base_commit": "",
+  "test_patch_applied": "diff --git a/xarray/tests/test_dataset.py b/xarray/tests/test_dataset.py\n--- a/xarray/tests/test_dataset.py\n+++ b/xarray/tests/test_dataset.py\n@@ -992,6 +992,13 @@ def test_attrs(self) -> None:\n         assert data.attrs[\"foobar\"], \"baz\"\n         assert isinstance(data.attrs, dict)\n \n+    def test_chunks_does_not_load_data(self) -> None:\n+        # regression test for GH6538\n+        store = InaccessibleVariableDataStore()\n+        create_test_data().dump_to_store(store)\n+        ds = open_dataset(store)\n+        assert ds.chunks == {}\n+\n     @requires_dask\n     def test_chunk(self) -> None:\n         data = create_test_data()",
+  "test_command": "pytest -rA xarray/tests/test_dataset.py",
+  "summary": {
+    "total_collected": 1445,
+    "passed": 1405,
+    "failed": 1,
+    "skipped": 33,
+    "xfailed": 1,
+    "xpassed": 5,
+    "warnings": 13,
+    "duration_seconds": 29.18
+  },
+  "fail_to_pass_results": {
+    "xarray/tests/test_dataset.py::TestDataset::test_chunks_does_not_load_data": {
+      "status": "FAILED",
+      "failure_type": "xarray.tests.UnexpectedDataAccess",
+      "failure_message": "Tried accessing data",
+      "trigger_location": "xarray/core/common.py:2026",
+      "trigger_expression": "if hasattr(v.data, \"chunks\"):",
+      "is_genuine_task_bug": true,
+      "is_environment_or_dependency_error": false
+    }
+  },
+  "pass_to_pass_summary": {
+    "expected_count": 1405,
+    "passed_count": 1405,
+    "all_passed": true
+  },
+  "empirical_verdict": "unresolved",
+  "conclusion": "The unpatched base commit cc183652bf6e1273e985e1c4b3cba79c896c1193 cleanly reproduces the exact task bug (UnexpectedDataAccess on accessing v.data during ds.chunks), failing the official FAIL_TO_PASS test while passing all 1,405 baseline PASS_TO_PASS tests. This confirms that the checkpoint in attempt 005 was genuinely unresolved prior to successor handoff, closing the verification gap."
+}

@@ -1,0 +1,11 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "bagi-20261027-v27-02",
+  "config_sha256": "7b89f9d4c6a9010bc15dfb188b1b7a3baaf498f96ef61cf073cd68e1be2a931f",
+  "plan_sha256": "88fa423e0ed4eea327bc16cb2d7fd1616f711db1feb4def886be365e536bc096",
+  "final_source_freeze_sha256": "927ec1ea0f4d0c3aac281318527fe3431cbb0b1a290e29d51304a911ae6b24c7",
+  "cap_usd": "20.00",
+  "attempts": 1,
+  "provider_inference_authorized": true,
+  "note": "Bagi approved v2.7 rerun attempt on pydata__xarray-6721 after missed-checkpoint bug fix in this continuous session on 2026-10-27."
+}

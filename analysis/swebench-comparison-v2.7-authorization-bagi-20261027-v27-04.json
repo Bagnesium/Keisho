@@ -1,0 +1,11 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "bagi-20261027-v27-04",
+  "config_sha256": "4d43d1f7a84340a7e962eb1443749f50bc3d8a10ed69c6a2a62dd011f36b1626",
+  "plan_sha256": "f5f28883446ac4633b32019ea07680e5bfc1a2c7e20a90b8ad925107e09b97af",
+  "final_source_freeze_sha256": "654fba3e3dcbb43b0ec26f252126ea001a7ca0e8485d2216b8f36bc527dfe70b",
+  "cap_usd": "20.00",
+  "attempts": 1,
+  "provider_inference_authorized": true,
+  "note": "Bagi approved v2.7 attempt with pre-execution source edit interception and Anthropic parameter routing on pydata__xarray-6721 in this continuous session on 2026-10-27."
+}

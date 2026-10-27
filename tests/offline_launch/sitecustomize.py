@@ -15,7 +15,11 @@ if settings_path:
     def trace(frame, event, arg):
         if event == 'call' and frame.f_code.co_name == 'main' and Path(frame.f_code.co_filename).resolve() == Path(settings['public_entry']).resolve():
             sys.settrace(None)
-            if settings.get('kind')=='benchmark':
+            if settings.get('kind') == 'benchmark_v27':
+                from rehearsal_v27_injection import inject
+            elif settings.get('kind') == 'benchmark_v26':
+                from rehearsal_v26_injection import inject
+            elif settings.get('kind') == 'benchmark':
                 from benchmark_injection import inject
             else:
                 from functional_injection import inject

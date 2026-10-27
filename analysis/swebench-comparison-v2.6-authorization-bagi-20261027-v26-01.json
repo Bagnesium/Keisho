@@ -1,0 +1,11 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "bagi-20261027-v26-01",
+  "config_sha256": "723403df9145eb28ace3df34ba63133f8b768b966ab282274ab574cff5a099ef",
+  "plan_sha256": "c268053c0458116daca100cdc125282538b3faab48073db565fc0dea70a238c3",
+  "final_source_freeze_sha256": "25e838a1bd1f33c1cff8c97cd8eaf2e27b99c4ef796451eab111083845aa05ae",
+  "cap_usd": "10.00",
+  "attempts": 1,
+  "provider_inference_authorized": true,
+  "note": "Bagi explicitly approved up to USD 10.00 for exactly ONE fresh Keisho v2.6 comparison attempt in this continuous session on 2026-10-27."
+}

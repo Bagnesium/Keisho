@@ -5,6 +5,27 @@ in a separate workspace and continue with a compact, inspectable handoff.
 It transfers externally observable task state, not hidden reasoning, model
 weights or activations, and does not guarantee error-free continuation.
 
+---
+
+## 📄 Research Paper & Empirical Benchmark Findings
+
+The primary pilot study evaluating epistemic context handoffs during mid-task frontier model takeovers on **SWE-bench Verified** is complete and available in multiple formats:
+
+- 📑 **Publication Paper (PDF, 8 pages)**: [`paper/MANUSCRIPT_FINAL_PILOT.pdf`](paper/MANUSCRIPT_FINAL_PILOT.pdf)
+- 📝 **Full Scholarly Manuscript (Markdown)**: [`paper/MANUSCRIPT_FINAL_PILOT.md`](paper/MANUSCRIPT_FINAL_PILOT.md)
+- 🌐 **Academic Web Presentation (HTML5)**: [`paper/MANUSCRIPT_FINAL_PILOT.html`](paper/MANUSCRIPT_FINAL_PILOT.html)
+- 📄 **Plain Text Version**: [`paper/MANUSCRIPT_FINAL_PILOT.txt`](paper/MANUSCRIPT_FINAL_PILOT.txt)
+- 📂 **Research Directory & Navigation**: [`paper/README.md`](paper/README.md)
+
+### Empirical Study Highlights: Mid-Task Frontier Takeover (`pydata__xarray-6721`)
+- **Pipeline**: Predecessor `openai/gpt-6-sol` $\rightarrow$ Note Generation `openai/gpt-6-luna` $\rightarrow$ Successor `anthropic/claude-opus-5.5`
+- **Interception Boundary**: Predecessor was halted *strictly prior to executing its first source edit*, leaving the container working tree unpatched.
+- **Empirical Checkpoint Verification**: Unpatched baseline was executed inside official Docker containers; verified that `FAIL_TO_PASS` test failed with `UnexpectedDataAccess: Tried accessing data` while all 1,405 regression tests passed.
+- **Results**: All 5 successor conditions resolved the issue (5/5 `resolved` in Docker). `KEISHO_2K` reduced successor input tokens by **65.9%** vs. `FULL_HISTORY` (47,170 vs. 138,443 tokens) and matched the minimal turn count (**4 model calls**, 34.5s), avoiding the exploratory extra verification turn required by ordinary narrative summaries (5 calls, 86.8s).
+- **Execution Ledgers & Verification**: See [`analysis/checkpoint_verification_result.json`](analysis/checkpoint_verification_result.json) and [`BENCHMARK_PROGRESS.md`](BENCHMARK_PROGRESS.md).
+
+---
+
 ```sh
 ./keisho pack --repo /absolute/project --session /absolute/session.json \
   --task "The actual unfinished task" --out /absolute/bundle --token-budget 2048

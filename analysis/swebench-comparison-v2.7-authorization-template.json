@@ -1,0 +1,11 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "PROSPECTIVE-V27-TEMPLATE-NOT-APPROVED",
+  "config_sha256": "09f93905fbbfb3abf25092b19657385ae644cfbf78714e5a0a36eb56b735b6ff",
+  "plan_sha256": "cc84d41d847ebcf3b3b1ed93b9dafe4ef0311f0315ffd4455cef09b56b84bcfc",
+  "final_source_freeze_sha256": "088b71d4fa162e0fdd0639809749d3ee8eb45291a0c5fe741bedf313be9bcd63",
+  "cap_usd": "20.00",
+  "attempts": 1,
+  "provider_inference_authorized": false,
+  "note": "PROPOSAL TEMPLATE ONLY; live execution requires fresh single-use authorization."
+}

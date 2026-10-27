@@ -1,0 +1,11 @@
+{
+  "version": "swebench-authorization/2.0",
+  "authorization_id": "bagi-20261027-v27-01",
+  "config_sha256": "23db896e9981c88b776fa2cb894d89f610f49ffbcf49fbd74eecc7f4d2676be7",
+  "plan_sha256": "a9890f4ac2d02975ebca400571b773bef0ffd87453e000101bfa636794b7cab6",
+  "final_source_freeze_sha256": "cbd8b4172bca0f954f475ba7731dfb52f7ba64334a89e48b203a77d72d94e54e",
+  "cap_usd": "20.00",
+  "attempts": 1,
+  "provider_inference_authorized": true,
+  "note": "Bagi explicitly approved up to USD 20.00 for exactly ONE fresh Keisho v2.7 comparison attempt on pydata__xarray-6721 with GPT-6 Sol predecessor and Opus 5.5 successors in this continuous session on 2026-10-27."
+}

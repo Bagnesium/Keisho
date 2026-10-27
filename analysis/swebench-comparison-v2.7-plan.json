@@ -1,0 +1,26 @@
+{
+  "offline_only": true,
+  "provider_requests": 0,
+  "credential_validation_requests": 0,
+  "new_spending_authorized": false,
+  "config_sha256": "09f93905fbbfb3abf25092b19657385ae644cfbf78714e5a0a36eb56b735b6ff",
+  "task_sha256": "1ece7acf4065ac5399dfc0781af941c52b5498c5192e51fcf4d3bd59512bf125",
+  "catalog_sha256": "c2401039b8759242b9d59dcd388eedc906ce1856d136197aa6bcc6f202fa574b",
+  "response_policy": "auxiliary-claims/2.0",
+  "response_format_sha256": "376bde7986cc2f8fd182f04e745c607933760bea7c306ea6e8e992b7f70be25a",
+  "agent_prompt_sha256": "bcede4362a8ba0c4e8cfb2104f87ad418eaee92923f7d1f7fe522af01005c5fe",
+  "schema_native_tokens": 0,
+  "first_request_upper_bound": 2444,
+  "cap_usd_proposed": "20.00",
+  "maximum_noncached_costs_usd": {
+    "predecessor": "1.49864400",
+    "successor": "17.50000000",
+    "note_generation": "0.01848000",
+    "invalid_predecessor_attempts": "0.05583900"
+  },
+  "total_envelope_usd": "19.07296300",
+  "largest_request_reservation_usd": "0.37900800",
+  "assumptions": "Frozen catalog rates with every input token charged at the cache-write rate (sol 2.5, luna 0.125, opus 5.0 USD/M), no cache-read discount, possible 5% BYOK fee. Predecessor total tokens 276,000; successor total tokens 234000; request input tokens 64,000; note generation input allowance 64,000; up to 2 extra first-call-only predecessor attempts bounded by a 2444-token first request. Task pydata__xarray-6721; gpt-6-sol predecessor; claude-opus-5.5 successors; gpt-6-luna note generation. No paid inference authorized.",
+  "checkpoint_uses_hidden_grades": false,
+  "agent_calls_so_far": 0
+}
