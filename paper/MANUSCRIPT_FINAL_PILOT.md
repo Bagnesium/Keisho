@@ -146,7 +146,7 @@ Four protocol-development attempts preceded the completed comparison. They are n
 
 **Table A1.** Provider charges and reservations across the five recorded attempts. Amounts are rounded to six decimal places.
 
-| Attempt | Provider requests | Outcome | Billed (USD) | Accounted (USD) | Unreconciled (USD) |
+| No. | Provider requests | Outcome | Billed (USD) | Accounted (USD) | Unreconciled (USD) |
 | --- | ---: | --- | ---: | ---: | ---: |
 | 001 | 8 | No qualifying checkpoint; successor branches unstarted | 0.069326 | 0.148786 | 0.000000 |
 | 002 | 13 | Predecessor finished the repair before a checkpoint; successors unstarted | 0.065966 | 0.249584 | 0.000000 |
@@ -158,7 +158,7 @@ Attempt 001 failed to reach the stopping rule after the reproduction script caug
 
 Attempt 003 reached an empty, officially unresolved checkpoint. The provider rejected the first successor request because the route did not accept the requested seed parameter. The ledger retains USD 0.379008 as unreconciled. Attempt 004 reached the same checkpoint, but each successor response exceeded the local input-token reservation bound before any tool action. In that run, one request was reported as 5,990 tokens by the OpenAI tokenizer while the provider reported 9,540 input tokens. Attempt 005 increased the reservation multiplier and completed all five branches.
 
-Across the five recorded attempts, raw ledger values sum to USD 2.051310325 in actual charges and USD 2.508869925 in conservative accounted spend. The USD 0.379008 reservation from Attempt 003 remains unreconciled. Totals are calculated from unrounded ledger values; row displays are rounded to six decimals. A separate earlier v2.6 pilot on `sympy__sympy-20590` used a checkpoint whose fix was already applied. It measured solution preservation and is not combined with this unresolved-checkpoint comparison.
+Across the five recorded attempts, raw ledger values sum to USD 2.051310325 in actual charges and USD 2.508869925 in conservative accounted spend. The USD 0.379008 reservation from Attempt 003 remains unreconciled. Totals are calculated from unrounded ledger values; row displays are rounded to six decimals. A separate earlier pilot on `sympy__sympy-20590` used a checkpoint whose fix was already applied. It measured solution preservation and is not combined with this unresolved-checkpoint comparison.
 
 ## Appendix B. Run Specification
 
