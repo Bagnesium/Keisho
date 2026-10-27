@@ -1,4 +1,11 @@
-# Reproducibility guide
+# Reproducibility guide: v1.2 engineering integration
+
+> **Scope:** This guide documents the earlier v1.2 offline/engineering
+> integration and its local evaluator setup. It is not the procedure or archive
+> for the later v2.7 empirical comparison. The v2.7 result and its limits are
+> in the [current manuscript](../paper/MANUSCRIPT_FINAL_PILOT.md); the raw run
+> archive is local and is not part of this public clone. Commands below that
+> refer to v1.2 remain historical and do not authorize new provider calls.
 
 Scope: implemented offline engineering and the prospective one-task integration.
 No provider inference is authorized by this guide. Historical configurations,
@@ -6,7 +13,8 @@ results, guard directories and ledgers must not be edited or reused.
 
 ## Environment and pins
 
-Project path used: `/Users/bagnesium/Documents/GitHub/Keisho`.
+The recorded project location was machine-specific and is omitted; run the
+commands from the repository root.
 Current engineering host: macOS 26.6.2 ARM64, Python 3.14.2; dedicated evaluator
 venv `.cache/swebench-evaluator/venv`, also Python 3.14.2. Docker Desktop daemon
 29.6.2 aarch64 runs the already prepared **linux/amd64** task image under emulation.
@@ -157,7 +165,9 @@ agent finish. Unstarted branches are ungraded, never failures. Separate service 
 uncached conservative accounting and synthetic estimates. Annotation contract validity
 is not truth; repetition interpretations require source events and human/model labels.
 
-Actual smoke/current software evidence and pending research results are separated in
-`paper/RESULTS_PENDING.md`. Final sprint command outputs/preservation evidence and
-the current blocker/next action are indexed by `BENCHMARK_PROGRESS.md` and
+Actual software evidence, the completed empirical pilot, and its remaining limits are
+reported separately in `paper/MANUSCRIPT_FINAL_PILOT.md` and
+`paper/EDITORIAL_AUDIT_20261027.md`. Final sprint command outputs,
+preservation evidence, and the blocker recorded at that time are indexed by
+`BENCHMARK_PROGRESS.md` and
 `results/offline-reliability-sprint-20261011/REPORT.md`.

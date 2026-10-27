@@ -1,4 +1,12 @@
-# Keisho Research Status & Closeout Assessment — 2026-10-27
+# Historical Keisho research closeout — 2026-10-27 (superseded)
+
+> This memo's opening status and sections 1–6 predate the completed v2.6 and
+> v2.7 comparisons. Section 8 records the later v2.6 run, but this file still
+> predates the v2.7 run reported in the
+> [current manuscript](../paper/MANUSCRIPT_FINAL_PILOT.md). Its old
+> statements about the current branch, uncompleted comparisons, and research
+> status are historical snapshots, not current findings. Use the manuscript
+> and [benchmark chronology](../BENCHMARK_PROGRESS.md) for current results.
 
 ## Executive Summary & Core Conclusion
 

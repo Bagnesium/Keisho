@@ -678,7 +678,8 @@ Across all twelve historical live attempts on SWE-bench Verified (v1.4 through v
   4. `KEISHO_2K`: **`resolved`** (official Docker grade). 4 model calls, 3 tool calls, **47,170 input tokens**, 1,493 output tokens, **34.5s**.
   5. `STRUCTURED_NOTES_2K`: **`resolved`** (official Docker grade). 5 model calls, 4 tool calls, **45,429 input tokens**, 1,650 output tokens, 86.5s.
 - **Scientific Findings**:
-  - **Mid-Task Frontier Takeover**: First empirical demonstration of mid-task handoff from an unresolved diagnostic checkpoint between heterogeneous frontier model families (`gpt-6-sol` -> `claude-opus-5.5`).
-  - **Token Efficiency**: `KEISHO_2K` achieved task resolution in 47,170 input tokens—a **65.9% reduction** relative to `FULL_HISTORY` (138,443 tokens).
-  - **Cognitive Latency**: `KEISHO_2K` reached resolution in the minimum number of turns (4 model calls, 34.5s), matching `FULL_HISTORY` (32.7s) and beating narrative summaries (`SUMMARY_2K` 86.8s, `STRUCTURED_NOTES_2K` 86.5s) by over 52 seconds, because typed provenance eliminated exploratory verification turns.
-  - Complete research manuscript authored: `paper/MANUSCRIPT_V27_COMPLETE_20261027.md`.
+  - This run is one completed mid-task handoff comparison between the recorded predecessor and successor models. It is a single-task pilot, not evidence of a general result.
+  - `KEISHO_2K` used 47,170 successor input tokens, 65.9% fewer than `FULL_HISTORY` at 138,443. `SUMMARY_2K` and `STRUCTURED_NOTES_2K` used fewer input tokens than Keisho. These are single-run resource observations; the branches transferred different content and the order was fixed.
+  - `KEISHO_2K` and `FULL_HISTORY` each used four model calls. The summary conditions used five calls and repository-only used seven. The observed elapsed times are not evidence that provenance labels caused a reduction in verification or latency.
+  - All five branches received official `resolved` grades. Since the outcome did not vary, the run does not rank conditions by task success or establish statistical, causal, or general advantages.
+  - The current manuscript is `paper/MANUSCRIPT_FINAL_PILOT.md`; the raw run archive is local and Git-ignored.

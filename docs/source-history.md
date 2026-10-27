@@ -15,8 +15,9 @@ Raw execution archives, captured/resumed workspaces, installed environments,
 Docker images, local certificates, credentials and official evaluator answer-key
 material remain local. Their files and execution guards are preserved, not deleted
 or reopened. The broad runs/results ignore rules prevent an accidental bulk add;
-selected safe metadata is explicitly staged when needed for frozen bindings and
-closed-authorization provenance.
+selected reports and metadata are tracked for frozen bindings and historical
+provenance. The redistribution status of tracked OpenRouter catalog snapshots is
+unresolved; see [the licensing review](../review/LICENSE_RESEARCH.md).
 
 A clone is not the complete local evaluation installation or audit archive.
 Docker-dependent and historical-artifact-dependent tests require the documented
@@ -24,7 +25,14 @@ local setup and retained artifacts; the public repository alone cannot reproduce
 private evaluator inputs. See [the reproducibility guide](../research/REPRODUCIBILITY.md).
 No credentials, old authorization or Git push grants new provider spending.
 
-Current research evidence remains limited: official evaluator smoke validation,
-closed real-model development failures/diagnostics, and explicitly synthetic
-software checks. Source publication does not turn those into a five-way empirical
-comparison or a demonstrated Keisho advantage.
+The superseded pre-run v2.1 draft pages and older paper drafts were removed;
+versioned protocol records and the benchmark chronology preserve the relevant
+history. The current empirical record is one completed five-condition exploratory run
+on `pydata__xarray-6721`, reported in
+[`paper/MANUSCRIPT_FINAL_PILOT.md`](../paper/MANUSCRIPT_FINAL_PILOT.md). Each
+condition ran once from a shared checkpoint and all five patches received an
+official `resolved` grade. This single-task result does not establish a causal,
+statistical, or general advantage for Keisho. The current run archive and
+private evaluator inputs remain local; the public clone cannot replay the paid
+comparison. Earlier development failures and synthetic checks remain separate
+from those empirical observations.
