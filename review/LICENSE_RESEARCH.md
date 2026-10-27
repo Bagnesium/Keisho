@@ -2,6 +2,11 @@
 
 This document provides a source-backed assessment of redistribution constraints for third-party code, datasets, APIs, vocabularies, and trust stores relevant to Keisho.
 
+The root `LICENSE` applies only to Keisho-authored code and documentation.
+Third-party and service-derived materials are outside that grant. This review
+does not establish redistribution permission for the tracked OpenRouter
+catalog snapshots; that status remains unresolved.
+
 ---
 
 ## 1. Vendored MIT Files (`src/keisho/benchmark/vendor/`)
@@ -15,7 +20,7 @@ This document provides a source-backed assessment of redistribution constraints 
 - **Status**: **CONFIRMED**.
 - **Redistribution Constraints**:
   - Permissive redistribution in source or binary forms.
-  - Mandatory requirement: retain the original copyright notice and permission notice in all copies or substantial portions of the software (fulfilled by keeping `src/keisho/benchmark/vendor/LICENSE` and listing attribution in `NOTICE`).
+  - Mandatory requirement: retain the original copyright notice and permission notice in all copies or substantial portions of the software. The vendored license file is retained at `src/keisho/benchmark/vendor/LICENSE`; no repository-level `NOTICE` file is currently present.
 
 ---
 

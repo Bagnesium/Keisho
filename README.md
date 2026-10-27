@@ -71,8 +71,9 @@ complete local evaluation installation.
 
 ## License status
 
-There is no project-level `LICENSE` file yet. The license in
-`src/keisho/benchmark/vendor/` applies to those vendored files only. A project
-license must be selected before the repository can grant reuse rights for the
-Keisho code; third-party data and assets may have separate terms. See
-[`review/LICENSE_RESEARCH.md`](review/LICENSE_RESEARCH.md).
+Keisho-authored code and documentation are licensed under the MIT License; see
+[`LICENSE`](LICENSE). Third-party code, datasets, service-derived metadata, and
+other assets are excluded and may have different terms. In particular, the
+tracked OpenRouter catalog snapshots have unresolved redistribution status.
+Review [`review/LICENSE_RESEARCH.md`](review/LICENSE_RESEARCH.md) before
+redistributing those materials.

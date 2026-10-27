@@ -50,5 +50,7 @@ do not overwrite a prior run. Distinguish synthetic offline fixtures from
 provider results and official benchmark grades. The public repository does not
 contain the complete raw archive needed to replay the current paid comparison.
 
-There is no project-level `LICENSE` yet. Do not assume the vendor license
-covers other Keisho files or third-party research assets.
+The MIT license covers Keisho-authored code and documentation. It does not
+cover third-party research assets or service-derived metadata. Keep separate
+notices intact and review `review/LICENSE_RESEARCH.md` before redistributing
+those materials.
